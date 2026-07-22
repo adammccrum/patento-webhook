@@ -1,0 +1,175 @@
+<svg viewBox="0 0 1000 800" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .title { font-size: 22px; font-weight: bold; fill: #1a237e; }
+      .subtitle { font-size: 13px; fill: #666; }
+      .layer-label { font-size: 16px; font-weight: bold; fill: white; }
+      .layer-sublabel { font-size: 12px; fill: white; }
+      .component-title { font-size: 11px; font-weight: bold; }
+      .component-text { font-size: 10px; }
+    </style>
+  </defs>
+
+  <!-- Title -->
+  <text x="500" y="35" text-anchor="middle" class="title">IrisKey System Layers – Detailed Component Breakdown</text>
+  <text x="500" y="58" text-anchor="middle" class="subtitle">Five architectural layers with components, responsibilities, and interdependencies</text>
+
+  <!-- Layer 5: Monitoring & Analytics (TOP - Cross-cutting) -->
+  <g id="layer-monitoring">
+    <rect x="50" y="80" width="900" height="70" rx="6" fill="#ede7f6" stroke="#311b92" stroke-width="2"/>
+    <text x="100" y="110" class="layer-label" font-size="15" fill="#311b92">LAYER 0: Continuous Monitoring &amp; Analytics</text>
+    <text x="100" y="130" class="component-text" fill="#311b92">Behavioral profiling • Anomaly scoring • Alert generation • Performance tracking • Continuous verification loops</text>
+    <text x="100" y="145" class="component-text" fill="#666">Triggers: Policy updates, escalation, revocation based on runtime observations</text>
+  </g>
+
+  <!-- Layer 1: Identity -->
+  <g id="layer-1">
+    <rect x="50" y="170" width="900" height="120" rx="6" fill="#1a237e" stroke="#000" stroke-width="2"/>
+    <text x="500" y="200" text-anchor="middle" class="layer-label">LAYER 1: Identity Verification</text>
+    <text x="500" y="220" text-anchor="middle" class="layer-sublabel">Establish and verify agent identity</text>
+
+    <!-- Component boxes inside layer 1 -->
+    <rect x="70" y="235" width="160" height="40" rx="3" fill="#3f51b5" stroke="#1a237e" stroke-width="1"/>
+    <text x="150" y="252" text-anchor="middle" class="component-title" fill="white">Agent Registry</text>
+    <text x="150" y="265" text-anchor="middle" class="component-text" fill="white">Lookup &amp; validation</text>
+
+    <rect x="260" y="235" width="160" height="40" rx="3" fill="#3f51b5" stroke="#1a237e" stroke-width="1"/>
+    <text x="340" y="252" text-anchor="middle" class="component-title" fill="white">Credential Verification</text>
+    <text x="340" y="265" text-anchor="middle" class="component-text" fill="white">Signature validation</text>
+
+    <rect x="450" y="235" width="160" height="40" rx="3" fill="#3f51b5" stroke="#1a237e" stroke-width="1"/>
+    <text x="530" y="252" text-anchor="middle" class="component-title" fill="white">Revocation List</text>
+    <text x="530" y="265" text-anchor="middle" class="component-text" fill="white">Status checking</text>
+
+    <rect x="640" y="235" width="200" height="40" rx="3" fill="#3f51b5" stroke="#1a237e" stroke-width="1"/>
+    <text x="740" y="252" text-anchor="middle" class="component-title" fill="white">Certificate Chain</text>
+    <text x="740" y="265" text-anchor="middle" class="component-text" fill="white">PKI validation</text>
+
+    <!-- Output -->
+    <text x="70" y="295" class="component-title" fill="white">Output:</text>
+    <text x="70" y="310" class="component-text" fill="white">Identity Token | Agent Verified ✓ or Identity Rejected ✗</text>
+  </g>
+
+  <!-- Layer 2: Authority -->
+  <g id="layer-2">
+    <rect x="50" y="310" width="900" height="120" rx="6" fill="#f57c00" stroke="#000" stroke-width="2"/>
+    <text x="500" y="340" text-anchor="middle" class="layer-label">LAYER 2: Authority Policy Evaluation</text>
+    <text x="500" y="360" text-anchor="middle" class="layer-sublabel">Determine authorization based on policy</text>
+
+    <!-- Component boxes -->
+    <rect x="70" y="375" width="160" height="40" rx="3" fill="#ff9800" stroke="#e65100" stroke-width="1"/>
+    <text x="150" y="392" text-anchor="middle" class="component-title" fill="white">Policy Repository</text>
+    <text x="150" y="405" text-anchor="middle" class="component-text" fill="white">Active policies</text>
+
+    <rect x="260" y="375" width="160" height="40" rx="3" fill="#ff9800" stroke="#e65100" stroke-width="1"/>
+    <text x="340" y="392" text-anchor="middle" class="component-title" fill="white">Role/Capability Map</text>
+    <text x="340" y="405" text-anchor="middle" class="component-text" fill="white">Agent authorizations</text>
+
+    <rect x="450" y="375" width="160" height="40" rx="3" fill="#ff9800" stroke="#e65100" stroke-width="1"/>
+    <text x="530" y="392" text-anchor="middle" class="component-title" fill="white">Scope Definition</text>
+    <text x="530" y="405" text-anchor="middle" class="component-text" fill="white">Action + resource limits</text>
+
+    <rect x="640" y="375" width="200" height="40" rx="3" fill="#ff9800" stroke="#e65100" stroke-width="1"/>
+    <text x="740" y="392" text-anchor="middle" class="component-title" fill="white">Token Generation</text>
+    <text x="740" y="405" text-anchor="middle" class="component-text" fill="white">Authority token creation</text>
+
+    <!-- Output -->
+    <text x="70" y="435" class="component-title" fill="white">Output:</text>
+    <text x="70" y="450" class="component-text" fill="white">Authority Token | Decision: APPROVE / REJECT / ESCALATE</text>
+  </g>
+
+  <!-- Layer 3: Verification (Five Gates) -->
+  <g id="layer-3">
+    <rect x="50" y="450" width="900" height="120" rx="6" fill="#388e3c" stroke="#000" stroke-width="2"/>
+    <text x="500" y="480" text-anchor="middle" class="layer-label">LAYER 3: Verification Engine (Five-Gate)</text>
+    <text x="500" y="500" text-anchor="middle" class="layer-sublabel">Sequential authorization gates with decision logic</text>
+
+    <!-- Component boxes -->
+    <rect x="70" y="515" width="110" height="40" rx="3" fill="#66bb6a" stroke="#2e7d32" stroke-width="1"/>
+    <text x="125" y="532" text-anchor="middle" class="component-title" fill="white">Identity Gate</text>
+    <text x="125" y="545" text-anchor="middle" class="component-text" fill="white">(~1-5ms)</text>
+
+    <rect x="200" y="515" width="110" height="40" rx="3" fill="#66bb6a" stroke="#2e7d32" stroke-width="1"/>
+    <text x="255" y="532" text-anchor="middle" class="component-title" fill="white">Policy Gate</text>
+    <text x="255" y="545" text-anchor="middle" class="component-text" fill="white">(~10-50ms)</text>
+
+    <rect x="330" y="515" width="110" height="40" rx="3" fill="#66bb6a" stroke="#2e7d32" stroke-width="1"/>
+    <text x="385" y="532" text-anchor="middle" class="component-title" fill="white">Action Gate</text>
+    <text x="385" y="545" text-anchor="middle" class="component-text" fill="white">(~5-20ms)</text>
+
+    <rect x="460" y="515" width="110" height="40" rx="3" fill="#66bb6a" stroke="#2e7d32" stroke-width="1"/>
+    <text x="515" y="532" text-anchor="middle" class="component-title" fill="white">Context Gate</text>
+    <text x="515" y="545" text-anchor="middle" class="component-text" fill="white">(~50-500ms)</text>
+
+    <rect x="590" y="515" width="110" height="40" rx="3" fill="#66bb6a" stroke="#2e7d32" stroke-width="1"/>
+    <text x="645" y="532" text-anchor="middle" class="component-title" fill="white">Execute Gate</text>
+    <text x="645" y="545" text-anchor="middle" class="component-text" fill="white">(~5-10ms)</text>
+
+    <!-- Decision logic -->
+    <rect x="720" y="515" width="120" height="40" rx="3" fill="#66bb6a" stroke="#2e7d32" stroke-width="1"/>
+    <text x="780" y="532" text-anchor="middle" class="component-title" fill="white">Decision Logic</text>
+    <text x="780" y="545" text-anchor="middle" class="component-text" fill="white">All pass = APPROVE</text>
+
+    <!-- Output -->
+    <text x="70" y="575" class="component-title" fill="white">Output:</text>
+    <text x="70" y="590" class="component-text" fill="white">Gate Results | Final Decision: APPROVE / REJECT / ESCALATE / DEFER</text>
+  </g>
+
+  <!-- Layer 4: Execution -->
+  <g id="layer-4">
+    <rect x="50" y="590" width="900" height="120" rx="6" fill="#c62828" stroke="#000" stroke-width="2"/>
+    <text x="500" y="620" text-anchor="middle" class="layer-label">LAYER 4: Action Execution &amp; Monitoring</text>
+    <text x="500" y="640" text-anchor="middle" class="layer-sublabel">Execute authorized actions with enforcement and monitoring</text>
+
+    <!-- Component boxes -->
+    <rect x="70" y="655" width="160" height="40" rx="3" fill="#e53935" stroke="#b71c1c" stroke-width="1"/>
+    <text x="150" y="672" text-anchor="middle" class="component-title" fill="white">Action Executor</text>
+    <text x="150" y="685" text-anchor="middle" class="component-text" fill="white">Perform authorized action</text>
+
+    <rect x="260" y="655" width="160" height="40" rx="3" fill="#e53935" stroke="#b71c1c" stroke-width="1"/>
+    <text x="340" y="672" text-anchor="middle" class="component-title" fill="white">Execution Monitor</text>
+    <text x="340" y="685" text-anchor="middle" class="component-text" fill="white">Watch for drift</text>
+
+    <rect x="450" y="655" width="160" height="40" rx="3" fill="#e53935" stroke="#b71c1c" stroke-width="1"/>
+    <text x="530" y="672" text-anchor="middle" class="component-title" fill="white">Resource Accessor</text>
+    <text x="530" y="685" text-anchor="middle" class="component-text" fill="white">Enforce scoped access</text>
+
+    <rect x="640" y="655" width="200" height="40" rx="3" fill="#e53935" stroke="#b71c1c" stroke-width="1"/>
+    <text x="740" y="672" text-anchor="middle" class="component-title" fill="white">Real-Time Logging</text>
+    <text x="740" y="685" text-anchor="middle" class="component-text" fill="white">Action-time audit capture</text>
+
+    <!-- Output -->
+    <text x="70" y="715" class="component-title" fill="white">Output:</text>
+    <text x="70" y="730" class="component-text" fill="white">Action Result | Success/Failure with detail &amp; side effects logged</text>
+  </g>
+
+  <!-- Layer 5: Audit -->
+  <g id="layer-5">
+    <rect x="50" y="730" width="900" height="70" rx="6" fill="#6a1b9a" stroke="#000" stroke-width="2"/>
+    <text x="500" y="758" text-anchor="middle" class="layer-label">LAYER 5: Cryptographic Audit Trail</text>
+
+    <!-- Component boxes -->
+    <rect x="70" y="720" width="150" height="35" rx="3" fill="#7e57c2" stroke="#4a148c" stroke-width="1"/>
+    <text x="145" y="738" text-anchor="middle" class="component-title" fill="white">Audit Entry Creator</text>
+    <text x="145" y="750" text-anchor="middle" class="component-text" fill="white">Signed records</text>
+
+    <rect x="240" y="720" width="150" height="35" rx="3" fill="#7e57c2" stroke="#4a148c" stroke-width="1"/>
+    <text x="315" y="738" text-anchor="middle" class="component-title" fill="white">Hash Chain</text>
+    <text x="315" y="750" text-anchor="middle" class="component-text" fill="white">Sequential integrity</text>
+
+    <rect x="410" y="720" width="150" height="35" rx="3" fill="#7e57c2" stroke="#4a148c" stroke-width="1"/>
+    <text x="485" y="738" text-anchor="middle" class="component-title" fill="white">Merkle Tree</text>
+    <text x="485" y="750" text-anchor="middle" class="component-text" fill="white">Aggregate proofs</text>
+
+    <rect x="580" y="720" width="150" height="35" rx="3" fill="#7e57c2" stroke="#4a148c" stroke-width="1"/>
+    <text x="655" y="738" text-anchor="middle" class="component-title" fill="white">Audit Store</text>
+    <text x="655" y="750" text-anchor="middle" class="component-text" fill="white">Immutable record</text>
+
+    <rect x="750" y="720" width="100" height="35" rx="3" fill="#7e57c2" stroke="#4a148c" stroke-width="1"/>
+    <text x="800" y="738" text-anchor="middle" class="component-title" fill="white">Backup</text>
+    <text x="800" y="750" text-anchor="middle" class="component-text" fill="white">Replication</text>
+  </g>
+
+  <!-- Legend -->
+  <text x="50" y="820" font-size="11" font-weight="bold" fill="#1a237e">Key Properties:  Layered Defense (each layer independent) | Separation of Concerns (focused responsibility) | Deterministic (predictable, auditable) | Real-Time (not deferred)</text>
+</svg>
