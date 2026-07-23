@@ -13,225 +13,225 @@
   </defs>
 
   <!-- Title -->
-  <text x="600" y="35" text-anchor="middle" class="title">Authority Token Lifecycle – State Machine</text>
-  <text x="600" y="58" text-anchor="middle" class="subtitle">From issuance through validation, use, renewal, and revocation with timing and triggers</text>
+  <text x="600" y="35" text-anchor="middle" class="title">Authority Token Lifecycle – State Machine</text>>
+  <text x="600" y="58" text-anchor="middle" class="subtitle">From issuance through validation, use, renewal, and revocation with timing and triggers</text>>
 
   <!-- Timeline bar -->
   <line x1="50" y1="100" x2="1150" y2="100" stroke="#ddd" stroke-width="1"/>
-  <text x="50" y="90" font-size="11" fill="#666">Time →</text>
+  <text x="50" y="90" font-size="11" fill="#666">Time →</text>>
 
   <!-- ===== STATE 1: ISSUANCE ===== -->
   <g id="state-issuance">
     <rect x="50" y="120" width="180" height="120" class="box" fill="#c8e6c9" stroke="#2e7d32" stroke-width="2"/>
 
-    <text x="140" y="150" text-anchor="middle" class="state-label" fill="#1b5e20">1. ISSUANCE</text>
+    <text x="140" y="150" text-anchor="middle" class="state-label" fill="#1b5e20">1. ISSUANCE</text>>
 
-    <text x="65" y="175" font-size="11" font-weight="bold" fill="#1a237e">Token Created:</text>
-    <text x="65" y="192" font-size="10" fill="#333">• Agent ID</text>
-    <text x="65" y="206" font-size="10" fill="#333">• Actions permitted</text>
-    <text x="65" y="220" font-size="10" fill="#333">• Resources allowed</text>
+    <text x="65" y="175" font-size="11" font-weight="bold" fill="#1a237e">Token Created:</text>>
+    <text x="65" y="192" font-size="10" fill="#333">• Agent ID</text>>
+    <text x="65" y="206" font-size="10" fill="#333">• Actions permitted</text>>
+    <text x="65" y="220" font-size="10" fill="#333">• Resources allowed</text>>
 
     <line x1="230" y1="180" x2="280" y2="180" stroke="#333" stroke-width="2.5" marker-end="url(#arrow)"/>
-    <text x="255" y="170" text-anchor="middle" font-size="10" fill="#666">Immediately</text>
+    <text x="255" y="170" text-anchor="middle" font-size="10" fill="#666">Immediately</text>>
   </g>
 
   <!-- ===== STATE 2: ACTIVE ===== -->
   <g id="state-active">
     <rect x="280" y="120" width="180" height="120" class="box" fill="#bbdefb" stroke="#1976d2" stroke-width="2"/>
 
-    <text x="370" y="150" text-anchor="middle" class="state-label" fill="#1a237e">2. ACTIVE</text>
+    <text x="370" y="150" text-anchor="middle" class="state-label" fill="#1a237e">2. ACTIVE</text>>
 
-    <text x="295" y="175" font-size="11" font-weight="bold" fill="#1a237e">Token Valid For:</text>
-    <text x="295" y="192" font-size="10" fill="#333">• Time window: 1–2 hours</text>
-    <text x="295" y="206" font-size="10" fill="#333">• Specified conditions</text>
-    <text x="295" y="220" font-size="10" fill="#333">• Agent behaving normally</text>
+    <text x="295" y="175" font-size="11" font-weight="bold" fill="#1a237e">Token Valid For:</text>>
+    <text x="295" y="192" font-size="10" fill="#333">• Time window: 1–2 hours</text>>
+    <text x="295" y="206" font-size="10" fill="#333">• Specified conditions</text>>
+    <text x="295" y="220" font-size="10" fill="#333">• Agent behaving normally</text>>
 
     <!-- Parallel transitions -->
     <!-- To VALIDATION -->
     <line x1="370" y1="240" x2="370" y2="280" stroke="#666" stroke-width="1.5" stroke-dasharray="3,3"/>
-    <text x="385" y="265" font-size="9" fill="#666">Continuous use</text>
+    <text x="385" y="265" font-size="9" fill="#666">Continuous use</text>>
 
     <!-- To EXPIRED -->
     <line x1="460" y1="180" x2="510" y2="180" stroke="#f57c00" stroke-width="2" marker-end="url(#arrow)"/>
-    <text x="485" y="170" text-anchor="middle" font-size="10" fill="#f57c00">Time passes</text>
+    <text x="485" y="170" text-anchor="middle" font-size="10" fill="#f57c00">Time passes</text>>
 
     <!-- To REVOKED -->
     <line x1="460" y1="150" x2="510" y2="80" stroke="#c62828" stroke-width="2" stroke-dasharray="3,3" marker-end="url(#arrow)"/>
-    <text x="485" y="110" text-anchor="middle" font-size="10" fill="#c62828">Anomaly/Policy</text>
+    <text x="485" y="110" text-anchor="middle" font-size="10" fill="#c62828">Anomaly/Policy</text>>
   </g>
 
   <!-- ===== STATE 3: VALIDATION (below ACTIVE) ===== -->
   <g id="state-validation">
     <rect x="280" y="280" width="180" height="100" class="box" fill="#fff9c4" stroke="#f57f17" stroke-width="2"/>
 
-    <text x="370" y="305" text-anchor="middle" class="state-label" fill="#f57f17">3. VALIDATION</text>
-    <text x="295" y="330" font-size="10" fill="#333">On each action request:</text>
-    <text x="295" y="345" font-size="10" fill="#333">• Verify signature</text>
-    <text x="295" y="360" font-size="10" fill="#333">• Check expiry</text>
-    <text x="295" y="375" font-size="10" fill="#333">• Confirm conditions</text>
+    <text x="370" y="305" text-anchor="middle" class="state-label" fill="#f57f17">3. VALIDATION</text>>
+    <text x="295" y="330" font-size="10" fill="#333">On each action request:</text>>
+    <text x="295" y="345" font-size="10" fill="#333">• Verify signature</text>>
+    <text x="295" y="360" font-size="10" fill="#333">• Check expiry</text>>
+    <text x="295" y="375" font-size="10" fill="#333">• Confirm conditions</text>>
 
     <!-- Back to ACTIVE -->
     <line x1="370" y1="280" x2="370" y2="240" stroke="#388e3c" stroke-width="2" marker-end="url(#arrow)"/>
-    <text x="360" y="260" font-size="9" fill="#388e3c">Valid → Continue</text>
+    <text x="360" y="260" font-size="9" fill="#388e3c">Valid → Continue</text>>
   </g>
 
   <!-- ===== STATE 4: RENEWAL ===== -->
   <g id="state-renewal">
     <rect x="510" y="280" width="180" height="100" class="box" fill="#e1bee7" stroke="#7b1fa2" stroke-width="2"/>
 
-    <text x="600" y="305" text-anchor="middle" class="state-label" fill="#7b1fa2">4. RENEWAL</text>
-    <text x="525" y="330" font-size="10" fill="#333">Token about to expire:</text>
-    <text x="525" y="345" font-size="10" fill="#333">• Re-verify authorization</text>
-    <text x="525" y="360" font-size="10" fill="#333">• Issue new token</text>
-    <text x="525" y="375" font-size="10" fill="#333">• Seamless transition</text>
+    <text x="600" y="305" text-anchor="middle" class="state-label" fill="#7b1fa2">4. RENEWAL</text>>
+    <text x="525" y="330" font-size="10" fill="#333">Token about to expire:</text>>
+    <text x="525" y="345" font-size="10" fill="#333">• Re-verify authorization</text>>
+    <text x="525" y="360" font-size="10" fill="#333">• Issue new token</text>>
+    <text x="525" y="375" font-size="10" fill="#333">• Seamless transition</text>>
 
     <!-- To new ACTIVE -->
     <line x1="600" y1="280" x2="600" y2="240" stroke="#7b1fa2" stroke-width="2" marker-end="url(#arrow)"/>
-    <text x="640" y="260" font-size="9" fill="#7b1fa2">Issue new token</text>
+    <text x="640" y="260" font-size="9" fill="#7b1fa2">Issue new token</text>>
   </g>
 
   <!-- ===== STATE 5: EXPIRED ===== -->
   <g id="state-expired">
     <rect x="720" y="120" width="180" height="120" class="box" fill="#fff3cd" stroke="#ff6b00" stroke-width="2"/>
 
-    <text x="810" y="150" text-anchor="middle" class="state-label" fill="#e65100">5. EXPIRED</text>
+    <text x="810" y="150" text-anchor="middle" class="state-label" fill="#e65100">5. EXPIRED</text>>
 
-    <text x="735" y="175" font-size="11" font-weight="bold" fill="#1a237e">Token Timeout:</text>
-    <text x="735" y="192" font-size="10" fill="#333">• Reached valid_until time</text>
-    <text x="735" y="206" font-size="10" fill="#333">• No longer usable</text>
-    <text x="735" y="220" font-size="10" fill="#333">• Stored in audit trail</text>
+    <text x="735" y="175" font-size="11" font-weight="bold" fill="#1a237e">Token Timeout:</text>>
+    <text x="735" y="192" font-size="10" fill="#333">• Reached valid_until time</text>>
+    <text x="735" y="206" font-size="10" fill="#333">• No longer usable</text>>
+    <text x="735" y="220" font-size="10" fill="#333">• Stored in audit trail</text>>
 
     <line x1="900" y1="180" x2="950" y2="180" stroke="#666" stroke-width="1.5" stroke-dasharray="3,3" marker-end="url(#arrow)"/>
-    <text x="925" y="170" font-size="10" fill="#666">Archived</text>
+    <text x="925" y="170" font-size="10" fill="#666">Archived</text>>
   </g>
 
   <!-- ===== STATE 6: REVOKED ===== -->
   <g id="state-revoked">
     <rect x="510" y="40" width="180" height="120" class="box" fill="#ffcdd2" stroke="#c62828" stroke-width="2"/>
 
-    <text x="600" y="70" text-anchor="middle" class="state-label" fill="#b71c1c">6. REVOKED</text>
+    <text x="600" y="70" text-anchor="middle" class="state-label" fill="#b71c1c">6. REVOKED</text>>
 
-    <text x="525" y="95" font-size="11" font-weight="bold" fill="#1a237e">Immediate Revocation:</text>
-    <text x="525" y="112" font-size="10" fill="#333">• Anomaly detected</text>
-    <text x="525" y="126" font-size="10" fill="#333">• Policy violation</text>
-    <text x="525" y="140" font-size="10" fill="#333">• Admin action</text>
+    <text x="525" y="95" font-size="11" font-weight="bold" fill="#1a237e">Immediate Revocation:</text>>
+    <text x="525" y="112" font-size="10" fill="#333">• Anomaly detected</text>>
+    <text x="525" y="126" font-size="10" fill="#333">• Policy violation</text>>
+    <text x="525" y="140" font-size="10" fill="#333">• Admin action</text>>
 
     <line x1="690" y1="100" x2="950" y2="100" stroke="#c62828" stroke-width="2" marker-end="url(#arrow)"/>
-    <text x="820" y="90" text-anchor="middle" font-size="10" fill="#c62828">Immediate rejection</text>
+    <text x="820" y="90" text-anchor="middle" font-size="10" fill="#c62828">Immediate rejection</text>>
   </g>
 
   <!-- ===== STATE 7: ARCHIVED ===== -->
   <g id="state-archived">
     <rect x="950" y="40" width="200" height="260" class="box" fill="#f5f5f5" stroke="#999" stroke-width="2"/>
 
-    <text x="1050" y="70" text-anchor="middle" class="state-label" fill="#333">7. ARCHIVED</text>
+    <text x="1050" y="70" text-anchor="middle" class="state-label" fill="#333">7. ARCHIVED</text>>
 
-    <text x="965" y="100" font-size="11" font-weight="bold" fill="#1a237e">Audit Trail Retention:</text>
-    <text x="965" y="120" font-size="10" fill="#333">• All decisions logged</text>
-    <text x="965" y="135" font-size="10" fill="#333">• Cryptographically signed</text>
-    <text x="965" y="150" font-size="10" fill="#333">• Tamper-evident chain</text>
-    <text x="965" y="165" font-size="10" fill="#333">• Forensic availability</text>
-    <text x="965" y="180" font-size="10" fill="#333">• Compliance retention</text>
-    <text x="965" y="195" font-size="10" fill="#333">• Historical analysis</text>
+    <text x="965" y="100" font-size="11" font-weight="bold" fill="#1a237e">Audit Trail Retention:</text>>
+    <text x="965" y="120" font-size="10" fill="#333">• All decisions logged</text>>
+    <text x="965" y="135" font-size="10" fill="#333">• Cryptographically signed</text>>
+    <text x="965" y="150" font-size="10" fill="#333">• Tamper-evident chain</text>>
+    <text x="965" y="165" font-size="10" fill="#333">• Forensic availability</text>>
+    <text x="965" y="180" font-size="10" fill="#333">• Compliance retention</text>>
+    <text x="965" y="195" font-size="10" fill="#333">• Historical analysis</text>>
 
-    <text x="965" y="225" font-size="10" font-weight="bold" fill="#666">Retention Policy:</text>
-    <text x="965" y="245" font-size="9" fill="#666">Typically 1–7 years</text>
-    <text x="965" y="260" font-size="9" fill="#666">per compliance requirements</text>
+    <text x="965" y="225" font-size="10" font-weight="bold" fill="#666">Retention Policy:</text>>
+    <text x="965" y="245" font-size="9" fill="#666">Typically 1–7 years</text>>
+    <text x="965" y="260" font-size="9" fill="#666">per compliance requirements</text>>
   </g>
 
   <!-- ===== REVOCATION TRIGGERS (Bottom Left) ===== -->
   <g id="revocation-triggers">
     <rect x="50" y="430" width="380" height="250" rx="6" fill="#ffe0b2" stroke="#f57c00" stroke-width="2"/>
 
-    <text x="240" y="460" text-anchor="middle" font-size="14" font-weight="bold" fill="#e65100">Revocation Triggers</text>
-    <text x="240" y="480" text-anchor="middle" font-size="11" fill="#666">(Move token to REVOKED state immediately)</text>
+    <text x="240" y="460" text-anchor="middle" font-size="14" font-weight="bold" fill="#e65100">Revocation Triggers</text>>
+    <text x="240" y="480" text-anchor="middle" font-size="11" fill="#666">(Move token to REVOKED state immediately)</text>>
 
     <!-- Trigger 1 -->
     <rect x="70" y="495" width="340" height="45" rx="3" fill="white" stroke="#f57c00" stroke-width="1"/>
-    <text x="85" y="515" font-size="11" font-weight="bold" fill="#1a237e">1. Anomaly Threshold Exceeded</text>
-    <text x="85" y="532" font-size="10" fill="#666">Behavioral anomaly score exceeds policy threshold; immediate escalation</text>
+    <text x="85" y="515" font-size="11" font-weight="bold" fill="#1a237e">1. Anomaly Threshold Exceeded</text>>
+    <text x="85" y="532" font-size="10" fill="#666">Behavioral anomaly score exceeds policy threshold; immediate escalation</text>>
 
     <!-- Trigger 2 -->
     <rect x="70" y="550" width="340" height="45" rx="3" fill="white" stroke="#f57c00" stroke-width="1"/>
-    <text x="85" y="570" font-size="11" font-weight="bold" fill="#1a237e">2. Policy Violation Detected</text>
-    <text x="85" y="587" font-size="10" fill="#666">Action violates authorization policy; forbidden operation attempted</text>
+    <text x="85" y="570" font-size="11" font-weight="bold" fill="#1a237e">2. Policy Violation Detected</text>>
+    <text x="85" y="587" font-size="10" fill="#666">Action violates authorization policy; forbidden operation attempted</text>>
 
     <!-- Trigger 3 -->
     <rect x="70" y="605" width="340" height="45" rx="3" fill="white" stroke="#f57c00" stroke-width="1"/>
-    <text x="85" y="625" font-size="11" font-weight="bold" fill="#1a237e">3. Administrator Action</text>
-    <text x="85" y="642" font-size="10" fill="#666">Security team manually revokes token due to suspected compromise</text>
+    <text x="85" y="625" font-size="11" font-weight="bold" fill="#1a237e">3. Administrator Action</text>>
+    <text x="85" y="642" font-size="10" fill="#666">Security team manually revokes token due to suspected compromise</text>>
   </g>
 
   <!-- ===== TIMING & LATENCY (Bottom Middle) ===== -->
   <g id="timing-info">
     <rect x="460" y="430" width="380" height="250" rx="6" fill="#e1f5fe" stroke="#0277bd" stroke-width="2"/>
 
-    <text x="650" y="460" text-anchor="middle" font-size="14" font-weight="bold" fill="#01579b">Timing & Latency</text>
-    <text x="650" y="480" text-anchor="middle" font-size="11" fill="#666">(Critical performance metrics)</text>
+    <text x="650" y="460" text-anchor="middle" font-size="14" font-weight="bold" fill="#01579b">Timing &amp; Latency</text>>
+    <text x="650" y="480" text-anchor="middle" font-size="11" fill="#666">(Critical performance metrics)</text>>
 
     <!-- Issuance latency -->
     <rect x="480" y="495" width="340" height="35" rx="3" fill="white" stroke="#0277bd" stroke-width="1"/>
-    <text x="495" y="515" font-size="11" font-weight="bold" fill="#1a237e">Issuance:</text>
-    <text x="790" y="515" font-size="11" fill="#01579b" font-weight="bold">&lt; 10ms</text>
-    <text x="495" y="527" font-size="10" fill="#666">Generate token + sign + store</text>
+    <text x="495" y="515" font-size="11" font-weight="bold" fill="#1a237e">Issuance:</text>>
+    <text x="790" y="515" font-size="11" fill="#01579b" font-weight="bold">&lt; 10ms</text>>
+    <text x="495" y="527" font-size="10" fill="#666">Generate token + sign + store</text>>
 
     <!-- Validation latency -->
     <rect x="480" y="540" width="340" height="35" rx="3" fill="white" stroke="#0277bd" stroke-width="1"/>
-    <text x="495" y="560" font-size="11" font-weight="bold" fill="#1a237e">Validation:</text>
-    <text x="790" y="560" font-size="11" fill="#01579b" font-weight="bold">&lt; 5ms</text>
-    <text x="495" y="572" font-size="10" fill="#666">Verify signature + check expiry + confirm conditions</text>
+    <text x="495" y="560" font-size="11" font-weight="bold" fill="#1a237e">Validation:</text>>
+    <text x="790" y="560" font-size="11" fill="#01579b" font-weight="bold">&lt; 5ms</text>>
+    <text x="495" y="572" font-size="10" fill="#666">Verify signature + check expiry + confirm conditions</text>>
 
     <!-- Revocation latency -->
     <rect x="480" y="585" width="340" height="35" rx="3" fill="white" stroke="#c62828" stroke-width="2"/>
-    <text x="495" y="605" font-size="11" font-weight="bold" fill="#1a237e">Revocation:</text>
-    <text x="790" y="605" font-size="11" fill="#c62828" font-weight="bold">&lt; 100ms</text>
-    <text x="495" y="617" font-size="10" fill="#c62828">Invalidate token + broadcast revocation + audit log</text>
+    <text x="495" y="605" font-size="11" font-weight="bold" fill="#1a237e">Revocation:</text>>
+    <text x="790" y="605" font-size="11" fill="#c62828" font-weight="bold">&lt; 100ms</text>>
+    <text x="495" y="617" font-size="10" fill="#c62828">Invalidate token + broadcast revocation + audit log</text>>
 
     <!-- Renewal latency -->
     <rect x="480" y="630" width="340" height="35" rx="3" fill="white" stroke="#0277bd" stroke-width="1"/>
-    <text x="495" y="650" font-size="11" font-weight="bold" fill="#1a237e">Renewal:</text>
-    <text x="790" y="650" font-size="11" fill="#01579b" font-weight="bold">&lt; 50ms</text>
-    <text x="495" y="662" font-size="10" fill="#666">Re-evaluate authorization + generate new token</text>
+    <text x="495" y="650" font-size="11" font-weight="bold" fill="#1a237e">Renewal:</text>>
+    <text x="790" y="650" font-size="11" fill="#01579b" font-weight="bold">&lt; 50ms</text>>
+    <text x="495" y="662" font-size="10" fill="#666">Re-evaluate authorization + generate new token</text>>
   </g>
 
   <!-- ===== TOKEN STRUCTURE (Bottom Right) ===== -->
   <g id="token-structure">
     <rect x="870" y="430" width="280" height="250" rx="6" fill="#f3e5f5" stroke="#6a1b9a" stroke-width="2"/>
 
-    <text x="1010" y="460" text-anchor="middle" font-size="14" font-weight="bold" fill="#4a148c">Token Structure</text>
+    <text x="1010" y="460" text-anchor="middle" font-size="14" font-weight="bold" fill="#4a148c">Token Structure</text>>
 
     <!-- Token fields -->
     <rect x="890" y="480" width="240" height="175" rx="3" fill="white" stroke="#6a1b9a" stroke-width="1" font-family="monospace"/>
 
-    <text x="900" y="497" font-size="10" font-family="monospace" fill="#333">{</text>
-    <text x="910" y="512" font-size="9" font-family="monospace" fill="#0d47a1" font-weight="bold">"agent_id"</text>
-    <text x="1000" y="512" font-size="9" font-family="monospace" fill="#333">: "agent-uuid",</text>
+    <text x="900" y="497" font-size="10" font-family="monospace" fill="#333">{</text>>
+    <text x="910" y="512" font-size="9" font-family="monospace" fill="#0d47a1" font-weight="bold">"agent_id"</text>>
+    <text x="1000" y="512" font-size="9" font-family="monospace" fill="#333">: "agent-uuid",</text>>
 
-    <text x="910" y="527" font-size="9" font-family="monospace" fill="#0d47a1" font-weight="bold">"actions"</text>
-    <text x="1000" y="527" font-size="9" font-family="monospace" fill="#333">: ["read", "query"],</text>
+    <text x="910" y="527" font-size="9" font-family="monospace" fill="#0d47a1" font-weight="bold">"actions"</text>>
+    <text x="1000" y="527" font-size="9" font-family="monospace" fill="#333">: ["read", "query"],</text>>
 
-    <text x="910" y="542" font-size="9" font-family="monospace" fill="#0d47a1" font-weight="bold">"resources"</text>
-    <text x="1000" y="542" font-size="9" font-family="monospace" fill="#333">: ["customer_data"],</text>
+    <text x="910" y="542" font-size="9" font-family="monospace" fill="#0d47a1" font-weight="bold">"resources"</text>>
+    <text x="1000" y="542" font-size="9" font-family="monospace" fill="#333">: ["customer_data"],</text>>
 
-    <text x="910" y="557" font-size="9" font-family="monospace" fill="#0d47a1" font-weight="bold">"conditions"</text>
-    <text x="1000" y="557" font-size="9" font-family="monospace" fill="#333">: {anomaly &lt; 0.5},</text>
+    <text x="910" y="557" font-size="9" font-family="monospace" fill="#0d47a1" font-weight="bold">"conditions"</text>>
+    <text x="1000" y="557" font-size="9" font-family="monospace" fill="#333">: {anomaly &lt; 0.5},</text>>
 
-    <text x="910" y="572" font-size="9" font-family="monospace" fill="#0d47a1" font-weight="bold">"issued_at"</text>
-    <text x="1000" y="572" font-size="9" font-family="monospace" fill="#333">: 1653020400,</text>
+    <text x="910" y="572" font-size="9" font-family="monospace" fill="#0d47a1" font-weight="bold">"issued_at"</text>>
+    <text x="1000" y="572" font-size="9" font-family="monospace" fill="#333">: 1653020400,</text>>
 
-    <text x="910" y="587" font-size="9" font-family="monospace" fill="#0d47a1" font-weight="bold">"expires_at"</text>
-    <text x="1000" y="587" font-size="9" font-family="monospace" fill="#333">: 1653024000,</text>
+    <text x="910" y="587" font-size="9" font-family="monospace" fill="#0d47a1" font-weight="bold">"expires_at"</text>>
+    <text x="1000" y="587" font-size="9" font-family="monospace" fill="#333">: 1653024000,</text>>
 
-    <text x="910" y="602" font-size="9" font-family="monospace" fill="#0d47a1" font-weight="bold">"signature"</text>
-    <text x="1000" y="602" font-size="9" font-family="monospace" fill="#333">: "sha256...",</text>
+    <text x="910" y="602" font-size="9" font-family="monospace" fill="#0d47a1" font-weight="bold">"signature"</text>>
+    <text x="1000" y="602" font-size="9" font-family="monospace" fill="#333">: "sha256...",</text>>
 
-    <text x="900" y="620" font-size="10" font-family="monospace" fill="#333">}</text>
+    <text x="900" y="620" font-size="10" font-family="monospace" fill="#333">}</text>>
 
-    <text x="900" y="650" font-size="10" fill="#666">All fields immutable</text>
-    <text x="900" y="668" font-size="10" fill="#666">Cryptographically signed</text>
+    <text x="900" y="650" font-size="10" fill="#666">All fields immutable</text>>
+    <text x="900" y="668" font-size="10" fill="#666">Cryptographically signed</text>>
   </g>
 
   <!-- Key insight box -->
   <rect x="50" y="690" width="1100" height="25" rx="4" fill="#c8e6c9" stroke="#2e7d32" stroke-width="2"/>
-  <text x="600" y="710" text-anchor="middle" font-size="12" font-weight="bold" fill="#1b5e20">Key Insight: Authority is NOT "revoked later" – authority is ACTIVE ONLY while conditions are met. Time-based and condition-based revocation happen automatically.</text>
+  <text x="600" y="710" text-anchor="middle" font-size="12" font-weight="bold" fill="#1b5e20">Key Insight: Authority is NOT "revoked later" – authority is ACTIVE ONLY while conditions are met. Time-based and condition-based revocation happen automatically.</text>>
 </svg>

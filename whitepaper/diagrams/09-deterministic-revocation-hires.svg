@@ -14,7 +14,7 @@
 
   <!-- Title -->
   <text x="600" y="35" text-anchor="middle" class="title">Deterministic Revocation – Immediate Authority Withdrawal</text>
-  <text x="600" y="60" text-anchor="middle" class="subtitle">Authority is not revoked later; it is automatically invalidated when conditions change (<1 second SLA)</text>
+  <text x="600" y="60" text-anchor="middle" class="subtitle">Authority is not revoked later; it is automatically invalidated when conditions change (&lt;1 second SLA)</text>
 
   <!-- Five Revocation Trigger Types -->
   <text x="600" y="100" text-anchor="middle" font-size="16" font-weight="bold" fill="#1a237e">Five Revocation Triggers</text>
