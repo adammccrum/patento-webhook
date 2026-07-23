@@ -1,9 +1,9 @@
 # IrisKey Whitepaper – Diagrams Production Status
 
 **Target:** 20 professional-quality technical diagrams  
-**Status:** 7 of 20 completed (~35% done)  
-**Format:** Vector SVG (publication-ready)  
-**Last Updated:** 2025-07-22
+**Status:** 8 of 20 completed SVGs + PNG conversions (40% done)  
+**Format:** Vector SVG + High-resolution PNG (300 DPI)  
+**Last Updated:** 2025-07-23
 
 ---
 
@@ -221,6 +221,38 @@
 
 ---
 
-**Progress:** 35% complete (7 of 20 diagrams)  
+**Progress:** 40% complete (8 of 20 diagrams with SVG + PNG conversion)  
+**PNG Conversion:** ✅ COMPLETE – All 8 SVG diagrams successfully converted to high-resolution PNG (300 DPI)  
 **Estimated completion:** 2–3 weeks at current pace  
 **Quality level:** Publication-ready (IEEE/ACM standards)
+
+---
+
+## PNG Conversion Status (2025-07-23)
+
+### ✅ SUCCESSFULLY CONVERTED (8/8)
+
+All diagrams have been converted to high-resolution PNG format at 300 DPI for publication:
+
+| Figure | SVG File | PNG File | Size | Status |
+|--------|----------|----------|------|--------|
+| 1 | 01-overall-architecture-hires.svg | 01-overall-architecture-hires.png | 120KB | ✅ |
+| 2 | 02-dual-brain-hires.svg | 02-dual-brain-hires.png | 160KB | ✅ Fixed XML |
+| 3 | 03-system-layers-hires.svg | 03-system-layers-hires.png | 113KB | ✅ |
+| 5 | 05-five-gate-hires.svg | 05-five-gate-hires.png | 174KB | ✅ |
+| 7 | 07-token-lifecycle-hires.svg | 07-token-lifecycle-hires.png | 148KB | ✅ Fixed XML |
+| 8 | 08-continuous-verification-hires.svg | 08-continuous-verification-hires.png | 110KB | ✅ |
+| 9 | 09-deterministic-revocation-hires.svg | 09-deterministic-revocation-hires.png | 146KB | ✅ Fixed XML |
+| 19 | 19-threat-model-matrix-hires.svg | 19-threat-model-matrix-hires.png | 263KB | ✅ Fixed XML |
+
+### Fixed XML Issues
+- **02-dual-brain-hires.svg:** Unescaped ampersands in text (e.g., "Tool Integration & Planning")
+- **07-token-lifecycle-hires.svg:** Unescaped ampersands in latency descriptions
+- **09-deterministic-revocation-hires.svg:** Extra closing `>` tags and unescaped `<` in SLA text
+- **19-threat-model-matrix-hires.svg:** Duplicate `class` attributes in legend boxes
+
+### Next Steps
+- [ ] Embed PNG diagrams in final PDF (currently 7 tested, 1 pending reportlab integration)
+- [ ] Create figure captions for publication
+- [ ] Generate remaining 12 diagrams (11, 12-18, 20)
+- [ ] Verify cross-references in white paper sections
