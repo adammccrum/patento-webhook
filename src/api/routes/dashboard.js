@@ -1,18 +1,20 @@
 /**
  * Dashboard API routes
  * Provides endpoints for the operation centre dashboard
+ * All routes require authentication (authMiddleware enforced in main app)
  */
 
 const express = require('express');
 const router = express.Router();
 const logger = require('../../utils/logger');
+const { requirePermission, requireAnyPermission } = require('../../middleware/permission-middleware');
 
 module.exports = (operationCentre, agentRegistry, _providerRegistry) => {
   /**
    * GET /api/dashboard
    * Get complete dashboard state snapshot
    */
-  router.get('/', (req, res) => {
+  router.get('/', requireAnyPermission(['objective:view', 'agent:view', 'task:view']), (req, res) => {
     try {
       const state = operationCentre.getDashboardState();
       res.json(state);
@@ -26,7 +28,7 @@ module.exports = (operationCentre, agentRegistry, _providerRegistry) => {
    * GET /api/dashboard/agents
    * Get all agents with current status
    */
-  router.get('/agents', (req, res) => {
+  router.get('/agents', requirePermission('agent:view'), (req, res) => {
     try {
       const agents = operationCentre.getAgentsStatus();
       res.json({
@@ -44,7 +46,7 @@ module.exports = (operationCentre, agentRegistry, _providerRegistry) => {
    * GET /api/dashboard/agents/:code
    * Get specific agent details
    */
-  router.get('/agents/:code', (req, res) => {
+  router.get('/agents/:code', requirePermission('agent:view'), (req, res) => {
     try {
       const agent = agentRegistry.getAgent(req.params.code);
       if (!agent) {
@@ -82,7 +84,7 @@ module.exports = (operationCentre, agentRegistry, _providerRegistry) => {
    * GET /api/dashboard/objectives
    * Get current objectives
    */
-  router.get('/objectives', (req, res) => {
+  router.get('/objectives', requirePermission('objective:view'), (req, res) => {
     try {
       const objectives = operationCentre.getObjectivesStatus();
       res.json({
@@ -100,7 +102,7 @@ module.exports = (operationCentre, agentRegistry, _providerRegistry) => {
    * GET /api/dashboard/tasks
    * Get current tasks
    */
-  router.get('/tasks', (req, res) => {
+  router.get('/tasks', requirePermission('task:view'), (req, res) => {
     try {
       const limit = parseInt(req.query.limit) || 50;
       const tasks = operationCentre.getTasksStatus().slice(0, limit);
@@ -119,7 +121,7 @@ module.exports = (operationCentre, agentRegistry, _providerRegistry) => {
    * GET /api/dashboard/events
    * Get recent events
    */
-  router.get('/events', (req, res) => {
+  router.get('/events', requirePermission('audit:view'), (req, res) => {
     try {
       const limit = parseInt(req.query.limit) || 50;
       const eventType = req.query.type;
@@ -145,7 +147,7 @@ module.exports = (operationCentre, agentRegistry, _providerRegistry) => {
    * GET /api/dashboard/authorizations
    * Get pending authorizations
    */
-  router.get('/authorizations', (req, res) => {
+  router.get('/authorizations', requirePermission('authorization:view'), (req, res) => {
     try {
       const authorizations = operationCentre.getPendingAuthorizations();
       res.json({
@@ -163,7 +165,7 @@ module.exports = (operationCentre, agentRegistry, _providerRegistry) => {
    * POST /api/dashboard/authorizations/:id/approve
    * Approve authorization request
    */
-  router.post('/authorizations/:id/approve', (req, res) => {
+  router.post('/authorizations/:id/approve', requirePermission('authorization:approve'), (req, res) => {
     try {
       const approverId = req.body.approver_id || 'system';
       const result = operationCentre.approveAuthorization(req.params.id, approverId);
@@ -182,7 +184,7 @@ module.exports = (operationCentre, agentRegistry, _providerRegistry) => {
    * POST /api/dashboard/authorizations/:id/deny
    * Deny authorization request
    */
-  router.post('/authorizations/:id/deny', (req, res) => {
+  router.post('/authorizations/:id/deny', requirePermission('authorization:deny'), (req, res) => {
     try {
       const denierId = req.body.denier_id || 'system';
       const reason = req.body.reason || 'No reason provided';
@@ -206,7 +208,7 @@ module.exports = (operationCentre, agentRegistry, _providerRegistry) => {
    * POST /api/dashboard/objectives/:id/pause
    * Pause objective
    */
-  router.post('/objectives/:id/pause', (req, res) => {
+  router.post('/objectives/:id/pause', requirePermission('objective:pause'), (req, res) => {
     try {
       const userId = req.body.user_id || 'system';
       const result = operationCentre.pauseObjective(req.params.id, userId);
@@ -225,7 +227,7 @@ module.exports = (operationCentre, agentRegistry, _providerRegistry) => {
    * POST /api/dashboard/objectives/:id/resume
    * Resume objective
    */
-  router.post('/objectives/:id/resume', (req, res) => {
+  router.post('/objectives/:id/resume', requirePermission('objective:resume'), (req, res) => {
     try {
       const userId = req.body.user_id || 'system';
       const result = operationCentre.resumeObjective(req.params.id, userId);
@@ -244,7 +246,7 @@ module.exports = (operationCentre, agentRegistry, _providerRegistry) => {
    * POST /api/dashboard/objectives/:id/cancel
    * Cancel objective
    */
-  router.post('/objectives/:id/cancel', (req, res) => {
+  router.post('/objectives/:id/cancel', requirePermission('objective:cancel'), (req, res) => {
     try {
       const userId = req.body.user_id || 'system';
       const reason = req.body.reason || '';
@@ -264,7 +266,7 @@ module.exports = (operationCentre, agentRegistry, _providerRegistry) => {
    * GET /api/dashboard/health
    * Get system health
    */
-  router.get('/health', (req, res) => {
+  router.get('/health', requireAnyPermission(['agent:view', 'objective:view']), (req, res) => {
     try {
       const health = operationCentre.getSystemHealth();
       res.json({
@@ -281,7 +283,7 @@ module.exports = (operationCentre, agentRegistry, _providerRegistry) => {
    * GET /api/dashboard/connections
    * Get WebSocket connection info
    */
-  router.get('/connections', (req, res) => {
+  router.get('/connections', requirePermission('system:admin'), (req, res) => {
     try {
       const info = operationCentre.getConnectionInfo();
       res.json(info);
