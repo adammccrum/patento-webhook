@@ -1,0 +1,160 @@
+roles:
+  owner:
+    description: "Full system access, implicit all permissions"
+    permissions: [] # owner has all permissions implicitly
+    is_builtin: true
+
+  administrator:
+    description: "Manage users, roles, system configuration"
+    permissions:
+      - objective:create
+      - objective:view
+      - objective:update
+      - objective:pause
+      - objective:resume
+      - objective:cancel
+      - objective:delete
+      - task:create
+      - task:view
+      - task:update
+      - task:retry
+      - task:delete
+      - agent:view
+      - agent:manage
+      - authorization:view
+      - authorization:approve
+      - authorization:deny
+      - authorization:revoke
+      - audit:view
+      - audit:export
+      - provider:manage
+      - system:admin
+    is_builtin: true
+
+  operator:
+    description: "Execute and monitor objectives, approve authorizations"
+    permissions:
+      - objective:view
+      - objective:pause
+      - objective:resume
+      - objective:cancel
+      - task:view
+      - task:retry
+      - agent:view
+      - authorization:view
+      - authorization:approve
+      - authorization:deny
+    is_builtin: true
+
+  reviewer:
+    description: "View-only access to objectives, tasks, and audit logs"
+    permissions:
+      - objective:view
+      - task:view
+      - agent:view
+      - authorization:view
+      - audit:view
+    is_builtin: true
+
+  viewer:
+    description: "Limited view-only access to objectives and tasks"
+    permissions:
+      - objective:view
+      - task:view
+      - agent:view
+    is_builtin: true
+
+  service_agent:
+    description: "Machine identity for service agents"
+    permissions:
+      - task:execute
+      - agent:report_status
+      - objective:view
+    is_builtin: true
+
+permissions:
+  # Objective permissions
+  - action: objective:create
+    resource: objective
+    description: "Create new objectives"
+  - action: objective:view
+    resource: objective
+    description: "View objectives"
+  - action: objective:update
+    resource: objective
+    description: "Update objective details"
+  - action: objective:pause
+    resource: objective
+    description: "Pause objective execution"
+  - action: objective:resume
+    resource: objective
+    description: "Resume paused objective"
+  - action: objective:cancel
+    resource: objective
+    description: "Cancel objective"
+  - action: objective:delete
+    resource: objective
+    description: "Delete objective"
+
+  # Task permissions
+  - action: task:create
+    resource: task
+    description: "Create new tasks"
+  - action: task:view
+    resource: task
+    description: "View tasks"
+  - action: task:update
+    resource: task
+    description: "Update task details"
+  - action: task:retry
+    resource: task
+    description: "Retry failed task"
+  - action: task:delete
+    resource: task
+    description: "Delete task"
+  - action: task:execute
+    resource: task
+    description: "Execute task (service agents only)"
+
+  # Agent permissions
+  - action: agent:view
+    resource: agent
+    description: "View agent status and capabilities"
+  - action: agent:manage
+    resource: agent
+    description: "Manage agent configuration"
+  - action: agent:report_status
+    resource: agent
+    description: "Report agent status (service agents only)"
+
+  # Authorization permissions
+  - action: authorization:view
+    resource: authorization
+    description: "View authorization requests"
+  - action: authorization:approve
+    resource: authorization
+    description: "Approve authorization requests"
+  - action: authorization:deny
+    resource: authorization
+    description: "Deny authorization requests"
+  - action: authorization:revoke
+    resource: authorization
+    description: "Revoke previous authorizations"
+
+  # Audit permissions
+  - action: audit:view
+    resource: audit
+    description: "View audit logs"
+  - action: audit:export
+    resource: audit
+    description: "Export audit logs"
+
+  # Provider permissions
+  - action: provider:manage
+    resource: provider
+    description: "Manage external providers"
+
+  # System permissions
+  - action: system:admin
+    resource: system
+    description: "System administration access"
