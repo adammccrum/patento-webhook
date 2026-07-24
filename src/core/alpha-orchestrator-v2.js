@@ -5,7 +5,7 @@
 
 const { v4: uuid } = require('uuid');
 const { AGENT_STATES } = require('../utils/constants');
-const { Objective, OBJECTIVE_TYPES } = require('../orchestration/task-schema');
+const { Objective } = require('../orchestration/task-schema');
 const { AuditEvent, AUDIT_EVENT_TYPES } = require('../audit/audit-event-schema');
 const ObjectiveClassifier = require('../orchestration/objective-classifier');
 const TaskPlanner = require('../orchestration/task-planner');
@@ -122,7 +122,7 @@ class AlphaOrchestratorV2 {
 
     try {
       // Execute with engine
-      const result = await this.executor.executeTask(task, context);
+      await this.executor.executeTask(task, context);
 
       // Aggregate results
       const aggregated = this.aggregateResults(task);
@@ -243,7 +243,7 @@ class AlphaOrchestratorV2 {
   /**
    * Handle escalation for restricted actions
    */
-  async escalateAction(actionId, actionType, context = {}) {
+  async escalateAction(actionId, actionType, _context = {}) {
     logger.warn(`Escalating action ${actionId} of type ${actionType}`);
 
     // Find appropriate escalation target (usually a human review or security agent)

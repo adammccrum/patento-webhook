@@ -2,7 +2,7 @@
  * Task planner - decomposes objectives into executable subtasks
  */
 
-const { Task, Objective, OBJECTIVE_TYPES, TASK_STATES } = require('./task-schema');
+const { Task, OBJECTIVE_TYPES } = require('./task-schema');
 const logger = require('../utils/logger');
 
 class TaskPlanner {
@@ -34,28 +34,28 @@ class TaskPlanner {
     // Generate subtask templates based on objective type
     let subtaskTemplates = [];
     switch (classification.type) {
-      case OBJECTIVE_TYPES.CREATE_CONTENT:
-        subtaskTemplates = this.planContentCreation(objective);
-        break;
-      case OBJECTIVE_TYPES.ANALYZE_DATA:
-        subtaskTemplates = this.planDataAnalysis(objective);
-        break;
-      case OBJECTIVE_TYPES.GENERATE_MEDIA:
-        subtaskTemplates = this.planMediaGeneration(objective);
-        break;
-      case OBJECTIVE_TYPES.AUTOMATE_WORKFLOW:
-        subtaskTemplates = this.planWorkflowAutomation(objective);
-        break;
-      case OBJECTIVE_TYPES.PROVIDE_CONSULTATION:
-        subtaskTemplates = this.planConsultation(objective);
-        break;
-      case OBJECTIVE_TYPES.INTEGRATE_SYSTEM:
-        subtaskTemplates = this.planIntegration(objective);
-        break;
-      default:
-        subtaskTemplates = Array.isArray(this.planGeneric(objective)) ?
-          this.planGeneric(objective) :
-          [this.planGeneric(objective)];
+    case OBJECTIVE_TYPES.CREATE_CONTENT:
+      subtaskTemplates = this.planContentCreation(objective);
+      break;
+    case OBJECTIVE_TYPES.ANALYZE_DATA:
+      subtaskTemplates = this.planDataAnalysis(objective);
+      break;
+    case OBJECTIVE_TYPES.GENERATE_MEDIA:
+      subtaskTemplates = this.planMediaGeneration(objective);
+      break;
+    case OBJECTIVE_TYPES.AUTOMATE_WORKFLOW:
+      subtaskTemplates = this.planWorkflowAutomation(objective);
+      break;
+    case OBJECTIVE_TYPES.PROVIDE_CONSULTATION:
+      subtaskTemplates = this.planConsultation(objective);
+      break;
+    case OBJECTIVE_TYPES.INTEGRATE_SYSTEM:
+      subtaskTemplates = this.planIntegration(objective);
+      break;
+    default:
+      subtaskTemplates = Array.isArray(this.planGeneric(objective)) ?
+        this.planGeneric(objective) :
+        [this.planGeneric(objective)];
     }
 
     // First pass: Create all subtasks and map template indices to actual IDs
@@ -118,7 +118,7 @@ class TaskPlanner {
       },
       {
         title: 'Generate Content',
-        description: `Write comprehensive content based on research findings`,
+        description: 'Write comprehensive content based on research findings',
         agent_code: 'DD', // Delta (documents)
         capability_required: 'document_generation',
         input: {
@@ -129,7 +129,7 @@ class TaskPlanner {
       },
       {
         title: 'Review & Polish',
-        description: `Review content for quality and correctness`,
+        description: 'Review content for quality and correctness',
         agent_code: 'PP', // Papa (QA)
         capability_required: 'quality_assurance',
         input: {
@@ -147,7 +147,7 @@ class TaskPlanner {
     return [
       {
         title: 'Gather Data',
-        description: `Collect data needed for analysis`,
+        description: 'Collect data needed for analysis',
         agent_code: 'OO', // Oscar (data)
         capability_required: 'data_collection',
         input: {
@@ -157,7 +157,7 @@ class TaskPlanner {
       },
       {
         title: 'Analyze Data',
-        description: `Perform analysis and generate insights`,
+        description: 'Perform analysis and generate insights',
         agent_code: 'OO', // Oscar (data)
         capability_required: 'data_analysis',
         input: {
@@ -167,7 +167,7 @@ class TaskPlanner {
       },
       {
         title: 'Create Dashboard',
-        description: `Visualize findings in a dashboard`,
+        description: 'Visualize findings in a dashboard',
         agent_code: 'VV', // Victor (vision/visualization)
         capability_required: 'visualization',
         input: {
@@ -195,7 +195,7 @@ class TaskPlanner {
       },
       {
         title: 'Generate Media',
-        description: `Execute media generation according to plan`,
+        description: 'Execute media generation according to plan',
         agent_code: 'FF', // Foxtrot (media)
         capability_required: 'media_generation',
         input: {
@@ -205,7 +205,7 @@ class TaskPlanner {
       },
       {
         title: 'Add Audio',
-        description: `Add voice narration or audio`,
+        description: 'Add voice narration or audio',
         agent_code: 'EE', // Echo (voice)
         capability_required: 'text_to_speech',
         input: {
@@ -234,7 +234,7 @@ class TaskPlanner {
       },
       {
         title: 'Build Automation',
-        description: `Implement the automation workflow`,
+        description: 'Implement the automation workflow',
         agent_code: 'BB', // Bravo (code)
         capability_required: 'automation_implementation',
         input: {
@@ -244,7 +244,7 @@ class TaskPlanner {
       },
       {
         title: 'Test Workflow',
-        description: `Test automation for correctness`,
+        description: 'Test automation for correctness',
         agent_code: 'PP', // Papa (QA)
         capability_required: 'testing',
         input: {
@@ -272,7 +272,7 @@ class TaskPlanner {
       },
       {
         title: 'Provide Recommendation',
-        description: `Provide expert recommendation based on research`,
+        description: 'Provide expert recommendation based on research',
         agent_code: 'BB', // Bravo (expertise)
         capability_required: 'consulting',
         input: {
@@ -282,7 +282,7 @@ class TaskPlanner {
       },
       {
         title: 'Prepare Documentation',
-        description: `Document recommendations for reference`,
+        description: 'Document recommendations for reference',
         agent_code: 'DD', // Delta (documentation)
         capability_required: 'documentation',
         input: {
@@ -310,7 +310,7 @@ class TaskPlanner {
       },
       {
         title: 'Implement Integration',
-        description: `Implement the integration`,
+        description: 'Implement the integration',
         agent_code: 'BB', // Bravo (code)
         capability_required: 'development',
         input: {
@@ -320,7 +320,7 @@ class TaskPlanner {
       },
       {
         title: 'Test Integration',
-        description: `Test integration endpoints and data flow`,
+        description: 'Test integration endpoints and data flow',
         agent_code: 'PP', // Papa (QA)
         capability_required: 'integration_testing',
         input: {

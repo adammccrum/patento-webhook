@@ -208,7 +208,7 @@ describe('Task Schema', () => {
         capability_required: 'work'
       });
 
-      const sub2 = task.addSubtask({
+      const _sub2 = task.addSubtask({
         title: 'Work2',
         description: 'Work',
         agent_code: 'LL',

@@ -200,14 +200,14 @@ class ExecutionEngine {
    * Execute subtask on the selected agent
    * This is where agent-specific logic would be called
    */
-  async executeOnAgent(agent, subtask, context) {
+  async executeOnAgent(agent, subtask, _context) {
     // For now, simulate agent execution
     // In Phase 3, this will call actual agent implementations
 
     logger.debug(`Delegating to agent ${agent.code}: ${subtask.capability_required}`);
 
     // Simulate async execution (in real implementation, this calls agent.execute())
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       setTimeout(() => {
         // Simulate successful completion
         resolve({

@@ -24,7 +24,7 @@ class SpecialistAgent {
    * Execute a delegated task
    * Must be implemented by subclass
    */
-  async execute(task, context = {}) {
+  async execute(task, _context = {}) {
     throw new Error('execute() must be implemented by subclass');
   }
 
@@ -45,7 +45,7 @@ class SpecialistAgent {
   /**
    * Validate task before execution
    */
-  validateTask(task, context) {
+  validateTask(task, _context) {
     if (!task.capability_required) {
       throw new Error('Task missing required capability');
     }

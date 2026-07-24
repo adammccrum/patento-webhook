@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Operation Centre - Multi-Agent Orchestration</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-content">
+        <h1 class="logo">⚙️ Operation Centre</h1>
+        <p class="subtitle">Real-time Multi-Agent Orchestration Dashboard</p>
+      </div>
+      <div class="header-status">
+        <div class="connection-status" id="connectionStatus">
+          <span class="status-indicator"></span>
+          <span class="status-text">Connecting...</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Navigation Tabs -->
+      <nav class="tabs">
+        <button class="tab-button active" data-tab="overview">Overview</button>
+        <button class="tab-button" data-tab="agents">Agents</button>
+        <button class="tab-button" data-tab="tasks">Tasks</button>
+        <button class="tab-button" data-tab="events">Events</button>
+        <button class="tab-button" data-tab="authorizations">Authorizations</button>
+        <button class="tab-button" data-tab="health">Health</button>
+      </nav>
+
+      <!-- Tab Content -->
+      <div class="tab-content">
+        <!-- Overview Tab -->
+        <section id="overview" class="tab-pane active">
+          <div class="grid-2">
+            <!-- Orchestrator Status -->
+            <div class="card">
+              <h2>Central Orchestrator</h2>
+              <div class="orchestrator-status">
+                <div class="agent-box alpha">
+                  <div class="agent-code">AA</div>
+                  <div class="agent-name">Alpha</div>
+                  <div class="agent-status">Executive Orchestrator</div>
+                  <div class="agent-state" id="alphaState">active</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="card">
+              <h2>System Status</h2>
+              <div class="stats-grid">
+                <div class="stat">
+                  <span class="stat-label">Connected Clients</span>
+                  <span class="stat-value" id="connectedClients">0</span>
+                </div>
+                <div class="stat">
+                  <span class="stat-label">Active Objectives</span>
+                  <span class="stat-value" id="activeObjectives">0</span>
+                </div>
+                <div class="stat">
+                  <span class="stat-label">Queued Tasks</span>
+                  <span class="stat-value" id="queuedTasks">0</span>
+                </div>
+                <div class="stat">
+                  <span class="stat-label">Failed Tasks</span>
+                  <span class="stat-value alert" id="failedTasks">0</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Agents Grid -->
+          <div class="card">
+            <h2>NATO Agents Status (26)</h2>
+            <div class="agents-grid" id="agentsGrid">
+              <!-- Populated by JavaScript -->
+            </div>
+          </div>
+
+          <!-- Recent Events -->
+          <div class="card">
+            <h2>Recent Events</h2>
+            <div class="event-list" id="recentEventsList" style="max-height: 400px; overflow-y: auto;">
+              <!-- Populated by JavaScript -->
+            </div>
+          </div>
+        </section>
+
+        <!-- Agents Tab -->
+        <section id="agents" class="tab-pane">
+          <div class="card">
+            <h2>All Agents</h2>
+            <div class="agents-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Code</th>
+                    <th>Name</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Current Task</th>
+                    <th>Last Event</th>
+                    <th>Enabled</th>
+                  </tr>
+                </thead>
+                <tbody id="agentsTableBody">
+                  <!-- Populated by JavaScript -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- Tasks Tab -->
+        <section id="tasks" class="tab-pane">
+          <div class="card">
+            <h2>Task Execution</h2>
+            <div class="tasks-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Task ID</th>
+                    <th>Status</th>
+                    <th>Objective</th>
+                    <th>Action</th>
+                    <th>Last Event</th>
+                    <th>Time</th>
+                  </tr>
+                </thead>
+                <tbody id="tasksTableBody">
+                  <!-- Populated by JavaScript -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- Events Tab -->
+        <section id="events" class="tab-pane">
+          <div class="card">
+            <h2>Event Feed</h2>
+            <div class="event-controls">
+              <input type="text" id="eventFilter" placeholder="Filter events by type..." class="filter-input">
+              <button id="clearEvents" class="btn-secondary">Clear</button>
+            </div>
+            <div class="event-log" id="eventLog">
+              <!-- Populated by JavaScript -->
+            </div>
+          </div>
+        </section>
+
+        <!-- Authorizations Tab -->
+        <section id="authorizations" class="tab-pane">
+          <div class="card">
+            <h2>Authorization Requests</h2>
+            <div id="authorizationsContainer">
+              <!-- Populated by JavaScript -->
+            </div>
+          </div>
+        </section>
+
+        <!-- Health Tab -->
+        <section id="health" class="tab-pane">
+          <div class="grid-2">
+            <!-- System Health -->
+            <div class="card">
+              <h2>System Health</h2>
+              <div id="systemHealthPanel">
+                <!-- Populated by JavaScript -->
+              </div>
+            </div>
+
+            <!-- Service Status -->
+            <div class="card">
+              <h2>Service Status</h2>
+              <div id="serviceStatusPanel">
+                <!-- Populated by JavaScript -->
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- Authorization Modal -->
+  <div id="authModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>Authorization Request</h2>
+      <div id="authDetails">
+        <!-- Populated by JavaScript -->
+      </div>
+      <div class="modal-actions">
+        <button id="approveBtn" class="btn-primary">Approve</button>
+        <button id="denyBtn" class="btn-danger">Deny</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/app.js"></script>
+</body>
+</html>
