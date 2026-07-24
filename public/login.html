@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Patento Dashboard - Login</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #0066cc;
+      --primary-dark: #0052a3;
+      --gray-100: #f5f5f5;
+      --gray-200: #e8e8e8;
+      --gray-400: #999;
+      --gray-600: #555;
+      --error-color: #d32f2f;
+      --success-color: #388e3c;
+      --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --gray-100: #1a1a1a;
+        --gray-200: #2d2d2d;
+        --gray-400: #999;
+        --gray-600: #e0e0e0;
+      }
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: var(--gray-100);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .login-container {
+      background: white;
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      padding: 40px;
+      width: 100%;
+      max-width: 400px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .login-container {
+        background: #1a1a1a;
+      }
+    }
+
+    .login-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .login-header h1 {
+      font-size: 28px;
+      margin-bottom: 8px;
+      color: var(--gray-600);
+    }
+
+    .login-header p {
+      color: var(--gray-400);
+      font-size: 14px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 500;
+      color: var(--gray-600);
+      font-size: 14px;
+    }
+
+    input[type="email"],
+    input[type="password"] {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid var(--gray-200);
+      border-radius: 4px;
+      font-size: 14px;
+      background: white;
+      color: var(--gray-600);
+      font-family: inherit;
+      transition: border-color 0.2s;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      input[type="email"],
+      input[type="password"] {
+        background: #2d2d2d;
+        color: #e0e0e0;
+        border-color: #404040;
+      }
+    }
+
+    input[type="email"]:focus,
+    input[type="password"]:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+    }
+
+    .login-button {
+      width: 100%;
+      padding: 12px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-top: 10px;
+    }
+
+    .login-button:hover {
+      background: var(--primary-dark);
+    }
+
+    .login-button:active {
+      transform: scale(0.98);
+    }
+
+    .login-button:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+
+    .error-message {
+      background: #fde8e8;
+      color: var(--error-color);
+      padding: 12px;
+      border-radius: 4px;
+      margin-bottom: 20px;
+      font-size: 14px;
+      display: none;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .error-message {
+        background: rgba(211, 47, 47, 0.1);
+        color: #ff6b6b;
+      }
+    }
+
+    .error-message.show {
+      display: block;
+    }
+
+    .loading {
+      display: none;
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid var(--gray-200);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .loading.show {
+      display: block;
+    }
+
+    .form-group.loading {
+      display: none;
+    }
+
+    .form-group.loading.show {
+      display: block;
+    }
+
+    .security-info {
+      margin-top: 20px;
+      padding: 12px;
+      background: var(--gray-100);
+      border-radius: 4px;
+      font-size: 12px;
+      color: var(--gray-400);
+      line-height: 1.6;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .security-info {
+        background: #2d2d2d;
+      }
+    }
+
+    .security-indicator {
+      display: inline-block;
+      margin-right: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-header">
+      <h1>🤖 Patento</h1>
+      <p>Multi-Agent Orchestration Dashboard</p>
+    </div>
+
+    <form id="loginForm">
+      <div class="error-message" id="errorMessage"></div>
+
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          placeholder="your@email.com"
+          required
+          autocomplete="email"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          placeholder="Enter your password"
+          required
+          autocomplete="current-password"
+        />
+      </div>
+
+      <button type="submit" class="login-button" id="loginBtn">
+        Sign In
+      </button>
+
+      <div class="loading" id="loadingIndicator">
+        <div class="spinner"></div>
+        <p>Signing in...</p>
+      </div>
+    </form>
+
+    <div class="security-info">
+      <div>
+        <span class="security-indicator">🔒</span>
+        <strong>Secure Session</strong>
+      </div>
+      <p>Your credentials are encrypted. Tokens are stored securely.</p>
+      <p style="margin-top: 8px;">
+        <span id="securityStatus">Loading...</span>
+      </p>
+    </div>
+  </div>
+
+  <script src="/js/auth.js"></script>
+  <script>
+    const loginForm = document.getElementById('loginForm');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const loginBtn = document.getElementById('loginBtn');
+    const loadingIndicator = document.getElementById('loadingIndicator');
+    const errorMessage = document.getElementById('errorMessage');
+    const securityStatus = document.getElementById('securityStatus');
+
+    // Check if already logged in
+    if (getCurrentUser()) {
+      window.location.href = '/';
+    }
+
+    // Update security status
+    updateSecurityStatus();
+
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const email = emailInput.value.trim();
+      const password = passwordInput.value;
+
+      if (!email || !password) {
+        showError('Please enter both email and password');
+        return;
+      }
+
+      loginBtn.disabled = true;
+      loadingIndicator.classList.add('show');
+      errorMessage.classList.remove('show');
+
+      try {
+        const response = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ email, password }),
+          credentials: 'include'
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          showError(data.error || 'Login failed');
+          return;
+        }
+
+        // Store tokens
+        localStorage.setItem('accessToken', data.accessToken);
+        localStorage.setItem('refreshToken', data.refreshToken);
+        localStorage.setItem('user', JSON.stringify(data.user));
+
+        // Redirect to dashboard
+        window.location.href = '/';
+      } catch (error) {
+        showError(`Login error: ${error.message}`);
+      } finally {
+        loginBtn.disabled = false;
+        loadingIndicator.classList.remove('show');
+      }
+    });
+
+    function showError(message) {
+      errorMessage.textContent = message;
+      errorMessage.classList.add('show');
+    }
+
+    function updateSecurityStatus() {
+      const isSecure = window.location.protocol === 'https:';
+      const status = isSecure
+        ? '🔒 HTTPS Secure'
+        : '⚠️ Development HTTP (use HTTPS in production)';
+      securityStatus.textContent = status;
+    }
+  </script>
+</body>
+</html>
