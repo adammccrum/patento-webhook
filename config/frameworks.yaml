@@ -1,0 +1,531 @@
+# Framework Registry Configuration
+# Defines metadata and configuration for all known frameworks
+
+frameworks:
+  - framework_id: native
+    display_name: LAO AI OS Native
+    category: general-agent
+    official_repository: https://github.com/anthropics/lao-ai-os
+    official_website: https://lao-ai.example.com
+    maintainer: Anthropic
+    licence: Proprietary
+    language: JavaScript/TypeScript
+    runtime: Node.js 18+
+    latest_verified_version: 0.9.0
+    verification_date: 2026-07-24
+    maintenance_status: active
+    community_size: large
+    adapter_status: complete
+    implementation_status: integrated
+    guardian_requirements: []
+    sierra_required: true
+    uniform_required: true
+    network_required: false
+    filesystem_required: false
+    memory_model: deterministic
+    tool_execution_model: synchronous
+    sandbox_support: true
+    streaming_support: true
+    human_approval_support: true
+    multi_agent_support: true
+    mcp_support: true
+    cost_model: internal
+    installation_method: built-in
+    activation_state: enabled
+    enabled: true
+    notes: Core LAO AI OS multi-agent orchestration framework
+
+  - framework_id: langgraph
+    display_name: LangGraph
+    category: multi-agent-framework
+    official_repository: https://github.com/langchain-ai/langgraph
+    official_website: https://langchain-ai.github.io/langgraph/
+    maintainer: LangChain AI
+    licence: MIT
+    language: Python
+    runtime: Python 3.9+
+    latest_verified_version: 0.0.0
+    verification_date: null
+    maintenance_status: active
+    community_size: large
+    adapter_status: stub
+    implementation_status: proposed
+    guardian_requirements: []
+    sierra_required: true
+    uniform_required: true
+    network_required: true
+    filesystem_required: false
+    memory_model: stateful
+    tool_execution_model: asynchronous
+    sandbox_support: false
+    streaming_support: true
+    human_approval_support: false
+    multi_agent_support: true
+    mcp_support: false
+    cost_model: external
+    installation_method: pip
+    activation_state: disabled
+    enabled: false
+    notes: Placeholder - framework integration pending Guardian evaluation
+
+  - framework_id: autogen
+    display_name: AutoGen
+    category: multi-agent-framework
+    official_repository: https://github.com/microsoft/autogen
+    official_website: https://microsoft.github.io/autogen/
+    maintainer: Microsoft
+    licence: Apache-2.0
+    language: Python
+    runtime: Python 3.8+
+    latest_verified_version: 0.0.0
+    verification_date: null
+    maintenance_status: active
+    community_size: large
+    adapter_status: stub
+    implementation_status: proposed
+    guardian_requirements: []
+    sierra_required: true
+    uniform_required: true
+    network_required: true
+    filesystem_required: false
+    memory_model: stateful
+    tool_execution_model: asynchronous
+    sandbox_support: false
+    streaming_support: false
+    human_approval_support: true
+    multi_agent_support: true
+    mcp_support: false
+    cost_model: external
+    installation_method: pip
+    activation_state: disabled
+    enabled: false
+    notes: Placeholder - Microsoft AutoGen multi-agent framework
+
+  - framework_id: crewai
+    display_name: CrewAI
+    category: multi-agent-framework
+    official_repository: https://github.com/joaomdmoura/crewai
+    official_website: https://crewai.com
+    maintainer: CrewAI Community
+    licence: MIT
+    language: Python
+    runtime: Python 3.10+
+    latest_verified_version: 0.0.0
+    verification_date: null
+    maintenance_status: active
+    community_size: medium
+    adapter_status: stub
+    implementation_status: proposed
+    guardian_requirements: []
+    sierra_required: true
+    uniform_required: true
+    network_required: true
+    filesystem_required: false
+    memory_model: stateful
+    tool_execution_model: asynchronous
+    sandbox_support: false
+    streaming_support: true
+    human_approval_support: false
+    multi_agent_support: true
+    mcp_support: false
+    cost_model: external
+    installation_method: pip
+    activation_state: disabled
+    enabled: false
+    notes: Placeholder - CrewAI multi-agent orchestration
+
+  - framework_id: pydanticai
+    display_name: PydanticAI
+    category: multi-agent-framework
+    official_repository: https://github.com/pydantic/pydantic-ai
+    official_website: https://ai.pydantic.dev
+    maintainer: Pydantic
+    licence: MIT
+    language: Python
+    runtime: Python 3.9+
+    latest_verified_version: 0.0.0
+    verification_date: null
+    maintenance_status: active
+    community_size: medium
+    adapter_status: stub
+    implementation_status: proposed
+    guardian_requirements: []
+    sierra_required: true
+    uniform_required: true
+    network_required: true
+    filesystem_required: false
+    memory_model: functional
+    tool_execution_model: asynchronous
+    sandbox_support: true
+    streaming_support: true
+    human_approval_support: false
+    multi_agent_support: false
+    mcp_support: false
+    cost_model: external
+    installation_method: pip
+    activation_state: disabled
+    enabled: false
+    notes: Placeholder - Pydantic AI framework
+
+  - framework_id: atomicagents
+    display_name: Atomic Agents
+    category: coding-agent
+    official_repository: https://github.com/BerriAI/atomic-agents
+    official_website: https://github.com/BerriAI/atomic-agents
+    maintainer: Berry AI
+    licence: MIT
+    language: Python
+    runtime: Python 3.10+
+    latest_verified_version: 0.0.0
+    verification_date: null
+    maintenance_status: active
+    community_size: small
+    adapter_status: stub
+    implementation_status: proposed
+    guardian_requirements: []
+    sierra_required: true
+    uniform_required: true
+    network_required: true
+    filesystem_required: false
+    memory_model: functional
+    tool_execution_model: asynchronous
+    sandbox_support: true
+    streaming_support: true
+    human_approval_support: false
+    multi_agent_support: true
+    mcp_support: false
+    cost_model: external
+    installation_method: pip
+    activation_state: disabled
+    enabled: false
+    notes: Placeholder - Atomic Agents framework
+
+  - framework_id: smolagents
+    display_name: SmolAgents
+    category: coding-agent
+    official_repository: https://github.com/huggingface/smolagents
+    official_website: https://github.com/huggingface/smolagents
+    maintainer: Hugging Face
+    licence: MIT
+    language: Python
+    runtime: Python 3.9+
+    latest_verified_version: 0.0.0
+    verification_date: null
+    maintenance_status: active
+    community_size: medium
+    adapter_status: stub
+    implementation_status: proposed
+    guardian_requirements: []
+    sierra_required: true
+    uniform_required: true
+    network_required: true
+    filesystem_required: false
+    memory_model: functional
+    tool_execution_model: asynchronous
+    sandbox_support: true
+    streaming_support: true
+    human_approval_support: false
+    multi_agent_support: true
+    mcp_support: false
+    cost_model: external
+    installation_method: pip
+    activation_state: disabled
+    enabled: false
+    notes: Placeholder - Hugging Face SmolAgents framework
+
+  - framework_id: mastra
+    display_name: Mastra
+    category: workflow-agent
+    official_repository: https://github.com/mastra-ai/mastra
+    official_website: https://mastra.ai
+    maintainer: Mastra Community
+    licence: MIT
+    language: JavaScript/TypeScript
+    runtime: Node.js 18+
+    latest_verified_version: 0.0.0
+    verification_date: null
+    maintenance_status: active
+    community_size: small
+    adapter_status: stub
+    implementation_status: proposed
+    guardian_requirements: []
+    sierra_required: true
+    uniform_required: true
+    network_required: true
+    filesystem_required: false
+    memory_model: event-driven
+    tool_execution_model: asynchronous
+    sandbox_support: false
+    streaming_support: true
+    human_approval_support: false
+    multi_agent_support: true
+    mcp_support: false
+    cost_model: external
+    installation_method: npm
+    activation_state: disabled
+    enabled: false
+    notes: Placeholder - Mastra workflow orchestration
+
+  - framework_id: openhands
+    display_name: OpenHands
+    category: coding-agent
+    official_repository: https://github.com/All-Hands-AI/OpenHands
+    official_website: https://openhands.dev
+    maintainer: All Hands AI
+    licence: MIT
+    language: Python
+    runtime: Python 3.10+
+    latest_verified_version: 0.0.0
+    verification_date: null
+    maintenance_status: active
+    community_size: medium
+    adapter_status: stub
+    implementation_status: proposed
+    guardian_requirements: []
+    sierra_required: true
+    uniform_required: true
+    network_required: true
+    filesystem_required: true
+    memory_model: stateful
+    tool_execution_model: asynchronous
+    sandbox_support: false
+    streaming_support: true
+    human_approval_support: true
+    multi_agent_support: false
+    mcp_support: false
+    cost_model: external
+    installation_method: docker
+    activation_state: disabled
+    enabled: false
+    notes: Placeholder - OpenHands autonomous coding agent
+
+  - framework_id: aider
+    display_name: Aider
+    category: coding-agent
+    official_repository: https://github.com/paul-gauthier/aider
+    official_website: https://aider.chat
+    maintainer: Paul Gauthier
+    licence: Apache-2.0
+    language: Python
+    runtime: Python 3.9+
+    latest_verified_version: 0.0.0
+    verification_date: null
+    maintenance_status: active
+    community_size: medium
+    adapter_status: stub
+    implementation_status: proposed
+    guardian_requirements: []
+    sierra_required: true
+    uniform_required: true
+    network_required: true
+    filesystem_required: true
+    memory_model: stateful
+    tool_execution_model: asynchronous
+    sandbox_support: false
+    streaming_support: false
+    human_approval_support: true
+    multi_agent_support: false
+    mcp_support: false
+    cost_model: external
+    installation_method: pip
+    activation_state: disabled
+    enabled: false
+    notes: Placeholder - Aider AI-assisted coding agent
+
+  - framework_id: skyvern
+    display_name: Skyvern
+    category: browser-agent
+    official_repository: https://github.com/Skyvern-AI/skyvern
+    official_website: https://www.skyvern.ai
+    maintainer: Skyvern AI
+    licence: AGPL-3.0
+    language: Python
+    runtime: Python 3.10+
+    latest_verified_version: 0.0.0
+    verification_date: null
+    maintenance_status: active
+    community_size: small
+    adapter_status: stub
+    implementation_status: proposed
+    guardian_requirements: []
+    sierra_required: true
+    uniform_required: true
+    network_required: true
+    filesystem_required: false
+    memory_model: stateful
+    tool_execution_model: asynchronous
+    sandbox_support: false
+    streaming_support: false
+    human_approval_support: true
+    multi_agent_support: false
+    mcp_support: false
+    cost_model: external
+    installation_method: docker
+    activation_state: disabled
+    enabled: false
+    notes: Placeholder - Skyvern browser automation agent
+
+  - framework_id: agent-e
+    display_name: Agent-E
+    category: general-agent
+    official_repository: https://github.com/EmergenceAI/Agent-E
+    official_website: https://github.com/EmergenceAI/Agent-E
+    maintainer: Emergence AI
+    licence: MIT
+    language: Python
+    runtime: Python 3.10+
+    latest_verified_version: 0.0.0
+    verification_date: null
+    maintenance_status: active
+    community_size: small
+    adapter_status: stub
+    implementation_status: proposed
+    guardian_requirements: []
+    sierra_required: true
+    uniform_required: true
+    network_required: true
+    filesystem_required: false
+    memory_model: functional
+    tool_execution_model: asynchronous
+    sandbox_support: true
+    streaming_support: true
+    human_approval_support: false
+    multi_agent_support: true
+    mcp_support: false
+    cost_model: external
+    installation_method: pip
+    activation_state: disabled
+    enabled: false
+    notes: Placeholder - Agent-E general-purpose agent
+
+  - framework_id: gpt-researcher
+    display_name: GPT Researcher
+    category: research-agent
+    official_repository: https://github.com/assafelovic/gpt-researcher
+    official_website: https://tavily.com
+    maintainer: Assaf Elovic
+    licence: MIT
+    language: Python
+    runtime: Python 3.9+
+    latest_verified_version: 0.0.0
+    verification_date: null
+    maintenance_status: active
+    community_size: medium
+    adapter_status: stub
+    implementation_status: proposed
+    guardian_requirements: []
+    sierra_required: true
+    uniform_required: true
+    network_required: true
+    filesystem_required: false
+    memory_model: functional
+    tool_execution_model: asynchronous
+    sandbox_support: true
+    streaming_support: false
+    human_approval_support: false
+    multi_agent_support: false
+    mcp_support: false
+    cost_model: external
+    installation_method: pip
+    activation_state: disabled
+    enabled: false
+    notes: Placeholder - GPT Researcher autonomous research agent
+
+  - framework_id: n8n
+    display_name: n8n
+    category: workflow-agent
+    official_repository: https://github.com/n8n-io/n8n
+    official_website: https://n8n.io
+    maintainer: n8n
+    licence: Sustainable Use License
+    language: JavaScript/TypeScript
+    runtime: Node.js 18+
+    latest_verified_version: 0.0.0
+    verification_date: null
+    maintenance_status: active
+    community_size: large
+    adapter_status: stub
+    implementation_status: proposed
+    guardian_requirements: []
+    sierra_required: true
+    uniform_required: true
+    network_required: true
+    filesystem_required: false
+    memory_model: event-driven
+    tool_execution_model: asynchronous
+    sandbox_support: false
+    streaming_support: false
+    human_approval_support: true
+    multi_agent_support: false
+    mcp_support: false
+    cost_model: external
+    installation_method: docker
+    activation_state: disabled
+    enabled: false
+    notes: Placeholder - n8n workflow automation platform
+
+  - framework_id: windmill
+    display_name: Windmill
+    category: workflow-agent
+    official_repository: https://github.com/windmill-labs/windmill
+    official_website: https://windmill.dev
+    maintainer: Windmill Labs
+    licence: AGPLv3 / Commercial
+    language: Python/JavaScript
+    runtime: Multi
+    latest_verified_version: 0.0.0
+    verification_date: null
+    maintenance_status: active
+    community_size: small
+    adapter_status: stub
+    implementation_status: proposed
+    guardian_requirements: []
+    sierra_required: true
+    uniform_required: true
+    network_required: true
+    filesystem_required: false
+    memory_model: event-driven
+    tool_execution_model: asynchronous
+    sandbox_support: true
+    streaming_support: false
+    human_approval_support: true
+    multi_agent_support: false
+    mcp_support: false
+    cost_model: external
+    installation_method: docker
+    activation_state: disabled
+    enabled: false
+    notes: Placeholder - Windmill workflow orchestration
+
+  - framework_id: activepieces
+    display_name: Activepieces
+    category: workflow-agent
+    official_repository: https://github.com/activepieces/activepieces
+    official_website: https://www.activepieces.com
+    maintainer: Activepieces
+    licence: MIT / Commercial
+    language: JavaScript/TypeScript
+    runtime: Node.js 18+
+    latest_verified_version: 0.0.0
+    verification_date: null
+    maintenance_status: active
+    community_size: small
+    adapter_status: stub
+    implementation_status: proposed
+    guardian_requirements: []
+    sierra_required: true
+    uniform_required: true
+    network_required: true
+    filesystem_required: false
+    memory_model: event-driven
+    tool_execution_model: asynchronous
+    sandbox_support: true
+    streaming_support: false
+    human_approval_support: true
+    multi_agent_support: false
+    mcp_support: false
+    cost_model: external
+    installation_method: docker
+    activation_state: disabled
+    enabled: false
+    notes: Placeholder - Activepieces workflow automation
