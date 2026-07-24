@@ -9,6 +9,7 @@ const express = require('express');
 const helmet = require('helmet');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
 const http = require('http');
 const path = require('path');
 const logger = require('./utils/logger');
@@ -19,18 +20,38 @@ const AlphaOrchestratorV2 = require('./core/alpha-orchestrator-v2');
 const OperationCentre = require('./operation-centre/operation-centre');
 const { SystemError } = require('./utils/errors');
 
+// Phase 4: Database and Authentication
+const { initializeDatabase } = require('./database/database');
+const { authMiddleware, optionalAuthMiddleware } = require('./auth/auth-middleware');
+const { rateLimitMiddleware } = require('./middleware/rate-limit-middleware');
+const { correlationIdMiddleware } = require('./middleware/correlation-id-middleware');
+const { requestSizeMiddleware } = require('./middleware/request-size-middleware');
+
 const PORT = process.env.PORT || 3000;
 
 async function main() {
   try {
     logger.info('═══════════════════════════════════════════════════════════════');
-    logger.info('Multi-Agent Orchestration System - Phase 3 (Operation Centre)');
+    logger.info('Multi-Agent Orchestration System - Phase 4 (Security & Persistence)');
     logger.info('═══════════════════════════════════════════════════════════════');
 
     // Load configuration
     logger.info('Loading configuration...');
     const configLoader = new ConfigLoader('config');
     const config = configLoader.loadAll();
+
+    // Phase 4: Initialize Database
+    if (config.env.DATABASE_URL) {
+      logger.info('Initializing database...');
+      await initializeDatabase(config.env.DATABASE_URL, {
+        poolMin: config.env.DATABASE_POOL_MIN || 2,
+        poolMax: config.env.DATABASE_POOL_MAX || 10,
+        migrationTable: config.env.DATABASE_MIGRATION_TABLE || 'knex_migrations'
+      });
+      logger.info('✓ Database initialized');
+    } else {
+      logger.warn('DATABASE_URL not set - running without persistent storage');
+    }
 
     // Initialize Agent Registry
     logger.info('Initializing agent registry...');
@@ -67,13 +88,19 @@ async function main() {
     app.use(helmet());
     app.use(cors());
     app.use(bodyParser.json());
+    app.use(cookieParser());
+
+    // Phase 4: Security Middleware
+    app.use(correlationIdMiddleware); // Add correlation ID to all requests
+    app.use(requestSizeMiddleware); // Limit request size
+    app.use(rateLimitMiddleware); // Rate limiting
 
     // Serve static files (dashboard)
     app.use(express.static(path.join(__dirname, '../public')));
 
     // Request logging middleware
     app.use((req, res, next) => {
-      logger.debug(`${req.method} ${req.path}`);
+      logger.debug(`${req.method} ${req.path}`, { correlationId: req.correlationId });
       next();
     });
 
@@ -88,7 +115,7 @@ async function main() {
     operationCentre.initialize();
     logger.info('✓ Operation Centre ready');
 
-    // Routes: Health check
+    // Routes: Health check (public)
     app.get('/health', (req, res) => {
       res.json({
         status: 'healthy',
@@ -96,7 +123,14 @@ async function main() {
       });
     });
 
-    // Routes: System status
+    // Phase 4: Authentication Routes (public)
+    const authRouter = require('./api/routes/auth');
+    app.use('/api/auth', authRouter);
+
+    // Apply authentication middleware to protected routes
+    app.use(authMiddleware);
+
+    // Routes: System status (protected)
     app.get('/status', async (req, res) => {
       try {
         const alphaStatus = alpha.getStatus();
@@ -249,6 +283,14 @@ async function main() {
       logger.info('═══════════════════════════════════════════════════════════════');
       logger.info('');
       logger.info('Available endpoints:');
+      logger.info('');
+      logger.info('Authentication (Public):');
+      logger.info('  POST /api/auth/login           - Login with email/password');
+      logger.info('  POST /api/auth/logout          - Logout and revoke session');
+      logger.info('  POST /api/auth/refresh         - Refresh access token');
+      logger.info('  GET  /api/auth/me              - Get current user');
+      logger.info('');
+      logger.info('Protected Endpoints (require authentication):');
       logger.info('  GET  /                         - Dashboard (HTML)');
       logger.info('  GET  /health                   - Health check');
       logger.info('  GET  /status                   - System status');
@@ -258,13 +300,13 @@ async function main() {
       logger.info('  POST /objectives               - Submit objective');
       logger.info('  POST /tasks/:taskId/execute    - Execute task');
       logger.info('');
-      logger.info('Dashboard API:');
+      logger.info('Dashboard API (protected):');
       logger.info('  GET  /api/dashboard            - Dashboard state');
       logger.info('  GET  /api/dashboard/agents     - Agents status');
       logger.info('  GET  /api/dashboard/events     - Recent events');
       logger.info('  GET  /api/dashboard/health     - System health');
       logger.info('');
-      logger.info('WebSocket:');
+      logger.info('WebSocket (protected):');
       logger.info('  WS   /ws/events                - Real-time event stream');
       logger.info('');
     });
