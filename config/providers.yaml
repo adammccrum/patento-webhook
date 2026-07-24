@@ -1,0 +1,452 @@
+# Provider Configuration
+# All providers default to disabled (enabled: false)
+# Providers are only instantiated when explicitly enabled and configured
+
+providers:
+  # ============================================================
+  # VOICE PROVIDERS
+  # ============================================================
+
+  - provider_id: voicebox
+    name: Voicebox
+    category: voice
+    repository: https://github.com/voicebox/voicebox
+    licence: Apache-2.0
+    adapter: VoiceboxAdapter
+    enabled: false
+    installed: false
+    configured: false
+    execution_mode: local
+    GPU_requirement: false
+    health_status: unknown
+    last_tested: null
+    cost_classification: free
+
+  - provider_id: piper
+    name: Piper TTS
+    category: voice
+    repository: https://github.com/rhasspy/piper
+    licence: MIT
+    adapter: PiperAdapter
+    enabled: false
+    installed: false
+    configured: false
+    execution_mode: local
+    GPU_requirement: false
+    health_status: unknown
+    last_tested: null
+    cost_classification: free
+
+  - provider_id: kokoro-tts
+    name: Kokoro TTS
+    category: voice
+    repository: https://github.com/remsky/kokoro-tts
+    licence: Apache-2.0
+    adapter: KokoroAdapter
+    enabled: false
+    installed: false
+    configured: false
+    execution_mode: local
+    GPU_requirement: false
+    health_status: unknown
+    last_tested: null
+    cost_classification: free
+
+  - provider_id: whisper-cpp
+    name: Whisper.cpp
+    category: voice
+    repository: https://github.com/ggerganov/whisper.cpp
+    licence: MIT
+    adapter: WhisperCppAdapter
+    enabled: false
+    installed: false
+    configured: false
+    execution_mode: local
+    GPU_requirement: false
+    health_status: unknown
+    last_tested: null
+    cost_classification: free
+
+  - provider_id: coqui-tts
+    name: Coqui TTS
+    category: voice
+    repository: https://github.com/coqui-ai/tts
+    licence: MPL-2.0
+    adapter: CoquiAdapter
+    enabled: false
+    installed: false
+    configured: false
+    execution_mode: local
+    GPU_requirement: false
+    health_status: unknown
+    last_tested: null
+    cost_classification: free
+
+  - provider_id: google-cloud-tts
+    name: Google Cloud Text-to-Speech
+    category: voice
+    repository: https://cloud.google.com/text-to-speech
+    licence: Commercial
+    adapter: GoogleCloudTTSAdapter
+    enabled: false
+    installed: false
+    configured: false
+    execution_mode: cloud
+    GPU_requirement: false
+    health_status: unknown
+    last_tested: null
+    cost_classification: usage-based
+
+  - provider_id: aws-polly
+    name: AWS Polly
+    category: voice
+    repository: https://aws.amazon.com/polly
+    licence: Commercial
+    adapter: AWSPollyAdapter
+    enabled: false
+    installed: false
+    configured: false
+    execution_mode: cloud
+    GPU_requirement: false
+    health_status: unknown
+    last_tested: null
+    cost_classification: usage-based
+
+  # ============================================================
+  # MEDIA PROVIDERS
+  # ============================================================
+
+  - provider_id: comfyui
+    name: ComfyUI
+    category: media
+    repository: https://github.com/comfyanonymous/ComfyUI
+    licence: GPL-3.0
+    adapter: ComfyUIAdapter
+    enabled: false
+    installed: false
+    configured: false
+    execution_mode: local
+    GPU_requirement: true
+    health_status: unknown
+    last_tested: null
+    cost_classification: free
+
+  - provider_id: stable-diffusion
+    name: Stable Diffusion
+    category: media
+    repository: https://github.com/replicate/cog-stable-diffusion
+    licence: OpenRAIL
+    adapter: StableDiffusionAdapter
+    enabled: false
+    installed: false
+    configured: false
+    execution_mode: local
+    GPU_requirement: true
+    health_status: unknown
+    last_tested: null
+    cost_classification: free
+
+  - provider_id: flux
+    name: FLUX
+    category: media
+    repository: https://github.com/black-forest-labs/flux
+    licence: Proprietary
+    adapter: FLUXAdapter
+    enabled: false
+    installed: false
+    configured: false
+    execution_mode: local
+    GPU_requirement: true
+    health_status: unknown
+    last_tested: null
+    cost_classification: free
+
+  - provider_id: cogvideox
+    name: CogVideoX
+    category: media
+    repository: https://github.com/THUDM/CogVideo
+    licence: MIT
+    adapter: CogVideoXAdapter
+    enabled: false
+    installed: false
+    configured: false
+    execution_mode: local
+    GPU_requirement: true
+    health_status: unknown
+    last_tested: null
+    cost_classification: free
+
+  - provider_id: stability-ai
+    name: Stability AI
+    category: media
+    repository: https://stability.ai
+    licence: Commercial
+    adapter: StabilityAIAdapter
+    enabled: false
+    installed: false
+    configured: false
+    execution_mode: cloud
+    GPU_requirement: false
+    health_status: unknown
+    last_tested: null
+    cost_classification: usage-based
+
+  - provider_id: openai-dalle
+    name: OpenAI DALL-E
+    category: media
+    repository: https://openai.com/api/dall-e
+    licence: Commercial
+    adapter: OpenAIDalleAdapter
+    enabled: false
+    installed: false
+    configured: false
+    execution_mode: cloud
+    GPU_requirement: false
+    health_status: unknown
+    last_tested: null
+    cost_classification: usage-based
+
+  # ============================================================
+  # AGENT FRAMEWORKS
+  # ============================================================
+
+  - provider_id: crewai
+    name: CrewAI
+    category: agents
+    repository: https://github.com/joaomdmoura/crewai
+    licence: MIT
+    adapter: CrewAIAdapter
+    enabled: false
+    installed: false
+    configured: false
+    execution_mode: local
+    GPU_requirement: false
+    health_status: unknown
+    last_tested: null
+    cost_classification: free
+
+  - provider_id: autogen
+    name: AutoGen
+    category: agents
+    repository: https://github.com/microsoft/autogen
+    licence: CC-BY-4.0
+    adapter: AutoGenAdapter
+    enabled: false
+    installed: false
+    configured: false
+    execution_mode: local
+    GPU_requirement: false
+    health_status: unknown
+    last_tested: null
+    cost_classification: free
+
+  - provider_id: langgraph
+    name: LangGraph
+    category: agents
+    repository: https://github.com/langchain-ai/langgraph
+    licence: MIT
+    adapter: LangGraphAdapter
+    enabled: false
+    installed: false
+    configured: false
+    execution_mode: local
+    GPU_requirement: false
+    health_status: unknown
+    last_tested: null
+    cost_classification: free
+
+  - provider_id: openhands
+    name: OpenHands
+    category: agents
+    repository: https://github.com/All-Hands-AI/OpenHands
+    licence: MIT
+    adapter: OpenHandsAdapter
+    enabled: false
+    installed: false
+    configured: false
+    execution_mode: local
+    GPU_requirement: false
+    health_status: unknown
+    last_tested: null
+    cost_classification: free
+
+  # ============================================================
+  # DOCUMENT PROVIDERS
+  # ============================================================
+
+  - provider_id: anythingllm
+    name: AnythingLLM
+    category: documents
+    repository: https://github.com/Mintplex-Labs/anything-llm
+    licence: MIT
+    adapter: AnythingLLMAdapter
+    enabled: false
+    installed: false
+    configured: false
+    execution_mode: local
+    GPU_requirement: false
+    health_status: unknown
+    last_tested: null
+    cost_classification: free
+
+  - provider_id: docling
+    name: Docling
+    category: documents
+    repository: https://github.com/DS4SD/docling
+    licence: MIT
+    adapter: DoclingAdapter
+    enabled: false
+    installed: false
+    configured: false
+    execution_mode: local
+    GPU_requirement: false
+    health_status: unknown
+    last_tested: null
+    cost_classification: free
+
+  # ============================================================
+  # VISION PROVIDERS
+  # ============================================================
+
+  - provider_id: yolo
+    name: YOLO
+    category: vision
+    repository: https://github.com/ultralytics/ultralytics
+    licence: AGPL-3.0
+    adapter: YOLOAdapter
+    enabled: false
+    installed: false
+    configured: false
+    execution_mode: local
+    GPU_requirement: false
+    health_status: unknown
+    last_tested: null
+    cost_classification: free
+
+  - provider_id: sam2
+    name: Segment Anything Model 2
+    category: vision
+    repository: https://github.com/facebookresearch/sam2
+    licence: Apache-2.0
+    adapter: SAM2Adapter
+    enabled: false
+    installed: false
+    configured: false
+    execution_mode: local
+    GPU_requirement: false
+    health_status: unknown
+    last_tested: null
+    cost_classification: free
+
+  # ============================================================
+  # DATABASE PROVIDERS
+  # ============================================================
+
+  - provider_id: postgresql
+    name: PostgreSQL
+    category: database
+    repository: https://www.postgresql.org
+    licence: PostgreSQL
+    adapter: PostgreSQLAdapter
+    enabled: false
+    installed: false
+    configured: false
+    execution_mode: local
+    GPU_requirement: false
+    health_status: unknown
+    last_tested: null
+    cost_classification: free
+
+  - provider_id: redis
+    name: Redis
+    category: database
+    repository: https://redis.io
+    licence: BSL
+    adapter: RedisAdapter
+    enabled: false
+    installed: false
+    configured: false
+    execution_mode: local
+    GPU_requirement: false
+    health_status: unknown
+    last_tested: null
+    cost_classification: free
+
+  - provider_id: chromadb
+    name: ChromaDB
+    category: database
+    repository: https://github.com/chroma-core/chroma
+    licence: Apache-2.0
+    adapter: ChromaDBAdapter
+    enabled: false
+    installed: false
+    configured: false
+    execution_mode: local
+    GPU_requirement: false
+    health_status: unknown
+    last_tested: null
+    cost_classification: free
+
+  - provider_id: qdrant
+    name: Qdrant
+    category: database
+    repository: https://github.com/qdrant/qdrant
+    licence: AGPL-3.0
+    adapter: QdrantAdapter
+    enabled: false
+    installed: false
+    configured: false
+    execution_mode: local
+    GPU_requirement: false
+    health_status: unknown
+    last_tested: null
+    cost_classification: free
+
+  # ============================================================
+  # LLM PROVIDERS
+  # ============================================================
+
+  - provider_id: ollama
+    name: Ollama
+    category: llm
+    repository: https://github.com/ollama/ollama
+    licence: MIT
+    adapter: OllamaAdapter
+    enabled: false
+    installed: false
+    configured: false
+    execution_mode: local
+    GPU_requirement: false
+    health_status: unknown
+    last_tested: null
+    cost_classification: free
+
+  - provider_id: vllm
+    name: vLLM
+    category: llm
+    repository: https://github.com/vllm-project/vllm
+    licence: Apache-2.0
+    adapter: VLLMAdapter
+    enabled: false
+    installed: false
+    configured: false
+    execution_mode: local
+    GPU_requirement: true
+    health_status: unknown
+    last_tested: null
+    cost_classification: free
+
+  - provider_id: openrouter
+    name: OpenRouter
+    category: llm
+    repository: https://openrouter.ai
+    licence: Commercial
+    adapter: OpenRouterAdapter
+    enabled: false
+    installed: false
+    configured: false
+    execution_mode: cloud
+    GPU_requirement: false
+    health_status: unknown
+    last_tested: null
+    cost_classification: usage-based

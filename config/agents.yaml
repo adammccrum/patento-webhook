@@ -1,0 +1,634 @@
+# Agent Registry Configuration
+# Defines all 26 NATO phonetic agents
+# Each agent has 14 required fields
+
+agents:
+  - code: AA
+    name: Alpha
+    role: Executive Orchestrator
+    description: Principal orchestrator that receives user objectives, breaks them into tasks, delegates to specialist agents, and aggregates results.
+    capabilities:
+      - task-routing
+      - delegation
+      - state-management
+      - result-aggregation
+    permissions:
+      - receive-objectives
+      - delegate-tasks
+      - coordinate-agents
+    restricted_actions: []
+    preferred_models: []
+    available_tools: []
+    voice_profile: null
+    escalation_target: AA
+    enabled: true
+    current_status: idle
+    last_health_check: null
+
+  - code: BB
+    name: Bravo
+    role: Software Engineering
+    description: Code generation, debugging, refactoring, and software development tasks.
+    capabilities:
+      - code-generation
+      - code-review
+      - debugging
+      - refactoring
+    permissions:
+      - read-code
+      - write-code
+      - execute-code
+    restricted_actions: []
+    preferred_models:
+      - claude-3.5-sonnet
+      - claude-3-opus
+    available_tools:
+      - code-executor
+      - git-integration
+      - test-runner
+    voice_profile: null
+    escalation_target: AA
+    enabled: true
+    current_status: idle
+    last_health_check: null
+
+  - code: CC
+    name: Charlie
+    role: Research & Intelligence
+    description: Information gathering, analysis, research, and intelligence synthesis.
+    capabilities:
+      - research
+      - analysis
+      - information-gathering
+      - synthesis
+    permissions:
+      - search-data
+      - read-documents
+      - aggregate-info
+    restricted_actions: []
+    preferred_models: []
+    available_tools:
+      - search-engine
+      - document-reader
+    voice_profile: null
+    escalation_target: AA
+    enabled: true
+    current_status: idle
+    last_health_check: null
+
+  - code: DD
+    name: Delta
+    role: Documents & Reports
+    description: Content generation, document assembly, report writing, and structured content creation.
+    capabilities:
+      - document-generation
+      - content-writing
+      - report-creation
+      - document-assembly
+    permissions:
+      - create-documents
+      - edit-documents
+      - format-content
+    restricted_actions: []
+    preferred_models: []
+    available_tools:
+      - document-generator
+      - formatting-engine
+    voice_profile: null
+    escalation_target: AA
+    enabled: true
+    current_status: idle
+    last_health_check: null
+
+  - code: EE
+    name: Echo
+    role: Voice & Audio
+    description: Speech synthesis, voice recognition, audio processing, narration generation, and voice operations.
+    capabilities:
+      - text-to-speech
+      - speech-to-text
+      - voice-cloning
+      - audio-processing
+    permissions:
+      - use-voice-providers
+      - generate-audio
+      - process-audio
+    restricted_actions: []
+    preferred_models: []
+    available_tools:
+      - voicebox
+      - audio-processor
+    voice_profile:
+      provider: voicebox
+      voice: default
+      language: en
+    escalation_target: AA
+    enabled: true
+    current_status: idle
+    last_health_check: null
+
+  - code: FF
+    name: Foxtrot
+    role: Image & Video Generation
+    description: Text-to-image generation, image manipulation, video generation, visual content creation.
+    capabilities:
+      - text-to-image
+      - image-to-video
+      - text-to-video
+      - image-editing
+    permissions:
+      - use-media-providers
+      - generate-images
+      - generate-videos
+    restricted_actions: []
+    preferred_models: []
+    available_tools:
+      - comfyui
+      - image-generator
+      - video-generator
+    voice_profile: null
+    escalation_target: AA
+    enabled: true
+    current_status: idle
+    last_health_check: null
+
+  - code: GG
+    name: Golf
+    role: Marketing & Social Media
+    description: Marketing content creation, social media strategy, promotional campaigns, brand messaging.
+    capabilities:
+      - content-marketing
+      - social-media-posting
+      - campaign-creation
+      - brand-messaging
+    permissions:
+      - create-marketing-content
+      - post-social-media
+    restricted_actions: []
+    preferred_models: []
+    available_tools:
+      - social-media-api
+      - marketing-tools
+    voice_profile: null
+    escalation_target: AA
+    enabled: true
+    current_status: idle
+    last_health_check: null
+
+  - code: HH
+    name: Hotel
+    role: Website & Front-End Development
+    description: Web interface development, UI/UX design, front-end implementation, website management.
+    capabilities:
+      - web-development
+      - ui-design
+      - frontend-implementation
+      - ux-design
+    permissions:
+      - develop-websites
+      - design-interfaces
+      - deploy-web-apps
+    restricted_actions: []
+    preferred_models: []
+    available_tools:
+      - web-framework
+      - design-tools
+    voice_profile: null
+    escalation_target: AA
+    enabled: true
+    current_status: idle
+    last_health_check: null
+
+  - code: II
+    name: India
+    role: Automation & Workflows
+    description: Process automation, workflow design, task scheduling, orchestration of repetitive processes.
+    capabilities:
+      - process-automation
+      - workflow-design
+      - task-scheduling
+      - orchestration
+    permissions:
+      - create-workflows
+      - schedule-tasks
+      - automate-processes
+    restricted_actions: []
+    preferred_models: []
+    available_tools:
+      - workflow-engine
+      - scheduler
+    voice_profile: null
+    escalation_target: AA
+    enabled: true
+    current_status: idle
+    last_health_check: null
+
+  - code: JJ
+    name: Juliet
+    role: Customer Support
+    description: Customer service, help desk operations, issue resolution, user support coordination.
+    capabilities:
+      - customer-support
+      - issue-resolution
+      - help-desk
+      - user-assistance
+    permissions:
+      - respond-to-users
+      - resolve-issues
+      - provide-support
+    restricted_actions: []
+    preferred_models: []
+    available_tools:
+      - support-ticket-system
+      - knowledge-base
+    voice_profile: null
+    escalation_target: AA
+    enabled: true
+    current_status: idle
+    last_health_check: null
+
+  - code: KK
+    name: Kilo
+    role: Sales & CRM
+    description: Sales management, customer relationship management, opportunity tracking, revenue operations.
+    capabilities:
+      - sales-management
+      - crm-operations
+      - opportunity-tracking
+      - revenue-analysis
+    permissions:
+      - manage-crm
+      - track-opportunities
+      - analyze-sales
+    restricted_actions: []
+    preferred_models: []
+    available_tools:
+      - crm-system
+      - sales-analytics
+    voice_profile: null
+    escalation_target: AA
+    enabled: true
+    current_status: idle
+    last_health_check: null
+
+  - code: LL
+    name: Lima
+    role: Finance, Grants & Funding
+    description: Financial analysis, grant management, funding strategy, budget planning, cost tracking.
+    capabilities:
+      - financial-analysis
+      - grant-management
+      - budget-planning
+      - cost-tracking
+    permissions:
+      - access-financial-data
+      - manage-budgets
+      - track-costs
+    restricted_actions: []
+    preferred_models: []
+    available_tools:
+      - financial-system
+      - accounting-tools
+    voice_profile: null
+    escalation_target: AA
+    enabled: true
+    current_status: idle
+    last_health_check: null
+
+  - code: MM
+    name: Mike
+    role: Cybersecurity
+    description: Security assessment, threat analysis, vulnerability detection, security compliance verification.
+    capabilities:
+      - security-assessment
+      - threat-analysis
+      - vulnerability-detection
+      - compliance-verification
+    permissions:
+      - assess-security
+      - analyze-threats
+      - verify-compliance
+    restricted_actions: []
+    preferred_models: []
+    available_tools:
+      - security-scanner
+      - threat-detection
+    voice_profile: null
+    escalation_target: AA
+    enabled: true
+    current_status: idle
+    last_health_check: null
+
+  - code: NN
+    name: November
+    role: DevOps & Infrastructure
+    description: Infrastructure management, deployment automation, system administration, cloud operations.
+    capabilities:
+      - infrastructure-management
+      - deployment-automation
+      - system-administration
+      - cloud-operations
+    permissions:
+      - manage-infrastructure
+      - deploy-applications
+      - administer-systems
+    restricted_actions: []
+    preferred_models: []
+    available_tools:
+      - cloud-provider-api
+      - deployment-tools
+    voice_profile: null
+    escalation_target: AA
+    enabled: true
+    current_status: idle
+    last_health_check: null
+
+  - code: OO
+    name: Oscar
+    role: Data & Analytics
+    description: Data analysis, business intelligence, dashboard creation, insights generation, reporting.
+    capabilities:
+      - data-analysis
+      - business-intelligence
+      - dashboard-creation
+      - insights-generation
+    permissions:
+      - access-data
+      - create-reports
+      - generate-insights
+    restricted_actions: []
+    preferred_models: []
+    available_tools:
+      - data-warehouse
+      - analytics-engine
+      - visualization-tools
+    voice_profile: null
+    escalation_target: AA
+    enabled: true
+    current_status: idle
+    last_health_check: null
+
+  - code: PP
+    name: Papa
+    role: Testing & Quality Assurance
+    description: Quality assurance, testing strategy, validation, quality metrics, defect management.
+    capabilities:
+      - testing-strategy
+      - quality-assurance
+      - validation
+      - defect-detection
+    permissions:
+      - execute-tests
+      - validate-quality
+      - report-defects
+    restricted_actions: []
+    preferred_models: []
+    available_tools:
+      - test-framework
+      - qa-tools
+    voice_profile: null
+    escalation_target: AA
+    enabled: true
+    current_status: idle
+    last_health_check: null
+
+  - code: QQ
+    name: Quebec
+    role: Knowledge Base & Memory
+    description: Documentation, knowledge management, information organization, memory systems, learning records.
+    capabilities:
+      - documentation
+      - knowledge-management
+      - information-organization
+      - learning-records
+    permissions:
+      - create-documentation
+      - manage-knowledge-base
+      - organize-information
+    restricted_actions: []
+    preferred_models: []
+    available_tools:
+      - knowledge-base-system
+      - documentation-tools
+    voice_profile: null
+    escalation_target: AA
+    enabled: true
+    current_status: idle
+    last_health_check: null
+
+  - code: RR
+    name: Romeo
+    role: APIs & Integrations
+    description: API design, service integration, third-party connectivity, data exchange, system interoperability.
+    capabilities:
+      - api-design
+      - service-integration
+      - data-exchange
+      - system-interoperability
+    permissions:
+      - design-apis
+      - integrate-services
+      - manage-connections
+    restricted_actions: []
+    preferred_models: []
+    available_tools:
+      - api-framework
+      - integration-platform
+    voice_profile: null
+    escalation_target: AA
+    enabled: true
+    current_status: idle
+    last_health_check: null
+
+  - code: SS
+    name: Sierra
+    role: IrisKey Biometrics & Identity
+    description: Identity verification, biometric integration, authorization checks, access control, user authentication.
+    capabilities:
+      - identity-verification
+      - biometric-processing
+      - authorization-checking
+      - access-control
+    permissions:
+      - verify-identity
+      - check-authorization
+      - manage-access
+    restricted_actions:
+      - modify-permissions
+      - override-authorization
+    preferred_models: []
+    available_tools:
+      - iriskey-api
+      - biometric-processor
+    voice_profile: null
+    escalation_target: AA
+    enabled: true
+    current_status: idle
+    last_health_check: null
+
+  - code: TT
+    name: Tango
+    role: LAO Academy Training
+    description: Course creation, training delivery, educational content management, learning platform integration.
+    capabilities:
+      - course-creation
+      - training-delivery
+      - content-management
+      - platform-integration
+    permissions:
+      - create-courses
+      - manage-training
+      - publish-content
+    restricted_actions: []
+    preferred_models: []
+    available_tools:
+      - lao-api
+      - course-builder
+    voice_profile: null
+    escalation_target: AA
+    enabled: true
+    current_status: idle
+    last_health_check: null
+
+  - code: UU
+    name: Uniform
+    role: Compliance & Governance
+    description: Policy enforcement, compliance checking, legal requirements verification, governance management.
+    capabilities:
+      - policy-enforcement
+      - compliance-checking
+      - legal-verification
+      - governance-management
+    permissions:
+      - check-compliance
+      - enforce-policies
+      - verify-legal-requirements
+    restricted_actions: []
+    preferred_models: []
+    available_tools:
+      - compliance-checker
+      - policy-engine
+    voice_profile: null
+    escalation_target: AA
+    enabled: true
+    current_status: idle
+    last_health_check: null
+
+  - code: VV
+    name: Victor
+    role: Computer Vision
+    description: Image analysis, object detection, visual recognition, scene understanding, visual intelligence.
+    capabilities:
+      - image-analysis
+      - object-detection
+      - visual-recognition
+      - scene-understanding
+    permissions:
+      - analyze-images
+      - detect-objects
+      - process-visuals
+    restricted_actions: []
+    preferred_models: []
+    available_tools:
+      - vision-api
+      - object-detector
+    voice_profile: null
+    escalation_target: AA
+    enabled: true
+    current_status: idle
+    last_health_check: null
+
+  - code: WW
+    name: Whiskey
+    role: Hardware & IoT
+    description: Device integration, IoT management, hardware coordination, physical system control.
+    capabilities:
+      - device-integration
+      - iot-management
+      - hardware-coordination
+      - system-control
+    permissions:
+      - control-devices
+      - manage-iot
+      - coordinate-hardware
+    restricted_actions: []
+    preferred_models: []
+    available_tools:
+      - device-api
+      - iot-platform
+    voice_profile: null
+    escalation_target: AA
+    enabled: true
+    current_status: idle
+    last_health_check: null
+
+  - code: XX
+    name: X-ray
+    role: Experimental Projects
+    description: Research and development, experimental features, proof-of-concepts, innovation exploration.
+    capabilities:
+      - experimentation
+      - prototyping
+      - innovation-exploration
+      - poc-development
+    permissions:
+      - experiment
+      - prototype
+      - explore-innovations
+    restricted_actions: []
+    preferred_models: []
+    available_tools:
+      - experimentation-tools
+    voice_profile: null
+    escalation_target: AA
+    enabled: true
+    current_status: idle
+    last_health_check: null
+
+  - code: YY
+    name: Yankee
+    role: Communications
+    description: Messaging, notifications, communications management, alerts, user notifications.
+    capabilities:
+      - messaging
+      - notifications
+      - communications-management
+      - alert-generation
+    permissions:
+      - send-messages
+      - create-notifications
+      - manage-communications
+    restricted_actions: []
+    preferred_models: []
+    available_tools:
+      - messaging-service
+      - notification-service
+    voice_profile: null
+    escalation_target: AA
+    enabled: true
+    current_status: idle
+    last_health_check: null
+
+  - code: ZZ
+    name: Zulu
+    role: Monitoring & System Health
+    description: System monitoring, health checks, alerting, performance tracking, system diagnostics.
+    capabilities:
+      - system-monitoring
+      - health-checking
+      - alerting
+      - performance-tracking
+    permissions:
+      - monitor-systems
+      - check-health
+      - generate-alerts
+    restricted_actions: []
+    preferred_models: []
+    available_tools:
+      - monitoring-system
+      - health-checker
+    voice_profile: null
+    escalation_target: AA
+    enabled: true
+    current_status: idle
+    last_health_check: null
