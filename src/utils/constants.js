@@ -49,14 +49,25 @@ const AUTHORIZATION_LEVELS = {
 
 // Audit event types
 const AUDIT_EVENT_TYPES = {
+  // Agent events
   AGENT_CREATED: 'agent_created',
   AGENT_EXECUTED: 'agent_executed',
   AGENT_FAILED: 'agent_failed',
+  // Provider events
   PROVIDER_REGISTERED: 'provider_registered',
   PROVIDER_HEALTH_CHECK: 'provider_health_check',
+  // Authorization events
   AUTHORIZATION_GRANTED: 'authorization_granted',
   AUTHORIZATION_DENIED: 'authorization_denied',
-  COST_TRACKED: 'cost_tracked'
+  // Cost tracking
+  COST_TRACKED: 'cost_tracked',
+  // Orchestration events
+  OBJECTIVE_RECEIVED: 'objective_received',
+  OBJECTIVE_FAILED: 'objective_failed',
+  TASK_PLANNED: 'task_planned',
+  TASK_COMPLETED: 'task_completed',
+  TASK_FAILED: 'task_failed',
+  ACTION_ESCALATED: 'action_escalated'
 };
 
 // NATO Phonetic Codes (26 agents)
