@@ -20,10 +20,59 @@ class DashboardApp {
   }
 
   init() {
+    // Check authentication before initializing dashboard
+    if (!isAuthenticated()) {
+      window.location.href = '/login.html';
+      return;
+    }
+
+    // Load user info and update UI
+    this.setupAuthUI();
     this.setupEventListeners();
     this.connectWebSocket();
     this.loadInitialData();
     this.startRefreshTimer();
+  }
+
+  /**
+   * Setup authentication UI
+   */
+  setupAuthUI() {
+    const user = getCurrentUser();
+    const userMenu = document.getElementById('userMenu');
+    const userEmail = document.getElementById('userEmail');
+    const userRole = document.getElementById('userRole');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const securityStatus = document.getElementById('securityStatus');
+
+    if (user && userMenu) {
+      userMenu.style.display = 'flex';
+      userEmail.textContent = user.email;
+      userRole.textContent = user.roles?.[0]?.name || 'user';
+    }
+
+    // Update security status indicator
+    if (securityStatus) {
+      const isSecure = window.location.protocol === 'https:';
+      const indicator = document.getElementById('securityIndicator');
+      const statusText = document.getElementById('securityText');
+
+      if (isSecure) {
+        indicator.textContent = '🔒';
+        statusText.textContent = 'Secure HTTPS';
+      } else {
+        indicator.textContent = '⚠️';
+        statusText.textContent = 'Development HTTP';
+      }
+    }
+
+    // Logout button handler
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', async () => {
+        await logout();
+        window.location.href = '/login.html';
+      });
+    }
   }
 
   /**
@@ -61,7 +110,8 @@ class DashboardApp {
    */
   connectWebSocket() {
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const url = `${protocol}//${window.location.host}/ws/events`;
+    const token = getAccessToken();
+    const url = `${protocol}//${window.location.host}/ws/events?token=${encodeURIComponent(token || '')}`;
 
     try {
       this.ws = new WebSocket(url);
@@ -244,7 +294,17 @@ class DashboardApp {
    */
   async loadInitialData() {
     try {
-      const response = await fetch('/api/dashboard');
+      const response = await authenticatedFetch('/api/dashboard');
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          logout();
+          window.location.href = '/login.html';
+          return;
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const data = await response.json();
 
       document.getElementById('connectedClients').textContent = data.connected_clients;
@@ -443,7 +503,7 @@ class DashboardApp {
    */
   async approveAuthorization(requestId) {
     try {
-      const response = await fetch(`/api/dashboard/authorizations/${requestId}/approve`, {
+      const response = await authenticatedFetch(`/api/dashboard/authorizations/${requestId}/approve`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ approver_id: 'system' })
@@ -466,7 +526,7 @@ class DashboardApp {
     if (!reason) return;
 
     try {
-      const response = await fetch(`/api/dashboard/authorizations/${requestId}/deny`, {
+      const response = await authenticatedFetch(`/api/dashboard/authorizations/${requestId}/deny`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
