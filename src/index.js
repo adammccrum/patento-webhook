@@ -318,6 +318,25 @@ async function main() {
       logger.info('');
     });
 
+    // Graceful shutdown handlers
+    const shutdown = async (signal) => {
+      logger.info(`Received ${signal}, shutting down gracefully...`);
+      server.close(async () => {
+        logger.info('HTTP server closed');
+        await operationCentre.shutdown();
+        process.exit(0);
+      });
+
+      // Force shutdown after 10 seconds
+      setTimeout(() => {
+        logger.error('Forced shutdown after timeout');
+        process.exit(1);
+      }, 10000);
+    };
+
+    process.on('SIGTERM', () => shutdown('SIGTERM'));
+    process.on('SIGINT', () => shutdown('SIGINT'));
+
   } catch (error) {
     logger.error(`Failed to start application: ${error.message}`);
     logger.error(error.stack);

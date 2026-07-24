@@ -397,6 +397,17 @@ class OperationCentre {
       timestamp: new Date().toISOString()
     };
   }
+
+  /**
+   * Graceful shutdown
+   */
+  async shutdown() {
+    logger.info('Shutting down Operation Centre...');
+    if (this.eventStream) {
+      this.eventStream.shutdown();
+    }
+    logger.info('Operation Centre shutdown complete');
+  }
 }
 
 module.exports = OperationCentre;

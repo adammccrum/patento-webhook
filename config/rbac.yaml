@@ -29,6 +29,14 @@ roles:
       - audit:export
       - provider:manage
       - system:admin
+      - websocket:connect
+      - websocket:events_view
+      - websocket:agent_view
+      - websocket:authorization_view
+      - websocket:audit_view
+      - websocket:objective_view
+      - websocket:task_view
+      - websocket:state_view
     is_builtin: true
 
   operator:
@@ -44,6 +52,13 @@ roles:
       - authorization:view
       - authorization:approve
       - authorization:deny
+      - websocket:connect
+      - websocket:events_view
+      - websocket:agent_view
+      - websocket:authorization_view
+      - websocket:objective_view
+      - websocket:task_view
+      - websocket:state_view
     is_builtin: true
 
   reviewer:
@@ -54,6 +69,12 @@ roles:
       - agent:view
       - authorization:view
       - audit:view
+      - websocket:connect
+      - websocket:events_view
+      - websocket:agent_view
+      - websocket:objective_view
+      - websocket:task_view
+      - websocket:state_view
     is_builtin: true
 
   viewer:
@@ -62,6 +83,10 @@ roles:
       - objective:view
       - task:view
       - agent:view
+      - websocket:connect
+      - websocket:events_view
+      - websocket:objective_view
+      - websocket:task_view
     is_builtin: true
 
   service_agent:
@@ -70,6 +95,10 @@ roles:
       - task:execute
       - agent:report_status
       - objective:view
+      - websocket:connect
+      - websocket:events_view
+      - websocket:agent_view
+      - websocket:task_view
     is_builtin: true
 
 permissions:
@@ -158,3 +187,29 @@ permissions:
   - action: system:admin
     resource: system
     description: "System administration access"
+
+  # WebSocket permissions
+  - action: websocket:connect
+    resource: websocket
+    description: "Establish WebSocket connection"
+  - action: websocket:events_view
+    resource: websocket
+    description: "View general WebSocket events"
+  - action: websocket:agent_view
+    resource: websocket
+    description: "View agent events via WebSocket"
+  - action: websocket:authorization_view
+    resource: websocket
+    description: "View authorization events via WebSocket"
+  - action: websocket:audit_view
+    resource: websocket
+    description: "View audit events via WebSocket"
+  - action: websocket:objective_view
+    resource: websocket
+    description: "View objective events via WebSocket"
+  - action: websocket:task_view
+    resource: websocket
+    description: "View task events via WebSocket"
+  - action: websocket:state_view
+    resource: websocket
+    description: "View state snapshots via WebSocket"
