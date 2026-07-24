@@ -26,6 +26,7 @@ const { authMiddleware, optionalAuthMiddleware } = require('./auth/auth-middlewa
 const { rateLimitMiddleware } = require('./middleware/rate-limit-middleware');
 const { correlationIdMiddleware } = require('./middleware/correlation-id-middleware');
 const { requestSizeMiddleware } = require('./middleware/request-size-middleware');
+const { validateProductionSetup } = require('./startup/security-validator');
 
 const PORT = process.env.PORT || 3000;
 
@@ -39,6 +40,12 @@ async function main() {
     logger.info('Loading configuration...');
     const configLoader = new ConfigLoader('config');
     const config = configLoader.loadAll();
+
+    // Phase 4: Validate production security
+    if (config.env.NODE_ENV === 'production') {
+      logger.info('Validating production security setup...');
+      validateProductionSetup();
+    }
 
     // Phase 4: Initialize Database
     if (config.env.DATABASE_URL) {
