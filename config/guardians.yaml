@@ -1,0 +1,398 @@
+# Guardian Framework Configuration
+#
+# Defines Guardian registrations, policies, and settings
+
+# Health monitoring configuration
+health_monitor:
+  health_check_interval_ms: 60000
+  failure_threshold: 3
+  recovery_timeout_ms: 300000
+
+# Policy configuration
+policies:
+  # Default policy: minimal controls
+  - name: default
+    priority: 0
+    fail_mode: fail_closed
+    required_guardians: [audit]
+    optional_guardians: []
+    description: Default policy - audit only
+
+  # High-risk actions require multiple Guardians
+  - name: high_risk_execution
+    priority: 100
+    action: [shell_command, execute_code]
+    fail_mode: fail_closed
+    required_guardians: [execution, audit]
+    optional_guardians: [secrets, compliance]
+    description: Shell execution and code evaluation requires execution Guardian
+
+  # Network operations require network Guardian
+  - name: network_operations
+    priority: 90
+    action: [fetch_url, api_call, network_request]
+    requires_network: true
+    fail_mode: fail_closed
+    required_guardians: [network, audit]
+    optional_guardians: [secrets]
+    description: Network operations must be evaluated for SSRF and unsafe destinations
+
+  # Memory operations require memory Guardian
+  - name: memory_operations
+    priority: 85
+    action: [memory_read, memory_write, memory_update]
+    fail_mode: fail_closed
+    required_guardians: [memory, audit]
+    optional_guardians: [compliance]
+    description: Memory access must be protected from poisoning
+
+  # Package installation requires supply-chain Guardian
+  - name: package_installation
+    priority: 95
+    action: [install_package, download_dependency]
+    fail_mode: fail_closed
+    required_guardians: [supply_chain, execution, audit]
+    optional_guardians: [secrets]
+    description: Package installation requires supply-chain verification
+
+  # Compliance-sensitive data access
+  - name: compliance_sensitive
+    priority: 80
+    data_classification: [confidential, restricted]
+    fail_mode: fail_closed
+    required_guardians: [compliance, audit]
+    optional_guardians: []
+    description: Confidential data access requires compliance evaluation
+
+  # High-risk + compliance = extra strict
+  - name: high_risk_compliance
+    priority: 110
+    action: [shell_command, execute_code]
+    data_classification: [confidential, restricted]
+    fail_mode: fail_closed
+    required_guardians: [execution, compliance, secrets, audit]
+    optional_guardians: []
+    description: High-risk operations on sensitive data require all checks
+
+# Default policy template (used if no policy matches)
+default_policy:
+  fail_mode: fail_closed
+  required_guardians: [audit]
+  optional_guardians: []
+
+# Guardian registry
+# This section describes Guardian categories and proposed tools
+# Implementation status values:
+# - interface_only: Only the interface is defined, no implementation
+# - mock: Mock adapter for testing
+# - adapter_stub: Adapter stub, not yet implemented
+# - development: In development, not ready for production
+# - verified: Tested and verified in production use
+# - disabled: Intentionally disabled
+
+guardians:
+  # Guardian Memory: Protects agent memory from poisoning
+  memory:
+    guardian_id: guardian-memory
+    category: memory
+    display_name: Guardian Memory
+    description: Protects persistent and retrieved agent memory from poisoning, untrusted instructions and unauthorised modification
+    implementation_status: interface_only
+    enabled: false
+    timeout_ms: 5000
+    fail_mode: fail_closed
+    priority: 100
+    required_for:
+      - memory_read
+      - memory_write
+      - memory_update
+    supported_actions:
+      - memory_read
+      - memory_write
+      - memory_update
+    proposed_tools:
+      - name: Prompt Injection Detection
+        category: ai_safety
+        status: proposed
+        note: Not yet integrated
+
+  # Guardian Execution: Evaluates command and code execution
+  execution:
+    guardian_id: guardian-execution
+    category: execution
+    display_name: Guardian Execution
+    description: Evaluates shell commands, code execution, filesystem access, subprocess invocation and tool permissions
+    implementation_status: interface_only
+    enabled: false
+    timeout_ms: 5000
+    fail_mode: fail_closed
+    priority: 100
+    network_required: false
+    required_for:
+      - shell_command
+      - execute_code
+      - subprocess_invoke
+    supported_actions:
+      - shell_command
+      - execute_code
+      - subprocess_invoke
+    proposed_tools:
+      - name: Code Analysis
+        category: static_analysis
+        status: proposed
+        note: Not yet integrated
+
+  # Guardian Network: Evaluates external API calls and network destinations
+  network:
+    guardian_id: guardian-network
+    category: network
+    display_name: Guardian Network
+    description: Evaluates URLs, external API calls, redirects, DNS resolution, SSRF risk and network destinations
+    implementation_status: interface_only
+    enabled: false
+    timeout_ms: 5000
+    fail_mode: fail_closed
+    priority: 100
+    network_required: true
+    required_for:
+      - fetch_url
+      - api_call
+      - network_request
+    supported_actions:
+      - fetch_url
+      - api_call
+      - network_request
+    proposed_tools:
+      - name: SSRF Defense
+        category: network_security
+        status: proposed
+        note: Not yet integrated
+
+  # Guardian Prompt: Detects prompt injection and instruction conflicts
+  prompt:
+    guardian_id: guardian-prompt
+    category: prompt
+    display_name: Guardian Prompt
+    description: Detects prompt injection, instruction conflicts, hidden instructions and unsafe context transitions
+    implementation_status: interface_only
+    enabled: false
+    timeout_ms: 5000
+    fail_mode: hold_for_review
+    priority: 90
+    required_for:
+      - prompt_injection_detection
+    supported_actions:
+      - evaluate_prompt
+      - evaluate_instruction
+    proposed_tools:
+      - name: Prompt Injection Detection Library
+        category: ai_safety
+        status: proposed
+        note: Not yet integrated
+
+  # Guardian Supply Chain: Reviews dependencies and packages
+  supply_chain:
+    guardian_id: guardian-supply-chain
+    category: supply_chain
+    display_name: Guardian Supply Chain
+    description: Reviews dependencies, packages, licences, repositories, model provenance and installation risks
+    implementation_status: interface_only
+    enabled: false
+    timeout_ms: 10000
+    fail_mode: fail_closed
+    priority: 100
+    network_required: false
+    required_for:
+      - install_package
+      - download_dependency
+      - install_model
+    supported_actions:
+      - install_package
+      - download_dependency
+      - install_model
+      - verify_dependency
+    proposed_tools:
+      - name: Dependency Scanner
+        category: supply_chain_security
+        status: proposed
+        note: Not yet integrated
+
+  # Guardian Secrets: Detects credentials and sensitive values
+  secrets:
+    guardian_id: guardian-secrets
+    category: secrets
+    display_name: Guardian Secrets
+    description: Detects credentials, keys, tokens and sensitive values in prompts, logs, files and outbound requests
+    implementation_status: interface_only
+    enabled: false
+    timeout_ms: 5000
+    fail_mode: fail_closed
+    priority: 100
+    required_for:
+      - secret_detection
+      - credential_scan
+    supported_actions:
+      - detect_secrets
+      - scan_prompt
+      - scan_output
+    proposed_tools:
+      - name: Secret Scanning Library
+        category: secrets_management
+        status: proposed
+        note: Not yet integrated
+
+  # Guardian Compliance: Applies organizational and regulatory policies
+  compliance:
+    guardian_id: guardian-compliance
+    category: compliance
+    display_name: Guardian Compliance
+    description: Applies organisational, legal, regulatory, educational and content policies
+    implementation_status: interface_only
+    enabled: false
+    timeout_ms: 5000
+    fail_mode: hold_for_review
+    priority: 90
+    required_for:
+      - compliance_check
+      - policy_evaluation
+    supported_actions:
+      - check_compliance
+      - evaluate_policy
+    proposed_tools: []
+
+  # Guardian Audit: Verifies audit events and chain health
+  audit:
+    guardian_id: guardian-audit
+    category: audit
+    display_name: Guardian Audit
+    description: Verifies required audit events, correlation references and audit-chain health before and after execution
+    implementation_status: mock
+    enabled: true
+    timeout_ms: 5000
+    fail_mode: fail_closed
+    priority: 100
+    required_for:
+      - audit_verification
+    supported_actions: ['*']
+    supported_resource_types: ['*']
+
+# RBAC Permissions for Guardian management
+# Add to existing RBAC configuration
+guardian_permissions:
+  - action: guardian:view
+    description: View Guardian status and health
+  - action: guardian:evaluate
+    description: Request Guardian evaluation
+  - action: guardian:findings_view
+    description: View Guardian findings
+  - action: guardian:sensitive_findings_view
+    description: View sensitive Guardian findings
+  - action: guardian:review
+    description: Review and approve held actions
+  - action: guardian:configure
+    description: Configure Guardian policies
+  - action: guardian:enable
+    description: Enable Guardian
+  - action: guardian:disable
+    description: Disable Guardian
+  - action: guardian:policy_view
+    description: View Guardian policies
+  - action: guardian:policy_manage
+    description: Manage Guardian policies
+  - action: guardian:health_view
+    description: View Guardian health status
+  - action: guardian:admin
+    description: Full Guardian administration
+
+# Default role permissions
+guardian_role_permissions:
+  owner:
+    - guardian:*
+  administrator:
+    - guardian:view
+    - guardian:evaluate
+    - guardian:findings_view
+    - guardian:sensitive_findings_view
+    - guardian:review
+    - guardian:configure
+    - guardian:enable
+    - guardian:disable
+    - guardian:policy_view
+    - guardian:policy_manage
+    - guardian:health_view
+    - guardian:admin
+  operator:
+    - guardian:view
+    - guardian:evaluate
+    - guardian:findings_view
+    - guardian:review
+    - guardian:health_view
+  reviewer:
+    - guardian:view
+    - guardian:findings_view
+    - guardian:review
+  viewer:
+    - guardian:view
+  service_agent:
+    - guardian:evaluate
+
+# Proposed external tools (not yet integrated)
+# These are listed for reference and planning purposes
+# DO NOT ENABLE THESE WITHOUT EXPLICIT VERIFICATION AND TESTING
+proposed_tools:
+  - name: SSRF-RF
+    category: network_security
+    purpose: SSRF payload detection and network validation
+    repository: https://github.com/swisskyrepo/SSRF_Vulnerable_Lab
+    licence: GPL-3.0
+    maintenance_status: active
+    language: Python
+    note: Requires external service or library wrapping
+    guardian_category: network
+    proposed_status: research
+
+  - name: Bandit
+    category: static_analysis
+    purpose: Security issues in Python code
+    repository: https://github.com/PyCQA/bandit
+    licence: Apache-2.0
+    maintenance_status: active
+    language: Python
+    note: Would require wrapping for Node.js/JavaScript
+    guardian_category: execution
+    proposed_status: research
+
+  - name: npm-audit
+    category: supply_chain
+    purpose: Identify vulnerable packages
+    repository: https://github.com/npm/cli
+    licence: Artistic-2.0
+    maintenance_status: active
+    language: JavaScript
+    note: Already available as npm command
+    guardian_category: supply_chain
+    proposed_status: ready
+
+  - name: OWASP Dependency-Check
+    category: supply_chain
+    purpose: Identify known vulnerable dependencies
+    repository: https://github.com/jeremylong/DependencyCheck
+    licence: Apache-2.0
+    maintenance_status: active
+    language: Java
+    note: Multi-language support via REST API
+    guardian_category: supply_chain
+    proposed_status: research
+
+  - name: git-secrets
+    category: secrets_management
+    purpose: Prevents secrets from being committed
+    repository: https://github.com/awslabs/git-secrets
+    licence: Apache-2.0
+    maintenance_status: maintenance_mode
+    language: Shell/Bash
+    note: Post-commit hook style
+    guardian_category: secrets
+    proposed_status: research
+
+status: "Guardian Framework components created. Ready for implementation of specific Guardians."

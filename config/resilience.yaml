@@ -1,0 +1,159 @@
+# Resilience Configuration
+# Controls failure isolation, timeouts, retries, and backpressure
+
+# Circuit Breaker Settings
+circuit_breakers:
+  default:
+    name: default-breaker
+    failure_threshold: 5
+    success_threshold: 2
+    cooldown_ms: 60000
+    half_open_probe_limit: 1
+    window_size_ms: 120000
+    counted_error_classes:
+      - transient_error
+      - timeout
+      - service_unavailable
+    ignored_error_classes:
+      - authorization_failure
+      - permission_denial
+      - policy_denial
+      - validation_error
+      - cancellation
+
+  providers:
+    name: provider-breaker
+    failure_threshold: 3
+    success_threshold: 2
+    cooldown_ms: 120000
+    half_open_probe_limit: 2
+
+# Bulkhead Isolation Settings
+bulkheads:
+  default:
+    name: default-bulkhead
+    max_concurrent: 100
+    max_queued: 1000
+    rejection_policy: reject  # reject, queue, shed
+
+  agents:
+    max_concurrent: 50
+    key_limits:
+      EC: 50
+      FX: 50
+      AA: 50
+
+  providers:
+    max_concurrent: 30
+    key_limits:
+      piper: 20
+      whisper: 20
+
+# Retry Policy Settings
+retry_policy:
+  max_attempts: 3
+  initial_delay_ms: 100
+  max_delay_ms: 5000
+  backoff_multiplier: 2
+  jitter_factor: 0.1
+  budget_per_minute: 1000
+  retryable_classes:
+    - transient_error
+    - timeout
+    - service_unavailable
+    - circuit_breaker
+    - bulkhead
+    - queue
+  non_retryable_classes:
+    - authorization_failure
+    - permission_denial
+    - policy_denial
+    - validation_error
+    - cancellation
+    - not_found
+    - conflict
+    - dead_letter
+
+# Timeout Policy Settings
+timeout_policy:
+  operation_timeout_ms: 30000
+  queue_timeout_ms: 60000
+  provider_timeout_ms: 30000
+  task_timeout_ms: 120000
+  shutdown_timeout_ms: 30000
+  global_max_timeout_ms: 300000
+
+  agent_overrides:
+    EC: 30000
+    FX: 45000
+
+  provider_overrides:
+    piper: 20000
+    whisper: 25000
+
+  operation_overrides:
+    voice:transcribe: 60000
+
+# Concurrency Limiting
+concurrency:
+  global_limit: 500
+  agent_limits:
+    EC: 100
+    FX: 100
+    AA: 100
+  provider_limits:
+    piper: 30
+    whisper: 30
+  user_limits:
+    default: 100
+  operation_limits:
+    voice:create: 50
+    voice:transcribe: 50
+
+# Queue Controller Settings
+queue:
+  max_size: 10000
+  max_priority: 5
+
+# Backpressure Settings
+backpressure:
+  queue_depth_threshold: 1000
+  active_execution_threshold: 500
+  error_rate_threshold: 0.1  # 10%
+  memory_threshold_mb: 512
+
+  strategies:
+    queue_depth: reject
+    active_execution: delay
+    error_rate: shed_low_priority
+    memory_pressure: reject
+
+# Dead-Letter Queue Settings
+dead_letter:
+  max_retention_days: 90
+
+# Idempotency Settings
+idempotency:
+  ttl_ms: 3600000  # 1 hour
+
+# Duplicate Detection
+duplicate_detection:
+  ttl_ms: 3600000  # 1 hour
+
+# Graceful Shutdown Settings
+graceful_shutdown:
+  timeout_ms: 30000
+
+# Readiness Manager Settings
+readiness:
+  required_components:
+    - database
+    - audit_system
+    - event_stream
+    - agent_registry
+    - authentication
+
+  optional_components:
+    - provider:voice:piper
+    - provider:voice:whisper
+    - monitoring
