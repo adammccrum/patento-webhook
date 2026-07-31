@@ -1,13 +1,14 @@
 /**
- * User registration endpoint
+ * LAO User registration endpoint
  */
 
 import { PrismaClient } from '@prisma/client';
-import { hashPassword, generateVerificationToken } from '@lao/auth';
+import { hashPassword, generateVerificationToken } from '@iriskey/auth';
 import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
 const prisma = new PrismaClient();
+const PRODUCT_ID = 'lao';
 
 const registerSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -17,7 +18,7 @@ const registerSchema = z.object({
 
 /**
  * POST /api/auth/register
- * Register a new user
+ * Register a new user on LAO
  */
 export async function POST(request: NextRequest) {
   try {
@@ -80,11 +81,10 @@ export async function POST(request: NextRequest) {
     await prisma.auditLog.create({
       data: {
         userId: user.id,
+        productId: PRODUCT_ID,
         action: 'user_registered',
         resource: 'auth',
-        details: {
-          email,
-        },
+        details: { email },
       },
     });
 

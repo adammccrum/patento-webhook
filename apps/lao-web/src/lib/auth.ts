@@ -1,10 +1,24 @@
 /**
- * Authentication utilities for Next.js
+ * LAO Authentication utilities
+ * Uses IrisKey Platform authentication
  */
 
-import { authConfig } from '@lao/auth';
+import { createAuthConfig } from '@iriskey/auth';
+import { PrismaClient } from '@prisma/client';
 import NextAuth from 'next-auth';
 import { headers } from 'next/headers';
+
+const prisma = new PrismaClient();
+
+const authConfig = createAuthConfig({
+  prisma,
+  productId: 'lao',
+  pages: {
+    signIn: '/auth/login',
+    error: '/auth/error',
+    callbackUrl: '/dashboard',
+  },
+});
 
 export const { auth, signIn, signOut, handlers } = NextAuth(authConfig);
 

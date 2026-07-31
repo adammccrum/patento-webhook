@@ -7,6 +7,21 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Product {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  description String?
+  enabled     Boolean   @default(true)
+  metadata    Json      @default("{}")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  providerConfigs ProviderConfig[]
+  featureFlags    FeatureFlag[]
+
+  @@index([enabled])
+}
+
 model User {
   id            String    @id @default(cuid())
   email         String    @unique
@@ -124,6 +139,7 @@ model AuditLog {
   id        String   @id @default(cuid())
   userId    String?
   user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  productId String?
   action    String
   resource  String
   details   Json
@@ -134,6 +150,7 @@ model AuditLog {
   createdAt DateTime @default(now())
 
   @@index([userId])
+  @@index([productId])
   @@index([action])
   @@index([resource])
   @@index([createdAt])
@@ -154,18 +171,22 @@ model Credits {
 }
 
 model ProviderConfig {
-  id        String   @id @default(cuid())
-  name      String   @unique
+  id        String    @id @default(cuid())
+  productId String
+  product   Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  name      String
   type      String
-  enabled   Boolean  @default(false)
-  priority  Int      @default(0)
+  enabled   Boolean   @default(false)
+  priority  Int       @default(0)
   config    Json
   secrets   Json
-  health    String   @default("unknown")
+  health    String    @default("unknown")
   lastCheck DateTime?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
+  @@unique([productId, name])
+  @@index([productId])
   @@index([type])
   @@index([enabled])
 }
@@ -186,14 +207,18 @@ model Settings {
 }
 
 model FeatureFlag {
-  id        String   @id @default(cuid())
-  name      String   @unique
-  enabled   Boolean  @default(false)
-  rollout   Int      @default(0)
-  targets   Json     @default("[]")
-  metadata  Json     @default("{}")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id        String    @id @default(cuid())
+  productId String
+  product   Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  name      String
+  enabled   Boolean   @default(false)
+  rollout   Int       @default(0)
+  targets   Json      @default("[]")
+  metadata  Json      @default("{}")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
+  @@unique([productId, name])
+  @@index([productId])
   @@index([enabled])
 }

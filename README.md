@@ -1,55 +1,117 @@
-# LAO - AI Learning Operating System
+# IrisKey Platform
 
-A production SaaS platform for personalized AI-driven learning.
+Production SaaS platform infrastructure for multi-product AI ecosystems. LAO (AI Learning Operating System) is the first product built on IrisKey Platform.
 
-## Overview
+## Vision
 
-LAO is an AI Learning Operating System that takes learners from where they are today to where they want to be. The platform uses intelligent AI routing to select the best providers for each task, maintains complete user privacy and audit trails, and scales from one user to one million.
+**Build once, use everywhere.**
+
+The IrisKey Platform provides reusable, production-grade infrastructure that enables multiple products to share:
+
+- **Authentication** - Multi-provider auth (email/password, Google, GitHub, IrisKey biometrics)
+- **Database** - Multi-tenant schema with product isolation
+- **Credits & Billing** - Usage tracking and subscription management
+- **AI Routing** - Intelligent provider selection (Claude, GPT, Gemini, etc)
+- **Notifications** - Email, SMS, push notifications
+- **Analytics** - Event tracking and metrics
+- **Audit Logging** - Immutable compliance logs
+- **File Storage** - S3-compatible storage
+- **Search** - Full-text search capabilities
+
+Products use these packages without coupling to product-specific logic.
+
+## Architecture
+
+```
+IrisKey Platform
+├── packages/iriskey/           ← Platform infrastructure (reusable)
+│   ├── auth                    # Multi-product authentication
+│   ├── database                # Multi-tenant database
+│   ├── shared                  # Common types & errors
+│   ├── providers               # AI provider registry
+│   ├── credits/                # [Coming] Usage tracking
+│   ├── payments/               # [Coming] Billing
+│   ├── notifications/          # [Coming] Email/SMS/push
+│   ├── analytics/              # [Coming] Event tracking
+│   ├── audit/                  # [Coming] Audit logging
+│   ├── files/                  # [Coming] File storage
+│   ├── email/                  # [Coming] Email delivery
+│   └── search/                 # [Coming] Full-text search
+│
+├── apps/                       ← Products
+│   └── lao-web                 # LAO (Learning OS) - First product
+│
+└── packages/lao/               ← LAO-specific packages
+    └── ui                      # LAO design system & components
+```
+
+## Package Principles
+
+**Platform Packages** (`@iriskey/*`)
+- Zero product-specific logic
+- Multi-tenant by design
+- Reusable across any product
+- Configuration-driven behavior
+- Full documentation and examples
+
+**Product Packages** (`apps/*`, `packages/lao/*`)
+- Use only platform packages
+- Implement product-specific features
+- Can be deployed independently
+- Shareable via monorepo or separate repos
+
+## Milestone 1: Authentication
+
+**Status**: Complete ✅
+
+### Deliverables
+
+**Platform**
+- ✅ `@iriskey/auth` - Multi-product authentication system
+- ✅ `@iriskey/database` - Multi-tenant PostgreSQL schema
+- ✅ `@iriskey/shared` - Shared types and errors
+- ✅ `@iriskey/providers` - AI provider infrastructure
+
+**Product**
+- ✅ `lao-web` - LAO authentication UI
+- ✅ `@lao/ui` - LAO component library
+
+### Features
+
+**Authentication Methods**
+- Email/Password with bcrypt hashing
+- Google OAuth 2.0
+- GitHub OAuth 2.0
+- Architecture ready for IrisKey biometrics
+
+**Database**
+- PostgreSQL with Prisma ORM
+- Multi-tenant schema (product isolation)
+- Tables: Users, Profiles, Accounts, Sessions, Roles, Permissions, AuditLogs, Credits, Settings, FeatureFlags, ProviderConfigs
+
+**Security**
+- OWASP Top 10 compliant
+- JWT-based stateless sessions
+- Secure password hashing (bcrypt 12 rounds)
+- Immutable audit logging with product tracking
+- Email verification tokens
+- Password reset tokens
+
+**CI/CD**
+- GitHub Actions on every commit
+- Linting, type checking, building, testing
+- No TODOs or placeholders allowed
+- Docker multi-stage builds
 
 ## Technology Stack
 
 - **Frontend**: Next.js 14, React 18, TypeScript, TailwindCSS, shadcn/ui
 - **Backend**: Next.js API Routes, TypeScript
-- **Database**: PostgreSQL with Prisma ORM
-- **Authentication**: Auth.js (NextAuth) with email/password, Google OAuth, GitHub OAuth
-- **Caching**: Redis (Upstash)
+- **Database**: PostgreSQL + Prisma ORM
+- **Auth**: Auth.js (NextAuth.js)
+- **Testing**: Jest
 - **Deployment**: Docker, Vercel, GitHub Actions
-- **Monitoring**: Structured logging, audit trails
-
-## Project Structure
-
-```
-lao/
-├── apps/
-│   └── web/                    # Next.js web application
-│       ├── src/
-│       │   ├── app/            # App Router pages and API routes
-│       │   ├── components/     # React components
-│       │   ├── lib/            # Utilities and helpers
-│       │   └── styles/         # Global styles
-│       ├── next.config.js
-│       ├── tailwind.config.ts
-│       └── package.json
-│
-├── packages/
-│   ├── ui/                     # Shared UI components (shadcn/ui)
-│   ├── database/               # Prisma schema and migrations
-│   ├── auth/                   # Authentication configuration
-│   ├── shared/                 # Shared types and utilities
-│   ├── providers/              # AI Provider registry and router
-│   ├── ai-router/              # AI Router (extends providers)
-│   └── config/                 # Configuration management
-│
-├── .github/
-│   └── workflows/
-│       └── ci.yml              # GitHub Actions CI/CD pipeline
-│
-├── Dockerfile                  # Production Docker image
-├── docker-compose.yml          # Local development environment
-├── tsconfig.json               # TypeScript configuration
-├── .prettierrc                 # Code formatting
-└── package.json                # Workspace configuration
-```
+- **Monorepo**: Yarn/pnpm workspaces with Turbo
 
 ## Getting Started
 
@@ -62,220 +124,285 @@ lao/
 
 ### Local Development
 
-1. **Clone the repository**
 ```bash
+# Clone and install
 git clone <repo>
-cd patento-webhook
-```
-
-2. **Install dependencies**
-```bash
+cd iriskey-platform
 pnpm install
-```
 
-3. **Setup environment**
-```bash
+# Setup environment
 cp .env.example .env.local
-```
 
-4. **Start PostgreSQL and Redis**
-```bash
+# Start database
 docker-compose up -d postgres redis
-```
 
-5. **Setup database**
-```bash
+# Setup database
 pnpm db:generate
 pnpm db:migrate
-```
 
-6. **Start development server**
-```bash
+# Start development server
 pnpm dev
 ```
 
-The app will be available at `http://localhost:3000`
+Access LAO at `http://localhost:3000`
 
-### Using Docker Compose for Full Stack
+### Using Docker Compose
 
 ```bash
 docker-compose up
 ```
 
-This starts the entire stack including PostgreSQL, Redis, and the web app.
+Starts entire stack: PostgreSQL, Redis, and LAO web app.
 
 ## Development Workflow
 
-### Running Tests
+### Standard Commands
 
 ```bash
-pnpm test
-```
+# Install dependencies across all packages
+pnpm install
 
-### Type Checking
+# Development mode (all apps)
+pnpm dev
 
-```bash
-pnpm type-check
-```
-
-### Linting
-
-```bash
-pnpm lint
-```
-
-### Building for Production
-
-```bash
+# Build all packages
 pnpm build
+
+# Type checking
+pnpm type-check
+
+# Linting
+pnpm lint
+
+# Testing
+pnpm test
+
+# Format code
+pnpm format
 ```
 
-### Database Management
+### Database Commands
 
 ```bash
 # Generate Prisma Client
 pnpm db:generate
 
-# Run migrations
+# Create and run migrations
 pnpm db:migrate
+
+# Open Prisma Studio (GUI)
+pnpm db:studio
 
 # Reset database (dev only)
 pnpm db:reset
-
-# Open Prisma Studio
-pnpm db:studio
 ```
 
-## API Endpoints
-
-### Authentication
-
-- `POST /api/auth/register` - Register new user
-- `POST /api/auth/verify-email` - Verify email
-- `POST /api/auth/forgot-password` - Request password reset
-- `GET/POST /api/auth/[...nextauth]` - NextAuth handlers
-
-## Database Schema
-
-The database includes tables for:
-
-- **Users** - User accounts and profiles
-- **Accounts** - OAuth provider accounts
-- **Sessions** - User sessions
-- **Roles & Permissions** - Authorization system
-- **AuditLogs** - Immutable event logging
-- **Credits** - Usage credits tracking
-- **ProviderConfigs** - AI provider configurations
-- **Settings** - User preferences
-- **FeatureFlags** - Feature rollout management
-
-See `packages/database/prisma/schema.prisma` for complete schema.
-
-## Milestone Progress
-
-- ✅ **Milestone 1: Authentication** - Complete
-  - Email/Password authentication
-  - Google OAuth
-  - GitHub OAuth
-  - Email verification
-  - Password reset
-  - Audit logging
-
-- 🔄 **Milestone 2: Database** - In progress
-- ⏳ **Milestone 3: Dashboard** - Upcoming
-- ⏳ **Milestone 4: Onboarding** - Upcoming
-- ⏳ **Milestone 5: AI Router** - Upcoming
-
-## Security
-
-The platform implements:
-
-- **OWASP Top 10** compliance
-- **Password hashing** with bcrypt (12 rounds)
-- **Rate limiting** on authentication endpoints
-- **CSRF** protection with NextAuth
-- **XSS** protection via React/Next.js
-- **SQL Injection** prevention via Prisma ORM
-- **Environment variable validation** on startup
-- **Immutable audit logging** for all critical actions
-- **Session management** with JWT tokens
-- **Role-based access control** (RBAC)
-
-## Deployment
-
-### Production Build
+### Working with Packages
 
 ```bash
-docker build -t lao:latest .
-docker run -p 3000:3000 lao:latest
+# Run command in specific package
+pnpm -F @iriskey/auth build
+pnpm -F lao-web dev
+
+# Add dependency to package
+pnpm -F @iriskey/auth add axios
 ```
 
-### Vercel Deployment
+## Production Deployment
+
+### Docker
 
 ```bash
-vercel deploy
+# Build image
+docker build -t iriskey-platform:latest .
+
+# Run container
+docker run -p 3000:3000 iriskey-platform:latest
 ```
 
-Set required environment variables in Vercel dashboard:
+### Vercel
+
+```bash
+# Deploy LAO
+vercel deploy apps/lao-web
+```
+
+Set required env vars:
 - `DATABASE_URL`
 - `NEXTAUTH_SECRET`
 - `NEXTAUTH_URL`
-- `GOOGLE_CLIENT_ID` (optional)
-- `GOOGLE_CLIENT_SECRET` (optional)
-- `GITHUB_CLIENT_ID` (optional)
-- `GITHUB_CLIENT_SECRET` (optional)
+- `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` (optional)
+- `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` (optional)
 
-## CI/CD Pipeline
+## Using Platform Packages
 
-GitHub Actions workflow (`/.github/workflows/ci.yml`) runs on every push:
+### Authentication
 
-1. **Lint** - ESLint checks
-2. **Type Check** - TypeScript compilation
-3. **Build** - Full application build
-4. **Test** - Jest test suite
-5. **Code Quality** - No TODO/FIXME comments allowed
+```typescript
+// In any product's Next.js server
+import { createAuthConfig } from '@iriskey/auth';
 
-The pipeline must pass before merging to main.
+const authConfig = createAuthConfig({
+  prisma,
+  productId: 'my-product',
+  pages: {
+    signIn: '/auth/login',
+    error: '/auth/error',
+  },
+});
+```
+
+### Database
+
+```typescript
+// Get Prisma Client
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
+const users = await prisma.user.findMany();
+```
+
+### Providers (AI Router)
+
+```typescript
+import { ProviderRegistry, AIRouter } from '@iriskey/providers';
+
+const registry = new ProviderRegistry();
+const router = new AIRouter(registry, costCalculator);
+
+// Route to best provider
+const provider = await router.selectProvider(
+  ProviderType.LLM,
+  'chat',
+  { inputTokens: 100 }
+);
+```
+
+## API Endpoints (LAO)
+
+### Authentication
+
+- `POST /api/auth/register` - Register user
+- `POST /api/auth/verify-email` - Verify email
+- `POST /api/auth/forgot-password` - Password reset
+- `GET/POST /api/auth/[...nextauth]` - NextAuth handlers
 
 ## Documentation
 
-- [Architecture Overview](./docs/ARCHITECTURE.md) - System design
-- [Provider Registry](./docs/PROVIDER_REGISTRY.md) - Available providers
-- [Implementation Guide](./docs/IMPLEMENTATION_GUIDE.md) - Build guide
+- [ARCHITECTURE.md](./ARCHITECTURE.md) - Complete system design
+- [ROADMAP.md](./ROADMAP.md) - Milestone planning (Milestones 1-12)
+
+## Next Milestones
+
+**Milestone 2**: Dashboard & Database Optimization
+- User dashboard
+- Profile management
+- Settings interface
+- Performance tuning
+
+**Milestone 3**: Onboarding Flow
+- Learning goal assessment
+- Skill evaluation
+- Personalization
+
+**Milestone 4**: AI Router Foundation
+- Provider health monitoring
+- Cost optimization
+- Metrics collection
+
+**Milestone 5**: First AI Provider
+- Claude integration
+- Chat interface
+- Token tracking
+
+**Milestone 6+**: Credits, Content, Community, Marketplace, Mobile, Enterprise
+
+## Security
+
+**Passwords**
+- bcrypt hashing (12 rounds, ~100ms per hash)
+- No plaintext storage
+- Constant-time comparison
+
+**Sessions**
+- JWT-based (stateless)
+- 30-day max age
+- HTTP-only cookies
+- SameSite=Lax
+
+**API**
+- Rate limiting ready
+- CSRF protection
+- XSS prevention
+- SQL injection protection (Prisma ORM)
+
+**Audit**
+- Immutable logs
+- Product tracking
+- Action logging
+- User accountability
+
+## Testing
+
+Platform packages designed for testing:
+
+```bash
+# Run all tests
+pnpm test
+
+# With coverage
+pnpm test --coverage
+
+# Watch mode
+pnpm test --watch
+```
 
 ## Contributing
 
-1. Create feature branch from the designated development branch
-2. Make changes following coding standards (see below)
-3. Run full test suite locally
+1. Create feature branch
+2. Make changes (no TODOs!)
+3. Run tests locally
 4. Push to branch
-5. Create pull request
-6. Wait for CI/CD to pass
+5. Create PR
+6. CI/CD must pass
 7. Code review
-8. Merge only after approval
+8. Merge
 
 ## Coding Standards
 
 ✅ **Required**
-- No `any` types - use strict TypeScript
-- No TODO/FIXME comments - complete implementation
-- No placeholder code - everything production-ready
+- No `any` types
+- No TODO/FIXME comments
+- Complete implementations
 - All functions documented
-- All public APIs typed
 - Tests for new features
-- No code duplication
+- Strict TypeScript
 
 ❌ **Not Allowed**
-- Console.log for errors - use structured logging
-- Catch-all error handlers
+- Console.log for errors
+- Catch-all handlers
 - Hardcoded secrets
 - Unused code
-- Browser-only code in server components
+- Browser code in server
 
 ## Support
 
-For questions or issues, contact the development team.
+For questions about:
+- **IrisKey Platform**: Contact platform team
+- **LAO Product**: Contact LAO team
+- **Development**: See Contributing above
 
 ## License
 
-Proprietary - LAO Platform
+Proprietary - IrisKey Platform
+
+---
+
+## Quick Links
+
+- [Authentication](./packages/iriskey/auth/src)
+- [Database Schema](./packages/iriskey/database/prisma/schema.prisma)
+- [Providers](./packages/iriskey/providers/src)
+- [LAO Web App](./apps/lao-web/src)
+- [Architecture Doc](./ARCHITECTURE.md)
+- [Roadmap](./ROADMAP.md)

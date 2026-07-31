@@ -1,11 +1,12 @@
 {
-  "name": "lao",
+  "name": "iriskey-platform",
   "version": "0.1.0",
-  "description": "LAO - AI Learning Operating System",
+  "description": "IrisKey Platform - Reusable infrastructure for AI products",
   "private": true,
   "workspaces": [
-    "apps/web",
-    "packages/*"
+    "apps/*",
+    "packages/iriskey/*",
+    "packages/lao/*"
   ],
   "scripts": {
     "dev": "turbo run dev --parallel",

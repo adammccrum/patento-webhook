@@ -1,7 +1,8 @@
 {
-  "name": "@lao/database",
+  "name": "@iriskey/database",
   "version": "0.1.0",
   "private": true,
+  "description": "IrisKey Platform - Multi-tenant database schema and migrations",
   "scripts": {
     "db:migrate": "prisma migrate dev",
     "db:generate": "prisma generate",
