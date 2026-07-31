@@ -59,7 +59,7 @@ export default function DashboardPage() {
     );
   }
 
-  const { user, profile, credits, settings, recentActivity, stats } = dashboardData;
+  const { user, profile, credits, settings, recentActivity, stats, portfolio = [], learnerState = {} } = dashboardData;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
@@ -79,20 +79,45 @@ export default function DashboardPage() {
       </nav>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold text-slate-900 mb-2">
-            Welcome, {user.name || user.email}!
-          </h2>
-          <p className="text-slate-600">
-            {stats.isOnboarded ? 'Onboarding completed' : 'Let\'s get you started'}
-          </p>
+        <div className="mb-8 flex justify-between items-start">
+          <div>
+            <h2 className="text-3xl font-bold text-slate-900 mb-2">
+              Welcome, {user.name || user.email}!
+            </h2>
+            <p className="text-slate-600">
+              {stats.isOnboarded ? 'Onboarding completed' : 'Let\'s get you started'}
+            </p>
+          </div>
+          <Link href="/discover">
+            <button className="px-6 py-3 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 transition">
+              + Start New Discovery
+            </button>
+          </Link>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-sm font-semibold text-slate-600 mb-2">Account Age</h3>
-            <p className="text-3xl font-bold text-slate-900">{stats.accountAge}</p>
-            <p className="text-sm text-slate-500">days</p>
+            <h3 className="text-sm font-semibold text-slate-600 mb-2">Problems Solved</h3>
+            <p className="text-3xl font-bold text-slate-900">{learnerState.problemsSolved || 0}</p>
+            <p className="text-sm text-slate-500">AI solutions built</p>
+          </div>
+
+          <div className="bg-white rounded-lg shadow p-6">
+            <h3 className="text-sm font-semibold text-slate-600 mb-2">Confidence</h3>
+            <p className="text-3xl font-bold text-slate-900">
+              {Math.round((learnerState.overallConfidence || 0.5) * 100)}%
+            </p>
+            <div className="mt-3 bg-slate-100 rounded-full h-2 overflow-hidden">
+              <div
+                className="bg-green-500 h-full transition-all"
+                style={{
+                  width: `${(learnerState.overallConfidence || 0.5) * 100}%`,
+                }}
+              />
+            </div>
+            <p className="text-sm text-slate-500 mt-2">
+              In your ability to build
+            </p>
           </div>
 
           <div className="bg-white rounded-lg shadow p-6">
@@ -112,42 +137,54 @@ export default function DashboardPage() {
               {credits?.spent || 0} / {credits?.monthlyReset || 0} used
             </p>
           </div>
-
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-sm font-semibold text-slate-600 mb-2">Onboarding Status</h3>
-            <p className="text-3xl font-bold text-slate-900">
-              {stats.isOnboarded ? '✓' : '○'}
-            </p>
-            <p className="text-sm text-slate-500 mt-2">
-              {stats.isOnboarded ? 'Completed' : 'Start now'}
-            </p>
-          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
             <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-lg font-semibold text-slate-900 mb-4">Recent Activity</h3>
-              <div className="space-y-3">
-                {recentActivity && recentActivity.length > 0 ? (
-                  recentActivity.map((activity: any) => (
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold text-slate-900">Your Portfolio</h3>
+                <span className="text-sm text-slate-500">{portfolio?.length || 0} solution{portfolio?.length !== 1 ? 's' : ''}</span>
+              </div>
+              <div className="space-y-4">
+                {portfolio && portfolio.length > 0 ? (
+                  portfolio.map((item: any) => (
                     <div
-                      key={activity.id}
-                      className="flex items-center justify-between py-2 border-b border-slate-100 last:border-b-0"
+                      key={item.id}
+                      className="p-4 border border-slate-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition"
                     >
-                      <div>
-                        <p className="text-sm font-medium text-slate-900">{activity.action}</p>
-                        <p className="text-xs text-slate-500">
-                          {new Date(activity.createdAt).toLocaleDateString()}
-                        </p>
+                      <div className="flex items-start justify-between mb-2">
+                        <div>
+                          <p className="font-semibold text-slate-900">Problem: {item.problemSolved}</p>
+                          <p className="text-sm text-slate-600 mt-1">Solution: {item.solutionCreated}</p>
+                        </div>
+                        <span className={`text-xs font-medium px-2 py-1 rounded ${
+                          item.status === 'in_daily_use'
+                            ? 'bg-green-100 text-green-800'
+                            : item.status === 'completed'
+                              ? 'bg-blue-100 text-blue-800'
+                              : 'bg-yellow-100 text-yellow-800'
+                        }`}>
+                          {item.status === 'in_daily_use' ? '✓ In Use' : item.status === 'completed' ? 'Completed' : 'Planned'}
+                        </span>
                       </div>
-                      <span className="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded">
-                        {activity.resource}
-                      </span>
+                      {item.reflection && (
+                        <p className="text-sm text-slate-600 mt-2 italic">&quot;{item.reflection}&quot;</p>
+                      )}
+                      <p className="text-xs text-slate-500 mt-2">
+                        Built {new Date(item.missionCompletedAt).toLocaleDateString()}
+                      </p>
                     </div>
                   ))
                 ) : (
-                  <p className="text-slate-500 text-sm">No activity yet</p>
+                  <div className="text-center py-8">
+                    <p className="text-slate-500 text-sm mb-4">You haven't built any AI solutions yet</p>
+                    <Link href="/discover">
+                      <button className="inline-flex px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition text-sm font-medium">
+                        Start Your First Discovery
+                      </button>
+                    </Link>
+                  </div>
                 )}
               </div>
             </div>

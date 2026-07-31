@@ -22,7 +22,7 @@ export const GET = withErrorHandler(async (request: NextRequest, ctx) => {
   }
 
   // Fetch user data in parallel
-  const [user, profile, credits, settings, recentActivity] = await Promise.all([
+  const [user, profile, credits, settings, recentActivity, portfolio, learnerState] = await Promise.all([
     db.user.findUnique({
       where: { id: userId },
       select: {
@@ -72,6 +72,27 @@ export const GET = withErrorHandler(async (request: NextRequest, ctx) => {
       orderBy: { createdAt: 'desc' },
       take: 10,
     }),
+    db.portfolio.findMany({
+      where: { userId },
+      select: {
+        id: true,
+        problemSolved: true,
+        solutionCreated: true,
+        reflection: true,
+        status: true,
+        missionCompletedAt: true,
+      },
+      orderBy: { missionCompletedAt: 'desc' },
+      take: 10,
+    }),
+    db.learnerState.findUnique({
+      where: { userId },
+      select: {
+        overallConfidence: true,
+        problemsSolved: true,
+        predictedReturnDate: true,
+      },
+    }),
   ]);
 
   if (!user) {
@@ -91,6 +112,12 @@ export const GET = withErrorHandler(async (request: NextRequest, ctx) => {
     },
     settings,
     recentActivity,
+    portfolio: portfolio || [],
+    learnerState: learnerState || {
+      overallConfidence: 0.5,
+      problemsSolved: 0,
+      predictedReturnDate: null,
+    },
     stats: {
       accountAge: Math.floor(
         (Date.now() - new Date(user.createdAt).getTime()) / (1000 * 60 * 60 * 24)
