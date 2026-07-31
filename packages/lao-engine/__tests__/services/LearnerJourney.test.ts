@@ -250,10 +250,14 @@ describe('Learner Journey - Complete Workflows', () => {
       // Then status should be paused
       expect(paused.status).toBe('paused');
 
-      // And can be resumed
-      const resumed = await goalService.markAchieved(paused.id);
-      // Note: Can transition to achieved if progress allows
-      expect(resumed).toBeDefined();
+      // And can be resumed by activating again
+      const activated = await goalService.activateGoal(paused.id);
+      expect(activated.status).toBe('active');
+
+      // And can be completed after reaching 100%
+      await goalService.updateProgress(activated.id, 100);
+      const completed = await goalService.markAchieved(activated.id);
+      expect(completed.status).toBe('achieved');
     });
   });
 
@@ -323,6 +327,9 @@ describe('Learner Journey - Complete Workflows', () => {
       // Then lastActiveAt should be set
       expect(active1.profile.lastActiveAt).toBeDefined();
       const firstTime = active1.profile.lastActiveAt;
+
+      // Wait a moment to ensure different timestamp
+      await new Promise((resolve) => setTimeout(resolve, 10));
 
       // When recording another session
       const active2 = await learnerService.recordActivity(learner.id);
