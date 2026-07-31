@@ -4,15 +4,14 @@
  */
 
 import { createAuthConfig } from '@iriskey/auth';
-import { PrismaClient } from '@prisma/client';
+import { getProductId } from '@iriskey/config';
+import { db } from './db';
 import NextAuth from 'next-auth';
 import { headers } from 'next/headers';
 
-const prisma = new PrismaClient();
-
 const authConfig = createAuthConfig({
-  prisma,
-  productId: 'lao',
+  prisma: db,
+  productId: getProductId(),
   pages: {
     signIn: '/auth/login',
     error: '/auth/error',

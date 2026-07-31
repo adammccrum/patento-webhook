@@ -1,14 +1,15 @@
 /**
  * LAO User registration endpoint
+ * Uses IrisKey Platform infrastructure
  */
 
-import { PrismaClient } from '@prisma/client';
-import { hashPassword, generateVerificationToken } from '@iriskey/auth';
-import { type NextRequest, NextResponse } from 'next/server';
+import { type NextRequest } from 'next/server';
 import { z } from 'zod';
-
-const prisma = new PrismaClient();
-const PRODUCT_ID = 'lao';
+import { hashPassword, generateVerificationToken } from '@iriskey/auth';
+import { getProductId } from '@iriskey/config';
+import { withErrorHandler, ApiResponseBuilder, validationError, ApiErrorResponse, toResponse } from '@iriskey/middleware';
+import { getAuditService } from '@iriskey/audit';
+import { db } from '@/lib/db';
 
 const registerSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -18,88 +19,71 @@ const registerSchema = z.object({
 
 /**
  * POST /api/auth/register
- * Register a new user on LAO
+ * Register a new user
  */
-export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json();
+export const POST = withErrorHandler(async (request: NextRequest, ctx) => {
+  const body = await request.json();
 
-    const validation = registerSchema.safeParse(body);
-    if (!validation.success) {
-      return NextResponse.json(
-        { error: validation.error.errors[0].message },
-        { status: 400 }
-      );
-    }
+  const validation = registerSchema.safeParse(body);
+  if (!validation.success) {
+    return validationError(validation.error.errors[0].message);
+  }
 
-    const { name, email, password } = validation.data;
+  const { name, email, password } = validation.data;
 
-    const existingUser = await prisma.user.findUnique({
-      where: { email },
-    });
+  const existingUser = await db.user.findUnique({
+    where: { email },
+  });
 
-    if (existingUser) {
-      return NextResponse.json(
-        { error: 'Email already registered' },
-        { status: 409 }
-      );
-    }
+  if (existingUser) {
+    throw new ApiErrorResponse('EMAIL_ALREADY_EXISTS', 'Email already registered', 409);
+  }
 
-    const hashedPassword = await hashPassword(password);
+  const hashedPassword = await hashPassword(password);
 
-    const user = await prisma.user.create({
-      data: {
-        name,
-        email,
-        password: hashedPassword,
-        profile: {
-          create: {},
-        },
-        credits: {
-          create: {
-            balance: 1000,
-            monthlyReset: 1000,
-          },
-        },
-        settings: {
-          create: {},
+  const user = await db.user.create({
+    data: {
+      name,
+      email,
+      password: hashedPassword,
+      profile: {
+        create: {},
+      },
+      credits: {
+        create: {
+          balance: 1000,
+          monthlyReset: 1000,
         },
       },
-    });
-
-    const verificationToken = generateVerificationToken();
-
-    await prisma.verificationToken.create({
-      data: {
-        identifier: email,
-        token: verificationToken,
-        type: 'email-verify',
-        expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+      settings: {
+        create: {},
       },
-    });
+    },
+  });
 
-    await prisma.auditLog.create({
-      data: {
-        userId: user.id,
-        productId: PRODUCT_ID,
-        action: 'user_registered',
-        resource: 'auth',
-        details: { email },
-      },
-    });
+  const verificationToken = generateVerificationToken();
 
-    return NextResponse.json(
+  await db.verificationToken.create({
+    data: {
+      identifier: email,
+      token: verificationToken,
+      type: 'email-verify',
+      expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+    },
+  });
+
+  // Use audit service instead of manual logging
+  const auditService = getAuditService();
+  await auditService.logUserRegistered(user.id, email, ctx.productId, ctx.ipAddress);
+
+  return toResponse(
+    ApiResponseBuilder.success(
       {
         message: 'Registration successful. Please verify your email.',
         userId: user.id,
       },
-      { status: 201 }
-    );
-  } catch (error) {
-    console.error('Registration error:', error);
-    return NextResponse.json(
-      { error: 'Registration failed' },
-      { status: 500 }
-    );
-  }
-}
+      { registered: true }
+    ),
+    201
+  );
+});
