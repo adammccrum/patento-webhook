@@ -19,8 +19,8 @@ const BUILD_STEPS: BuildStep[] = [
     id: 1,
     title: 'Define the Task',
     description: 'What exactly do you want the AI to do?',
-    prompt: 'Let me understand your task better. In one sentence, what should the AI do every time you use it?',
-    inputLabel: 'Task description:',
+    prompt: 'In one sentence: what should this AI tool do? Be specific about what it takes in and what it should produce.',
+    inputLabel: 'What should it do?',
     placeholder: 'e.g., Analyze emails and create a one-sentence summary',
     example: 'My task: Summarize long emails into key action items',
   },
@@ -28,8 +28,8 @@ const BUILD_STEPS: BuildStep[] = [
     id: 2,
     title: 'Create the Prompt',
     description: 'Give the AI clear instructions',
-    prompt: 'Now, what instructions should I give the AI? What format do you want the output in? Any specific rules or quality standards?',
-    inputLabel: 'Your instructions:',
+    prompt: 'You\'re doing great. Now I need to know: What format should the output be in? Any rules or standards the AI should follow?',
+    inputLabel: 'Give the AI instructions:',
     placeholder: 'e.g., Output should be a bullet list of action items, max 3 items, prioritized by urgency',
     example: 'Be concise, extract action items, mark deadlines in bold',
   },
@@ -37,8 +37,8 @@ const BUILD_STEPS: BuildStep[] = [
     id: 3,
     title: 'Test It Out',
     description: 'Make sure it works as expected',
-    prompt: 'Let\'s test your AI assistant with a real example. Paste in a sample input that the AI will work on.',
-    inputLabel: 'Test input:',
+    prompt: 'Final step: let\'s test this with real data. Give me an example of what you\'d normally feed into this tool.',
+    inputLabel: 'Test with a real example:',
     placeholder: 'Paste an example email, document, or text here...',
     example: 'The Johnson proposal came in today. They want feedback by Friday. Also need quote for phase 2.',
   },
@@ -46,7 +46,7 @@ const BUILD_STEPS: BuildStep[] = [
     id: 4,
     title: 'You\'re Done!',
     description: 'Your AI assistant is ready to use',
-    prompt: 'Congratulations! Your AI assistant is ready. You\'ve successfully built a tool that will save you time every single day.',
+    prompt: 'You just built something real. This tool is going to save you time every single week from now on.',
     inputLabel: '',
     placeholder: '',
     example: '',
@@ -158,7 +158,7 @@ export default function BuildPage() {
           <Link href="/dashboard">
             <h1 className="text-2xl font-bold text-slate-900 hover:text-slate-700 cursor-pointer">LAO</h1>
           </Link>
-          <div className="text-sm text-slate-600">Step {currentStep} of 4: {step?.title}</div>
+          <div className="text-sm text-slate-600">Building: {step?.title}</div>
         </div>
       </nav>
 

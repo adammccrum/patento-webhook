@@ -144,7 +144,7 @@ export default function CoachPage() {
             <h1 className="text-2xl font-bold text-slate-900 hover:text-slate-700 cursor-pointer">LAO</h1>
           </Link>
           <div className="text-sm text-slate-600">
-            Step {step + 1} of 4: {['Problem', 'Explore', 'Recommend', 'Build'][step]}
+            Step {step + 1} of 5: {['Understanding', 'Exploring', 'Planning', 'Building', 'Done'][step]}
           </div>
         </div>
       </nav>

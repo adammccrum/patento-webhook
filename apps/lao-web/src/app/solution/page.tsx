@@ -76,7 +76,7 @@ export default function SolutionPage() {
           <Link href="/dashboard">
             <h1 className="text-2xl font-bold text-slate-900 hover:text-slate-700 cursor-pointer">LAO</h1>
           </Link>
-          <div className="text-sm text-slate-600">Step 3 of 5: Solution Recommendation</div>
+          <div className="text-sm text-slate-600">Step 3 of 5: Your Plan</div>
         </div>
       </nav>
 
@@ -86,11 +86,11 @@ export default function SolutionPage() {
           {/* Header */}
           <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-8 text-white">
             <div className="flex items-center justify-center w-12 h-12 rounded-full bg-white bg-opacity-20 mb-4">
-              <span className="text-2xl">🎯</span>
+              <span className="text-2xl">🛠️</span>
             </div>
-            <h2 className="text-3xl font-bold mb-2">Here's Your Solution</h2>
+            <h2 className="text-3xl font-bold mb-2">Here's What We'll Build</h2>
             <p className="text-blue-100">
-              Based on your problem, here's what we'll build together in the next 25 minutes
+              25 minutes from now, you'll have a working tool that solves your problem
             </p>
           </div>
 
@@ -174,9 +174,9 @@ export default function SolutionPage() {
             </div>
 
             {/* Info box */}
-            <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg mb-8">
+            <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg mb-8">
               <p className="text-sm text-slate-700">
-                <span className="font-semibold">💡 Pro tip:</span> Don't worry if you're not technical. I'll guide you through every step, and you don't need to write any code.
+                <span className="font-semibold">No coding required.</span> You'll describe what you want, and we'll set up the AI to do it for you. I'll guide every step.
               </p>
             </div>
 
@@ -186,21 +186,21 @@ export default function SolutionPage() {
                 onClick={() => router.push(`/build?goalId=${goalId}`)}
                 className="flex-1 px-6 py-3 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 transition"
               >
-                Start Building →
+                Build It Now →
               </button>
               <Link href="/discover">
                 <button className="px-6 py-3 border border-slate-300 text-slate-700 font-semibold rounded-lg hover:bg-slate-50 transition">
-                  Go Back
+                  Start Over
                 </button>
               </Link>
             </div>
           </div>
         </div>
 
-        {/* Confidence indicator */}
+        {/* Momentum message */}
         <div className="mt-8 text-center">
           <p className="text-slate-600 text-sm">
-            ✓ Your coach is confident this solution will solve your problem in under 30 minutes
+            You're 3 steps in. 2 more and you'll have something you can use tomorrow.
           </p>
         </div>
       </main>

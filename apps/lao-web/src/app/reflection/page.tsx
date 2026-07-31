@@ -86,7 +86,7 @@ export default function ReflectionPage() {
           <Link href="/dashboard">
             <h1 className="text-2xl font-bold text-slate-900 hover:text-slate-700 cursor-pointer">LAO</h1>
           </Link>
-          <div className="text-sm text-slate-600">Step 5 of 5: Reflection</div>
+          <div className="text-sm text-slate-600">Step 5 of 5: What Did You Learn?</div>
         </div>
       </nav>
 
@@ -190,10 +190,10 @@ export default function ReflectionPage() {
             {/* Reflection questions */}
             <div className="mb-8">
               <label htmlFor="reflection" className="block text-sm font-semibold text-slate-900 mb-2">
-                What surprised you about this process?
+                What changed for you?
               </label>
               <p className="text-xs text-slate-500 mb-3">
-                We're curious what stood out to you. Did something work better than expected? Was something harder or easier?
+                How does solving this problem change your week? What was the biggest surprise?
               </p>
               <textarea
                 id="reflection"
@@ -202,7 +202,7 @@ export default function ReflectionPage() {
                   setReflection(e.target.value);
                   setError(null);
                 }}
-                placeholder="For example: I was surprised how quickly I could set up the prompt. I expected it to be much more technical."
+                placeholder="For example: I didn't expect I could actually build this in 25 minutes. Now I can see how AI could help with other things too."
                 className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                 rows={5}
               />

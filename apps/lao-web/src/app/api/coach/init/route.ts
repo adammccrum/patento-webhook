@@ -49,10 +49,10 @@ export async function GET(request: Request) {
       });
     }
 
-    // Initial coach message - ask about the problem
-    const initialMessage = `I'm your AI Coach, and I'm here to help you solve "${goal.problem}" using AI.
+    // Initial coach message - celebrate and explore
+    const initialMessage = `Great—that's the kind of problem worth solving. "${goal.problem}" is something you deal with regularly, which means any time we save here compounds every single week.
 
-First, let me understand this better: **How much time does this task take you each day or week?** And what specifically makes it frustrating or time-consuming?`;
+Let's understand it better: **How much time does this actually take you?** Is it 10 minutes a day? An hour a week? And what part is the most annoying—is it the repetition, the detail work, or something else?`;
 
     return NextResponse.json({
       goal,

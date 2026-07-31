@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
+// Page: "Let's Solve Something" (renamed from Discover)
+
 const PROBLEM_CATEGORIES = [
   { id: 'writing', label: 'Writing', icon: '✍️' },
   { id: 'email', label: 'Email', icon: '📧' },
@@ -83,7 +85,7 @@ export default function DiscoverPage() {
               <div className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-500 text-white text-sm font-bold">
                 1
               </div>
-              <span className="text-sm font-medium text-slate-600">Problem Identification</span>
+              <span className="text-sm font-medium text-slate-600">Let's Start</span>
             </div>
             <div className="w-full bg-slate-200 rounded-full h-1">
               <div className="bg-blue-500 h-1 rounded-full" style={{ width: '20%' }}></div>
@@ -93,10 +95,10 @@ export default function DiscoverPage() {
           {/* Main question */}
           <div className="mb-8">
             <h2 className="text-3xl font-bold text-slate-900 mb-2">
-              What is one task you wish took less time?
+              What's one thing you wish took less time?
             </h2>
             <p className="text-slate-600 text-lg">
-              Don't think too hard. Just describe something that frustrates you—something you do regularly but wish was faster or easier.
+              Tell me about something you do regularly that eats up your day. What would your week look like if you could skip this task?
             </p>
           </div>
 
@@ -154,7 +156,7 @@ export default function DiscoverPage() {
               disabled={loading}
               className="flex-1 px-6 py-3 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 disabled:bg-slate-300 disabled:cursor-not-allowed transition"
             >
-              {loading ? 'Creating your goal...' : 'Continue to AI Coach'}
+              {loading ? 'Let\'s go...' : 'Let\'s Build Something →'}
             </button>
             <Link href="/dashboard">
               <button className="px-6 py-3 border border-slate-300 text-slate-700 font-semibold rounded-lg hover:bg-slate-50 transition">
@@ -163,10 +165,10 @@ export default function DiscoverPage() {
             </Link>
           </div>
 
-          {/* Info box */}
-          <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          {/* Momentum message */}
+          <div className="mt-8 p-4 bg-green-50 border border-green-200 rounded-lg">
             <p className="text-sm text-slate-700">
-              <span className="font-semibold">Next:</span> Your AI Coach will ask 2-3 questions to understand your problem better, then recommend the simplest solution to build together.
+              <span className="font-semibold">What's next:</span> I'll ask you a few questions about this problem, then we'll design your solution together. You'll have something built in 25 minutes.
             </p>
           </div>
         </div>

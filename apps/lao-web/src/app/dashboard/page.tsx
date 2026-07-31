@@ -97,13 +97,13 @@ export default function DashboardPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-sm font-semibold text-slate-600 mb-2">Problems Solved</h3>
+            <h3 className="text-sm font-semibold text-slate-600 mb-2">Things You've Built</h3>
             <p className="text-3xl font-bold text-slate-900">{learnerState.problemsSolved || 0}</p>
-            <p className="text-sm text-slate-500">AI solutions built</p>
+            <p className="text-sm text-slate-500">AI solutions in use</p>
           </div>
 
           <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-sm font-semibold text-slate-600 mb-2">Confidence</h3>
+            <h3 className="text-sm font-semibold text-slate-600 mb-2">Your Confidence</h3>
             <p className="text-3xl font-bold text-slate-900">
               {Math.round((learnerState.overallConfidence || 0.5) * 100)}%
             </p>
@@ -116,7 +116,7 @@ export default function DashboardPage() {
               />
             </div>
             <p className="text-sm text-slate-500 mt-2">
-              In your ability to build
+              In building solutions
             </p>
           </div>
 
@@ -143,8 +143,8 @@ export default function DashboardPage() {
           <div className="lg:col-span-2">
             <div className="bg-white rounded-lg shadow p-6">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold text-slate-900">Your Portfolio</h3>
-                <span className="text-sm text-slate-500">{portfolio?.length || 0} solution{portfolio?.length !== 1 ? 's' : ''}</span>
+                <h3 className="text-lg font-semibold text-slate-900">What I've Built</h3>
+                <span className="text-sm text-slate-500">{portfolio?.length || 0} creation{portfolio?.length !== 1 ? 's' : ''}</span>
               </div>
               <div className="space-y-4">
                 {portfolio && portfolio.length > 0 ? (
@@ -154,34 +154,34 @@ export default function DashboardPage() {
                       className="p-4 border border-slate-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition"
                     >
                       <div className="flex items-start justify-between mb-2">
-                        <div>
-                          <p className="font-semibold text-slate-900">Problem: {item.problemSolved}</p>
-                          <p className="text-sm text-slate-600 mt-1">Solution: {item.solutionCreated}</p>
+                        <div className="flex-1">
+                          <p className="font-semibold text-slate-900">{item.problemSolved}</p>
+                          <p className="text-sm text-slate-600 mt-1">✓ Built: {item.solutionCreated}</p>
                         </div>
-                        <span className={`text-xs font-medium px-2 py-1 rounded ${
+                        <span className={`text-xs font-medium px-2 py-1 rounded whitespace-nowrap ml-2 ${
                           item.status === 'in_daily_use'
                             ? 'bg-green-100 text-green-800'
                             : item.status === 'completed'
                               ? 'bg-blue-100 text-blue-800'
                               : 'bg-yellow-100 text-yellow-800'
                         }`}>
-                          {item.status === 'in_daily_use' ? '✓ In Use' : item.status === 'completed' ? 'Completed' : 'Planned'}
+                          {item.status === 'in_daily_use' ? 'Using It' : item.status === 'completed' ? 'Done' : 'Next'}
                         </span>
                       </div>
                       {item.reflection && (
                         <p className="text-sm text-slate-600 mt-2 italic">&quot;{item.reflection}&quot;</p>
                       )}
                       <p className="text-xs text-slate-500 mt-2">
-                        Built {new Date(item.missionCompletedAt).toLocaleDateString()}
+                        {new Date(item.missionCompletedAt).toLocaleDateString()}
                       </p>
                     </div>
                   ))
                 ) : (
                   <div className="text-center py-8">
-                    <p className="text-slate-500 text-sm mb-4">You haven't built any AI solutions yet</p>
+                    <p className="text-slate-600 text-sm font-medium mb-4">No creations yet—let's build your first one</p>
                     <Link href="/discover">
-                      <button className="inline-flex px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition text-sm font-medium">
-                        Start Your First Discovery
+                      <button className="inline-flex px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition text-sm font-medium">
+                        + Build Something Now
                       </button>
                     </Link>
                   </div>
@@ -191,42 +191,49 @@ export default function DashboardPage() {
           </div>
 
           <div>
-            <div className="bg-white rounded-lg shadow p-6 mb-6">
-              <h3 className="text-lg font-semibold text-slate-900 mb-4">Quick Links</h3>
+            <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg shadow p-6 mb-6 border border-blue-200">
+              <h3 className="text-lg font-semibold text-slate-900 mb-3">What's Next?</h3>
+              {portfolio && portfolio.length > 0 ? (
+                <div className="space-y-3">
+                  <p className="text-sm text-slate-700 font-medium">Keep building momentum.</p>
+                  <Link href="/discover">
+                    <button className="w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition text-sm font-medium">
+                      Build Another Solution
+                    </button>
+                  </Link>
+                  <p className="text-xs text-slate-600 text-center">Your creations compound. Build 3 and you'll see real change.</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <p className="text-sm text-slate-700 font-medium">Ready to build something?</p>
+                  <Link href="/discover">
+                    <button className="w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition text-sm font-medium">
+                      Start Building Now
+                    </button>
+                  </Link>
+                  <p className="text-xs text-slate-600 text-center">25 minutes from start to a working tool.</p>
+                </div>
+              )}
+            </div>
+
+            <div className="bg-white rounded-lg shadow p-6">
+              <h3 className="text-lg font-semibold text-slate-900 mb-4">Account</h3>
               <div className="space-y-2">
                 <Link href="/profile">
                   <button className="w-full text-left px-3 py-2 rounded hover:bg-slate-100 text-slate-700 text-sm font-medium transition">
-                    → Profile
+                    Profile
                   </button>
                 </Link>
                 <Link href="/settings">
                   <button className="w-full text-left px-3 py-2 rounded hover:bg-slate-100 text-slate-700 text-sm font-medium transition">
-                    → Settings
+                    Settings
                   </button>
                 </Link>
                 <Link href="/credits">
                   <button className="w-full text-left px-3 py-2 rounded hover:bg-slate-100 text-slate-700 text-sm font-medium transition">
-                    → Credits
+                    Credits
                   </button>
                 </Link>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-lg font-semibold text-slate-900 mb-4">Status</h3>
-              <div className="space-y-2 text-sm">
-                <div className="flex items-center gap-2">
-                  <span className="inline-block w-2 h-2 rounded-full bg-green-500"></span>
-                  <span className="text-slate-600">Email Verified</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="inline-block w-2 h-2 rounded-full bg-blue-500"></span>
-                  <span className="text-slate-600">2FA: {settings?.twoFactorEnabled ? 'On' : 'Off'}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="inline-block w-2 h-2 rounded-full bg-slate-400"></span>
-                  <span className="text-slate-600">Notifications: {settings?.emailNotifications ? 'On' : 'Off'}</span>
-                </div>
               </div>
             </div>
           </div>
