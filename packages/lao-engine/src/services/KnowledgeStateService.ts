@@ -12,6 +12,8 @@ import {
   UpdateLearnerMemoryCommand,
   SetPrerequisitesCommand,
 } from './commands/KnowledgeCommands';
+import { GraphClaimService } from './GraphClaimService';
+import { BeliefRecalculationService } from './BeliefRecalculationService';
 
 /**
  * KnowledgeStateService is the cognitive core of LAO.
@@ -45,7 +47,9 @@ export class KnowledgeStateService implements IService {
   constructor(
     private eventStore: IEventStore,
     private eventBus: IEventBus,
-    private knowledgeRepository: any // Placeholder for repository
+    private knowledgeRepository: any, // Placeholder for repository
+    private graphClaimService?: GraphClaimService,
+    private beliefService?: BeliefRecalculationService
   ) {}
 
   async health(): Promise<boolean> {
@@ -98,6 +102,12 @@ export class KnowledgeStateService implements IService {
   /**
    * Record an assessment result.
    * This is evidence of skill mastery (or lack thereof).
+   *
+   * Flow:
+   * 1. Update KnowledgeState with evidence
+   * 2. Create/strengthen GraphClaim in knowledge graph
+   * 3. Recalculate Belief from graph evidence
+   * 4. Publish events
    */
   async recordAssessment(command: RecordAssessmentCommand): Promise<KnowledgeState> {
     const state = await this.getOrCreateKnowledgeState(
@@ -117,12 +127,19 @@ export class KnowledgeStateService implements IService {
       timestamp,
       confidence: command.score >= command.passThreshold ? 0.8 : 0.3,
       weight: 0.5, // Assessments are significant evidence
+      metadata: {
+        assessmentId: command.assessmentId,
+        score: command.score,
+        maxScore: command.maxScore,
+        timeSpentSeconds: command.timeSpentSeconds,
+        attemptNumber: command.attemptNumber,
+      },
     };
 
     // Update knowledge state with new evidence
     const updated = state.withEvidence(evidence);
 
-    // Persist events
+    // Step 1: Persist KnowledgeState event
     const event = new DomainEventBuilder('SkillAssessed', state.id, 'KnowledgeState')
       .setTenantId(command.tenantId)
       .setData({
@@ -144,6 +161,30 @@ export class KnowledgeStateService implements IService {
 
     await this.eventStore.append(event);
     this.cache.set(`${command.learnerId}:${command.skillId}`, updated);
+
+    // Step 2: Update graph with evidence-based claim (if service provided)
+    if (this.graphClaimService) {
+      try {
+        const skillNodeId = `skill-${command.skillId}`;
+        const claim = await this.graphClaimService.processEvidence(
+          command.learnerId,
+          skillNodeId,
+          evidence,
+          command.tenantId
+        );
+
+        // Step 3: Recalculate belief from graph
+        if (this.beliefService) {
+          const claimAge = 0; // Newly created/strengthened claim
+          await this.beliefService.recalculateBelief(claim, claimAge, command.tenantId);
+        }
+      } catch (error) {
+        // Graph integration is best-effort; don't fail KnowledgeState update
+        console.warn('Graph integration error:', error);
+      }
+    }
+
+    // Publish the main event
     await this.eventBus.publish(event);
 
     return updated;
@@ -151,6 +192,12 @@ export class KnowledgeStateService implements IService {
 
   /**
    * Record skills gained from mission completion.
+   *
+   * Flow:
+   * 1. Update KnowledgeState with mission evidence
+   * 2. Create/strengthen GraphClaim (mission demonstrates capability)
+   * 3. Recalculate Belief
+   * 4. Publish events
    */
   async recordMissionCompletion(command: RecordMissionCompletionCommand): Promise<void> {
     const timestamp = now();
@@ -170,10 +217,15 @@ export class KnowledgeStateService implements IService {
         timestamp,
         confidence: skillGain.confidence,
         weight: 0.7, // Missions demonstrate skill application
+        metadata: {
+          missionId: command.missionId,
+          qualityScore: command.qualityScore,
+        },
       };
 
       const updated = state.withEvidence(evidence);
 
+      // Persist KnowledgeState event
       const event = new DomainEventBuilder('MissionCompletedWithSkills', state.id, 'KnowledgeState')
         .setTenantId(command.tenantId)
         .setData({
@@ -191,6 +243,26 @@ export class KnowledgeStateService implements IService {
 
       await this.eventStore.append(event);
       this.cache.set(`${command.learnerId}:${skillGain.skillId}`, updated);
+
+      // Update graph with evidence
+      if (this.graphClaimService) {
+        try {
+          const skillNodeId = `skill-${skillGain.skillId}`;
+          const claim = await this.graphClaimService.processEvidence(
+            command.learnerId,
+            skillNodeId,
+            evidence,
+            command.tenantId
+          );
+
+          if (this.beliefService) {
+            await this.beliefService.recalculateBelief(claim, 0, command.tenantId);
+          }
+        } catch (error) {
+          console.warn('Graph integration error:', error);
+        }
+      }
+
       await this.eventBus.publish(event);
     }
   }

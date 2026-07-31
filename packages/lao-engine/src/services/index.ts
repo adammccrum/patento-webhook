@@ -10,3 +10,7 @@ export * from './commands/ProgressCommands';
 export * from './commands/KnowledgeCommands';
 export * from './ReadModels';
 export * from './PerformanceMetrics';
+export * from './GraphClaimService';
+export * from './BeliefRecalculationService';
+export * from './GraphQueryService';
+export * from './RecommendationOrchestrator';
