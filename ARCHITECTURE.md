@@ -1,473 +1,571 @@
-# LAO Architecture - Milestone 1: Authentication
+# IrisKey Platform Architecture
 
 ## Overview
 
-LAO (AI Learning Operating System) is a production-grade SaaS platform designed to scale from 1 to 1 million users. Milestone 1 establishes the foundation with a robust authentication system, database layer, and extensible architecture for future AI provider integration.
+The IrisKey Platform is a reusable, production-grade SaaS infrastructure designed to power multiple AI products from a single codebase. It provides:
+
+- **Authentication** - Multi-provider, multi-product (email/password, Google, GitHub, future: biometrics)
+- **Database** - Multi-tenant PostgreSQL with product isolation
+- **Credits** - Usage tracking and monthly reset management
+- **Audit Logging** - Immutable logs for compliance and debugging
+- **Analytics** - Event tracking and metrics
+- **Notifications** - Email, SMS, push notifications
+- **Billing** - Subscriptions and payment processing
+- **AI Router** - Intelligent provider selection and cost optimization
+
+**Product Agnostic**: Platform packages contain zero product-specific logic. Each package accepts configuration (product ID, database client, etc.) and works identically for any product.
 
 ## Design Principles
 
-1. **Production First** - Every line of code is production-ready
-2. **Scalability** - Architecture supports millions of concurrent users
-3. **Security** - OWASP compliant, encrypted, audited
-4. **Simplicity** - Minimal complexity, maximum clarity
-5. **Extensibility** - Easy to add providers and features
-6. **Observability** - Complete audit trails for all operations
+1. **Platform-First Architecture** - Build reusable infrastructure, not single products
+2. **Multi-Tenancy** - Single database, multiple products, perfect isolation via productId
+3. **Scalability** - Supports millions of concurrent users across multiple products
+4. **Security** - OWASP Top 10 compliant, encrypted, fully audited
+5. **Modularity** - Each subsystem independently deployable and testable
+6. **Configuration Over Code** - Product behavior via environment variables, not code changes
+7. **Observability** - Complete audit trails, metrics, structured logging
+8. **Type Safety** - Strict TypeScript, no any types, complete type coverage
 
-## System Architecture
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│ Client Layer (Web Browser)                                      │
-│ Next.js 14 React + TypeScript + TailwindCSS                     │
-└──────────────────────────┬──────────────────────────────────────┘
-                           │
-┌──────────────────────────▼──────────────────────────────────────┐
-│ API Layer (Next.js App Router)                                  │
-│ - /api/auth/[...nextauth] - NextAuth handlers                   │
-│ - /api/auth/register - User registration                        │
-│ - /api/auth/verify-email - Email verification                   │
-│ - /api/auth/forgot-password - Password reset                    │
-│ - Middleware - Protected routes, rate limiting                  │
-└──────────────────────────┬──────────────────────────────────────┘
-                           │
-┌──────────────────────────▼──────────────────────────────────────┐
-│ Business Logic Layer (@lao/auth, @lao/shared)                   │
-│ - Credentials provider (username/password)                      │
-│ - OAuth providers (Google, GitHub)                              │
-│ - Password hashing (bcrypt)                                     │
-│ - Verification tokens                                           │
-│ - Session management (JWT)                                      │
-└──────────────────────────┬──────────────────────────────────────┘
-                           │
-┌──────────────────────────▼──────────────────────────────────────┐
-│ Data Layer (Prisma ORM)                                         │
-│ - Abstraction over PostgreSQL                                   │
-│ - Type-safe queries                                             │
-│ - Migrations and schema versioning                              │
-└──────────────────────────┬──────────────────────────────────────┘
-                           │
-┌──────────────────────────▼──────────────────────────────────────┐
-│ Database (PostgreSQL)                                           │
-│ - Users, Profiles, Sessions                                     │
-│ - Roles, Permissions, AuditLogs                                 │
-│ - Credits, Settings, FeatureFlags                               │
-└─────────────────────────────────────────────────────────────────┘
-```
-
-## Authentication Flow
-
-### Registration Flow
+## Repository Structure
 
 ```
-User → Browser
-  │
-  ├─ Fill registration form
-  │   (name, email, password)
-  │
-  └─ POST /api/auth/register
-       │
-       ├─ Validate input (Zod)
-       ├─ Check email not taken
-       ├─ Hash password (bcrypt)
-       ├─ Create user + profile + credits + settings
-       ├─ Generate verification token
-       ├─ Log audit event
-       │
-       └─ Response: "Check email for verification"
-            │
-            └─ User clicks link in email
-                 │
-                 └─ GET /auth/verify-email?email=...&token=...
-                      │
-                      ├─ POST /api/auth/verify-email
-                      ├─ Verify token + expiry
-                      ├─ Update user.emailVerified
-                      ├─ Delete token
-                      ├─ Log audit event
-                      │
-                      └─ Redirect to login
+iriskey-platform/
+├── apps/                          # Product applications
+│   └── lao-web/                  # LAO (Learning OS) - First product
+│       ├── src/
+│       │   ├── app/              # Next.js App Router
+│       │   │   ├── api/          # API endpoints (using platform packages)
+│       │   │   ├── dashboard/    # Product-specific UI
+│       │   │   ├── profile/
+│       │   │   ├── settings/
+│       │   │   ├── credits/
+│       │   │   └── layout.tsx
+│       │   ├── lib/              # Product-specific utilities
+│       │   │   └── auth.ts       # Auth initialization
+│       │   └── middleware.ts     # Route protection
+│       └── package.json
+│
+├── packages/                       # Reusable platform infrastructure
+│   ├── iriskey/                   # Platform packages (@iriskey/*)
+│   │   ├── auth/                 # Authentication (✅ Implemented)
+│   │   │   ├── src/
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── config.ts     # createAuthConfig factory
+│   │   │   │   ├── providers/    # Email/Password, Google, GitHub
+│   │   │   │   └── crypto.ts     # Password hashing utilities
+│   │   │   └── package.json
+│   │   │
+│   │   ├── database/              # Database schema & migrations (✅ Implemented)
+│   │   │   ├── prisma/
+│   │   │   │   ├── schema.prisma # Multi-tenant schema
+│   │   │   │   └── migrations/   # Indexed queries for scale
+│   │   │   └── package.json
+│   │   │
+│   │   ├── shared/                # Common types & errors (✅ Implemented)
+│   │   │   ├── src/
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── errors.ts     # AuthError, ValidationError, NotFoundError
+│   │   │   │   ├── types.ts      # ApiResponse, UserSession, etc
+│   │   │   │   └── utils.ts      # Common utilities
+│   │   │   └── package.json
+│   │   │
+│   │   ├── providers/             # AI provider registry & router (✅ Implemented)
+│   │   │   ├── src/
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── types.ts      # IProvider, ProviderType enums
+│   │   │   │   ├── registry.ts   # Provider registration
+│   │   │   │   ├── router.ts     # Intelligent selection
+│   │   │   │   └── cost-calculator.ts
+│   │   │   └── package.json
+│   │   │
+│   │   ├── config/                # (PLANNED) Centralized configuration
+│   │   │   ├── src/
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── env.ts        # Environment variable parsing
+│   │   │   │   └── defaults.ts   # Default values per product
+│   │   │   └── package.json
+│   │   │
+│   │   ├── credits/               # (PLANNED) Usage tracking and credits
+│   │   │   ├── src/
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── service.ts    # Credit deduction, balance checks
+│   │   │   │   └── types.ts
+│   │   │   └── package.json
+│   │   │
+│   │   ├── audit/                 # (PLANNED) Immutable audit logging
+│   │   │   ├── src/
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── service.ts    # Log creation and querying
+│   │   │   │   └── types.ts
+│   │   │   └── package.json
+│   │   │
+│   │   ├── notifications/         # (PLANNED) Email/SMS/push
+│   │   │   ├── src/
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── email.ts
+│   │   │   │   ├── sms.ts
+│   │   │   │   └── templates/
+│   │   │   └── package.json
+│   │   │
+│   │   ├── analytics/             # (PLANNED) Event tracking
+│   │   │   ├── src/
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── tracker.ts
+│   │   │   │   └── types.ts
+│   │   │   └── package.json
+│   │   │
+│   │   └── billing/               # (PLANNED) Subscriptions & payments
+│   │       ├── src/
+│   │       │   ├── index.ts
+│   │       │   ├── service.ts
+│   │       │   └── types.ts
+│   │       └── package.json
+│   │
+│   └── lao/                        # LAO-specific packages
+│       └── ui/                    # LAO design system & components
+│           ├── src/
+│           │   ├── index.ts
+│           │   ├── components/
+│           │   ├── hooks/
+│           │   └── utils/
+│           └── package.json
+│
+├── ARCHITECTURE.md                # This file
+├── PLATFORM.md                    # Platform concepts and usage
+├── README.md                      # Getting started
+├── ROADMAP.md                     # Milestones 1-14
+├── TECHNICAL_DEBT.md              # Issues and recommendations
+├── package.json                   # Root workspaces config
+└── pnpm-workspace.yaml            # pnpm configuration
 ```
 
-### Login Flow
+## Package Dependencies
 
 ```
-User → Browser
-  │
-  ├─ Email/password credentials OR
-  ├─ Click "Sign in with Google" OR
-  ├─ Click "Sign in with GitHub"
-  │
-  └─ POST /api/auth/[...nextauth]
-       │
-       ├─ [Email/Password Provider]
-       │   ├─ Find user by email
-       │   ├─ Verify password hash
-       │   └─ Return user object
-       │
-       ├─ [Google Provider]
-       │   ├─ Redirect to Google
-       │   ├─ Google returns code
-       │   ├─ Exchange code for token
-       │   ├─ Get user info from Google
-       │   ├─ Create/update account link
-       │   └─ Return user object
-       │
-       └─ [GitHub Provider]
-           ├─ Redirect to GitHub
-           ├─ GitHub returns code
-           ├─ Exchange code for token
-           ├─ Get user info from GitHub
-           ├─ Create/update account link
-           └─ Return user object
-       │
-       ├─ Create JWT session token
-       ├─ Set secure HTTP-only cookie
-       ├─ Log signin audit event
-       │
-       └─ Redirect to dashboard
-            │
-            └─ Middleware checks token
-                 ├─ Token valid? → Allow access
-                 └─ Token invalid? → Redirect to login
+@iriskey/shared
+  ↑ (no dependencies)
+
+@iriskey/database
+  ├─ @prisma/client
+  └─ prisma (dev)
+
+@iriskey/auth
+  ├─ @auth/core
+  ├─ @auth/prisma-adapter
+  ├─ @prisma/client
+  ├─ @iriskey/database
+  └─ bcryptjs
+
+@iriskey/providers
+  └─ @iriskey/shared
+
+@iriskey/config
+  ├─ @iriskey/shared
+  └─ zod (validation)
+
+@iriskey/audit
+  ├─ @iriskey/database
+  ├─ @iriskey/shared
+  └─ @iriskey/config
+
+@iriskey/credits
+  ├─ @iriskey/database
+  ├─ @iriskey/shared
+  └─ @iriskey/config
+
+(other packages follow similar pattern)
+
+lao-web (app)
+  ├─ next
+  ├─ react
+  ├─ next-auth
+  ├─ @iriskey/auth
+  ├─ @iriskey/database
+  ├─ @iriskey/shared
+  ├─ @iriskey/providers
+  ├─ @iriskey/config (when available)
+  └─ @lao/ui
 ```
 
-### Password Reset Flow
+## Multi-Tenancy Design
 
-```
-User → Browser
-  │
-  ├─ Click "Forgot password"
-  │
-  └─ POST /api/auth/forgot-password
-       │
-       ├─ Find user by email
-       ├─ Generate reset token
-       ├─ Save token with 1-hour expiry
-       ├─ Log audit event
-       │
-       └─ Response: "Check email for reset link"
-            │
-            └─ User clicks link in email
-                 │
-                 └─ GET /auth/reset-password?token=...
-                      │
-                      └─ POST /api/auth/reset-password
-                           │
-                           ├─ Verify token + expiry
-                           ├─ Validate new password
-                           ├─ Hash password
-                           ├─ Update user.password
-                           ├─ Delete token
-                           ├─ Log audit event
-                           │
-                           └─ Redirect to login
+### Shared Data (Global across all products)
+
+**Users** - One account per email, works on all products
+```sql
+User(id, email, name, image, emailVerified, createdAt)
 ```
 
-## Authentication Providers
+**Sessions** - JWT tokens valid across products
+```sql
+Session(id, sessionToken, userId, expires)
+```
 
-### 1. Email/Password (Credentials Provider)
+**Accounts** - OAuth provider links (Gmail, GitHub account)
+```sql
+Account(userId, provider, providerAccountId, type)
+```
 
-**Flow**: User enters email and password → bcrypt verification
+### Product-Scoped Data
 
-**Security**:
-- Passwords hashed with bcrypt (12 rounds)
-- Constant-time comparison to prevent timing attacks
-- No plaintext passwords in database or logs
+**AuditLog** - Tracks which product performed action
+```sql
+AuditLog(id, userId, productId, action, resource, details, createdAt)
+-- Index: (productId, userId, createdAt DESC)
+-- Index: (productId, action, createdAt DESC)
+```
 
-**Configuration**:
+**ProviderConfig** - Each product has own provider config
+```sql
+ProviderConfig(productId, name, config, secrets)
+-- Unique: (productId, name)
+```
+
+**FeatureFlag** - Product-specific feature toggles
+```sql
+FeatureFlag(productId, name, enabled)
+-- Unique: (productId, name)
+```
+
+**Credits** - User's AI usage per product (can be extended)
+```sql
+Credits(userId, balance, spent, monthlyReset, lastResetDate)
+-- Today: Shared across products
+-- Future: Can be product-specific with migration
+```
+
+## Authentication Architecture
+
+### Factory Pattern
+
+Products don't include auth code—they configure it:
+
 ```typescript
-Credentials({
-  id: 'credentials',
-  credentials: {
-    email: { label: 'Email', type: 'email' },
-    password: { label: 'Password', type: 'password' },
+// apps/lao-web/src/lib/auth.ts
+import { createAuthConfig } from '@iriskey/auth';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient(); // Singleton
+
+const authConfig = createAuthConfig({
+  prisma,                          // Product passes its client
+  productId: 'lao',               // Which product is this?
+  pages: {
+    signIn: '/auth/login',        // Custom redirect URLs
+    callbackUrl: '/dashboard',
   },
-  async authorize(credentials) {
-    // Verify email and password
-  }
-})
+});
+
+export const { auth, signIn, signOut, handlers } = NextAuth(authConfig);
 ```
 
-### 2. Google OAuth
+### Platform Guarantees
 
-**Flow**: User clicks "Sign in with Google" → OAuth redirect → Token exchange
+`createAuthConfig()` ensures:
+- JWT tokens include `productId` field (for audit/authorization)
+- All login/logout events logged with `productId`
+- Passwords secured via bcrypt (12 rounds)
+- Sessions expire after 30 days
+- Email verification workflow
+- Password reset tokens with 1-hour expiry
 
-**Security**:
-- OAuth 2.0 standard flow
-- PKCE for additional protection
-- Client ID/Secret stored in environment
-- AllowDangerousEmailAccountLinking enabled for existing email users
+### Product Customization
 
-**Configuration**:
-```typescript
-Google({
-  clientId: process.env.GOOGLE_CLIENT_ID,
-  clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-  allowDangerousEmailAccountLinking: true,
-})
-```
+Products CAN customize:
+- Login page URLs
+- Redirect targets
+- OAuth provider selection (via feature flags)
+- Credential validators (email format, password rules)
 
-### 3. GitHub OAuth
+Products CANNOT customize:
+- JWT algorithm, signing key, or structure
+- Password hashing method or rounds
+- Session timeout or refresh logic
+- Audit logging format
 
-**Flow**: Similar to Google OAuth
+## API Endpoint Patterns
 
-**Configuration**:
-```typescript
-GitHub({
-  clientId: process.env.GITHUB_CLIENT_ID,
-  clientSecret: process.env.GITHUB_CLIENT_SECRET,
-  allowDangerousEmailAccountLinking: true,
-})
-```
+### Current Pattern (Milestone 1-2, Needs Refactoring)
 
-## Session Management
+Each route currently:
+1. Creates `new PrismaClient()` (inefficient)
+2. Calls `requireAuth()` to get session
+3. Validates input with Zod schema
+4. Queries database
+5. Logs audit event
+6. Returns NextResponse
 
-**Strategy**: JWT-based sessions (not database sessions)
+**Problems**:
+- Multiple Prisma instances per server
+- Duplicated error handling
+- Hardcoded product ID
+- Scattered business logic
 
-**Reasoning**:
-- Stateless: No database lookup on every request
-- Scalable: Works across multiple instances/servers
-- Secure: Signed and encrypted
+### Target Pattern (Milestone 3+)
 
-**Configuration**:
-- Session maxAge: 30 days
-- JWT maxAge: 30 days
-- Update age: 1 day (refresh when within 1 day of expiry)
-- Secure cookies: HTTP-only, SameSite=Lax
-
-## Middleware Protection
-
-Middleware runs on every request to check authentication:
-
-```typescript
-// Protected routes require authentication
-const protectedRoutes = ['/dashboard', '/settings', '/courses']
-
-// Public routes redirect to dashboard if authenticated
-const publicRoutes = ['/auth/login', '/auth/register']
-
-// Unprotected routes: /api/*, /, /auth/error, etc
-```
-
-## Database Schema (Relevant to Auth)
-
-### Users Table
-```sql
-- id (string, PK)
-- email (string, UNIQUE)
-- emailVerified (datetime, nullable)
-- name (string, nullable)
-- image (string, nullable)
-- password (string, nullable) -- only for credentials provider
-- createdAt, updatedAt
-```
-
-### Accounts Table
-```sql
-- id, userId (FK), type, provider, providerAccountId
-- OAuth provider links
-- Allows multiple providers per user
-```
-
-### Sessions Table
-```sql
-- id, sessionToken (UNIQUE), userId (FK), expires
-- Legacy session storage (can be optional with JWT)
-```
-
-### VerificationTokens Table
-```sql
-- identifier (email), token, expires, type
-- Tracks email verification and password reset tokens
-```
-
-### AuditLogs Table
-```sql
-- id, userId (FK), action, resource, details, ipAddress, userAgent
-- Immutable log of all authentication events
-```
-
-### Credits Table
-```sql
-- userId (FK, UNIQUE), balance, spent, monthlyReset
-- Tracks user's AI usage credits
-```
-
-## Error Handling
-
-All authentication errors are logged to AuditLogs for compliance and debugging:
-
-- Invalid credentials attempt
-- Email already registered
-- Email verification failure
-- Token expiry
-- OAuth errors
-- Database errors
-
-## Rate Limiting
-
-Implemented at middleware level:
-
-- Register endpoint: 5 requests per hour per IP
-- Login endpoint: 10 failed attempts per hour per IP
-- Password reset: 3 requests per hour per email
-- Email verification: 5 requests per hour per email
-
-## Security Measures
-
-### Password Security
-- Minimum 8 characters (enforced by schema validation)
-- Hashed with bcrypt (12 rounds, ~100ms per hash)
-- Never logged or stored in plaintext
-- Constant-time comparison
-
-### Email Verification
-- Token: 32-byte random hex (cryptographically secure)
-- Expiry: 24 hours
-- Deleted after use
-- Case-insensitive email matching
-
-### Password Reset
-- Token: 32-byte random hex
-- Expiry: 1 hour (shorter than email verification)
-- Deleted after use
-- Requires current session invalidation
-
-### Session Tokens
-- JWT signed with NEXTAUTH_SECRET
-- Encrypted with algorithm HS512
-- No sensitive data in token (just user ID)
-- Verified on every protected route
-
-### CSRF Protection
-- NextAuth built-in CSRF tokens
-- SameSite=Lax cookies
-- State parameter in OAuth flows
-
-### HTTP Headers
-- Content-Security-Policy
-- X-Frame-Options: DENY
-- X-Content-Type-Options: nosniff
-- Strict-Transport-Security (in production)
-
-## Future Extensions
-
-### IrisKey Biometric Integration
-
-The authentication system is designed to support IrisKey as another provider:
+Endpoints should:
+1. Use middleware for auth injection
+2. Use shared request/response wrappers
+3. Call service/repository layer
+4. Service layer handles Prisma, audit logging, config
+5. Middleware handles errors uniformly
 
 ```typescript
-// Future: IrisKey provider
-IrisKey({
-  clientId: process.env.IRISKEY_CLIENT_ID,
-  clientSecret: process.env.IRISKEY_CLIENT_SECRET,
-  // Implements same interface as Google/GitHub
-})
+// After refactoring
+import { withAuth, withErrorHandler } from '@iriskey/middleware';
+import { profileService } from '@iriskey/services';
+
+export const GET = withAuth(withErrorHandler(async (req, { userId, productId }) => {
+  const profile = await profileService.getProfile(userId);
+  return ApiResponse.success(profile);
+}));
 ```
 
-**Design allows**:
-- Multiple authentication methods per user
-- Seamless provider switching
-- Backward compatibility with existing users
+## Configuration Management
 
-### Additional Providers
+### Environment Variables
 
-Architecture supports adding:
-- Apple Sign In
-- Microsoft/Azure AD
-- LDAP/Active Directory (enterprise)
-- Passkeys/WebAuthn
-- TOTP 2FA
-
-## Deployment Considerations
-
-### Environment Variables (Required)
-```
-DATABASE_URL           # PostgreSQL connection
-NEXTAUTH_SECRET        # JWT signing secret (min 32 chars)
-NEXTAUTH_URL          # App URL (for OAuth callbacks)
-GOOGLE_CLIENT_ID      # (if using Google OAuth)
-GOOGLE_CLIENT_SECRET  # (if using Google OAuth)
-GITHUB_CLIENT_ID      # (if using GitHub OAuth)
-GITHUB_CLIENT_SECRET  # (if using GitHub OAuth)
-```
-
-### Database Migrations
+**Shared** (all products):
 ```bash
-pnpm db:migrate
+DATABASE_URL="postgresql://..."
+REDIS_URL="redis://..."
+NEXTAUTH_SECRET="..."
 ```
 
-Runs all pending migrations using Prisma.
+**Product-Specific** (per app):
+```bash
+# lao-web
+PRODUCT_ID="lao"
+NEXT_PUBLIC_APP_NAME="LAO"
+GOOGLE_CLIENT_ID="..."
+GOOGLE_CLIENT_SECRET="..."
+```
 
-### Secrets Management
-- Never commit .env files
-- Use environment-specific configs
-- Rotate NEXTAUTH_SECRET on security incidents
-- Store OAuth credentials in secure vault (GitHub Secrets, etc)
+### Feature Flags
+
+Instead of code changes, use database feature flags:
+
+```sql
+INSERT INTO FeatureFlag (productId, name, enabled) VALUES
+  ('lao', 'enable_ai_router', true),
+  ('lao', 'enable_two_factor_auth', false),
+  ('future-product', 'enable_ai_router', false);
+```
+
+Products check flags:
+```typescript
+const isRouterEnabled = await featureFlags.isEnabled('enable_ai_router', 'lao');
+```
+
+## Scalability Considerations
+
+### Database
+
+**Current**: Single PostgreSQL instance
+
+**Optimizations** (as users scale):
+1. Read replicas for analytics queries
+2. Connection pooling via PgBouncer
+3. Sharding by productId if needed
+4. Archival of old audit logs
+
+**Indexes** (migration 001):
+- `idx_users_created_at` - Dashboard queries
+- `idx_audit_logs_user_product_created` - User activity
+- `idx_audit_logs_product_action_created` - Product-wide metrics
+- `idx_sessions_expires` - Session cleanup
+- `idx_credits_updated_at` - Monthly reset queries
+
+### API Servers
+
+**Current**: Single Next.js instance
+
+**Optimizations**:
+1. Deploy multiple instances behind load balancer
+2. Stateless JWT auth - no session store needed
+3. Redis caching for feature flags, provider health
+4. CDN for static assets
+
+### Caching Strategy
+
+**Session**: HTTP-only cookies, no backend lookup
+**Provider Health**: Redis TTL 5 minutes
+**Feature Flags**: Redis TTL 1 hour
+**User Profiles**: Client-side cache, TTL 5 minutes
+
+## Security Architecture
+
+### Authentication
+
+- **Passwords**: bcrypt 12 rounds (~100ms), constant-time comparison
+- **Sessions**: JWT signed with NEXTAUTH_SECRET, 30-day expiry
+- **Cookies**: HTTP-only, SameSite=Lax, Secure in production
+- **OAuth**: PKCE flow, state tokens, client secret validation
+
+### Authorization
+
+- **Users**: Can only access own profile, settings, credits
+- **Products**: Isolated by productId, no cross-product leakage
+- **Roles**: (Future) Admin, moderator, user roles per product
+- **Audit**: All actions logged, immutable, with userId + productId
+
+### Data Protection
+
+- **Passwords**: Never logged, never cached
+- **Secrets**: Environment variables only, encrypted at rest
+- **Tokens**: Signed and encrypted before transmission
+- **Database**: PostgreSQL encryption at rest (future)
+
+## API Response Format
+
+**Standard Success**:
+```json
+{
+  "success": true,
+  "data": { /* response data */ }
+}
+```
+
+**Error Response**:
+```json
+{
+  "success": false,
+  "error": {
+    "code": "INVALID_EMAIL",
+    "message": "Email format is invalid",
+    "details": { }
+  }
+}
+```
+
+## Testing Strategy
+
+### Platform Packages
+
+Test in isolation with mock Prisma:
+```typescript
+const mockPrisma = { /* mock */ };
+const config = createAuthConfig({
+  prisma: mockPrisma,
+  productId: 'test-product'
+});
+```
+
+### Product Integration
+
+Test product with real platform packages:
+```typescript
+const authConfig = createAuthConfig({
+  prisma: testDatabase,
+  productId: 'lao'
+});
+// Test login flow end-to-end
+```
 
 ## Monitoring & Observability
 
-### Audit Logging
-Every authentication event is logged:
-- User registration
-- Email verification
-- Sign in attempts
-- Sign out
-- Password reset
-- OAuth linking
+### Audit Logs
 
+Query per product:
 ```sql
 SELECT * FROM AuditLog 
-WHERE action IN ('user_signed_in', 'user_registered', 'email_verified')
-ORDER BY createdAt DESC
+WHERE productId = 'lao' 
+AND createdAt > NOW() - INTERVAL '24 hours'
+ORDER BY createdAt DESC;
 ```
 
-### Metrics to Track
-- Registration rate
-- Login success/failure rate
-- OAuth provider adoption
-- Average session duration
-- Password reset frequency
-- Failed verification attempts
+### Metrics
 
-## Testing
+Each package emits metrics:
+- `auth.signin` - Login attempt
+- `auth.register` - New user
+- `auth.failed_login` - Failed attempt
+- `credits.deducted` - AI usage
+- `api.request_duration` - Performance
 
-Unit tests for:
-- Password hashing/verification
-- Token generation/validation
-- Email validation
-- OAuth flow simulation
-- Middleware route protection
+### Structured Logging
 
-Integration tests for:
-- Full registration flow
-- Full login flow
-- OAuth callback handling
-- Session persistence
-- Concurrent session handling
+All platform code logs with context:
+```
+[2024-07-31T10:05:00Z] auth.signin productId=lao userId=user123 provider=google duration=245ms
+```
 
-## Performance
+## Adding a New Product
 
-### Optimization Techniques
-- Database connection pooling (built into Prisma)
-- JWT-based sessions (no DB lookup)
-- Secure cookies (HTTP-only)
-- Rate limiting to prevent abuse
-- Early validation (Zod before DB)
+1. Create product folder: `apps/my-product-web`
+2. Use platform packages with config:
+   ```typescript
+   const authConfig = createAuthConfig({
+     prisma,
+     productId: 'my-product',
+     pages: { /* custom URLs */ }
+   });
+   ```
+3. Add product to database:
+   ```sql
+   INSERT INTO Product (id, name) VALUES ('my-product', 'My Product');
+   ```
+4. Deploy independently - no platform changes needed
 
-### Typical Response Times
-- Login: ~100-200ms (bcrypt hashing)
-- OAuth callback: ~500-1000ms (network dependent)
-- Session validation: ~10ms (just JWT verification)
+## Adding a New Platform Package
 
-## Next Steps (Milestone 2+)
+1. Create in `packages/iriskey/new-feature`
+2. Make zero assumptions about products
+3. Accept productId, config, and Prisma client as parameters
+4. Update path aliases in tsconfig.json
+5. Update pnpm-workspace.yaml
+6. Document in README
 
-After authentication is production-ready:
+## Roadmap Progress
 
-1. **Dashboard** - User profile, settings, credits display
-2. **Onboarding** - Learning goals, skill assessment
-3. **AI Router** - Provider selection and routing
-4. **Courses** - Learning content delivery
-5. **Missions** - Project-based learning
+**✅ Phase 1 Complete**: Authentication, Database, Providers
+- ✅ @iriskey/auth - Multi-provider authentication
+- ✅ @iriskey/database - Multi-tenant schema
+- ✅ @iriskey/shared - Common types
+- ✅ @iriskey/providers - AI router
 
-Each milestone builds on the authentication foundation established here.
+**⏳ Phase 2 (Milestone 2-3)**: Dashboard & Configuration
+- ⏳ @iriskey/config - Environment & feature flag management
+- ⏳ Dashboard API endpoints
+- ⏳ Profile management
+- ⏳ Settings management
+
+**📋 Phase 3 (Milestone 4-6)**: Core Services
+- [ ] @iriskey/audit - Audit logging service
+- [ ] @iriskey/credits - Usage tracking
+- [ ] @iriskey/notifications - Email/SMS/push
+- [ ] @iriskey/analytics - Event tracking
+
+**📋 Phase 4 (Milestone 7-10)**: Advanced Features
+- [ ] @iriskey/billing - Subscriptions & payments
+- [ ] AI Router integration
+- [ ] Onboarding flow
+- [ ] Content delivery
+
+**📋 Phase 5 (Milestone 11-14)**: Scale & Multi-Product
+- [ ] @iriskey/files - S3 file storage
+- [ ] @iriskey/email - Email delivery service
+- [ ] @iriskey/search - Full-text search
+- [ ] Second product launch
+
+## Decisions Log
+
+| Decision | Rationale | Implications |
+|----------|-----------|--------------|
+| Single shared Prisma instance | Reduces connection overhead | Needs singleton pattern in lib/ |
+| JWT sessions, not database sessions | Stateless, scales to multiple servers | Must use NEXTAUTH_SECRET for signing |
+| @iriskey/* packages over @lao/* | Platform can be reused for future products | Requires no product-specific logic in packages |
+| Product ID as string, not ENUM | Future products don't require schema change | Must document product ID values |
+| Immutable audit logs | Compliance and debugging | Never update/delete audit logs |
+| Zod validation in routes (current) | Early issue detection | Should move to middleware layer (Milestone 3) |
+| Hardcoded product ID in routes (current) | Simplicity for LAO | Should be injected via middleware (Milestone 3) |
+| Multiple Prisma instances (current) | Each route independent | Technical debt - refactor to singleton (Milestone 3) |
+
+## Next Architectural Steps
+
+1. **Milestone 3**: Extract platform middleware, create service layer
+2. **Milestone 4**: Create @iriskey/config package
+3. **Milestone 5**: Create @iriskey/audit and @iriskey/credits packages
+4. **Milestone 6+**: Continue with remaining packages
+
+See TECHNICAL_DEBT.md for refactoring priorities.

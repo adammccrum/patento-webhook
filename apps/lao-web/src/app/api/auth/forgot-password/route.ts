@@ -3,7 +3,7 @@
  */
 
 import { PrismaClient } from '@prisma/client';
-import { generateVerificationToken } from '@lao/auth';
+import { generateVerificationToken } from '@iriskey/auth';
 import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
