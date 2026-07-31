@@ -2,10 +2,18 @@
  * Common types used across the engine.
  */
 
+import { v4 as uuidv4 } from 'uuid';
+
 export type UUID = string & { readonly __brand: 'UUID' };
 
-export function createUUID(id: string): UUID {
-  // Simple validation: must be valid UUID format
+export function createUUID(): UUID;
+export function createUUID(id: string): UUID;
+export function createUUID(id?: string): UUID {
+  if (id === undefined) {
+    // Generate new UUID
+    return uuidv4() as UUID;
+  }
+  // Validate existing UUID
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   if (!uuidRegex.test(id)) {
     throw new Error(`Invalid UUID: ${id}`);
