@@ -1,19 +1,23 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { getAnalytics } from '@/lib/analytics';
 
 export default function ReflectionPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const goalId = searchParams.get('goalId');
+  const analytics = getAnalytics();
+  const reflectionPageLoadTimeRef = useRef(Date.now());
 
   const [reflection, setReflection] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [goalData, setGoalData] = useState<any>(null);
   const [submitted, setSubmitted] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!goalId) {
@@ -23,6 +27,13 @@ export default function ReflectionPage() {
 
     async function loadGoal() {
       try {
+        // Get user
+        const userResponse = await fetch('/api/profile');
+        if (userResponse.ok) {
+          const userData = await userResponse.json();
+          setUserId(userData.user?.id);
+        }
+
         const response = await fetch(`/api/solution/details?goalId=${goalId}`);
         if (!response.ok) throw new Error('Failed to load goal');
         const { goal } = await response.json();
@@ -45,17 +56,28 @@ export default function ReflectionPage() {
     setError(null);
 
     try {
+      const ttftMillis = Date.now() - reflectionPageLoadTimeRef.current;
+
+      const sessionId = analytics.getSessionId();
+
       const response = await fetch('/api/reflection/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           goalId,
           reflection: reflection.trim(),
+          ttftMillis,
+          sessionId,
         }),
       });
 
       if (!response.ok) {
         throw new Error('Failed to submit reflection');
+      }
+
+      if (userId) {
+        analytics.logReflectionSubmitted(userId, goalId, reflection.trim(), 0.7);
+        analytics.logSessionCompleted(userId, goalId, true);
       }
 
       setSubmitted(true);

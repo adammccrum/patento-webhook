@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { getAnalytics } from '@/lib/analytics';
 
 interface BuildStep {
   id: number;
@@ -57,6 +58,8 @@ export default function BuildPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const goalId = searchParams.get('goalId');
+  const buildStartTimeRef = useRef(Date.now());
+  const analytics = getAnalytics();
 
   const [currentStep, setCurrentStep] = useState(1);
   const [inputs, setInputs] = useState<Record<number, string>>({});
@@ -64,6 +67,7 @@ export default function BuildPage() {
   const [error, setError] = useState<string | null>(null);
   const [goalData, setGoalData] = useState<any>(null);
   const [coachResponses, setCoachResponses] = useState<Record<number, string>>({});
+  const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!goalId) {
@@ -73,6 +77,16 @@ export default function BuildPage() {
 
     async function loadGoal() {
       try {
+        // Get user
+        const userResponse = await fetch('/api/profile');
+        if (userResponse.ok) {
+          const userData = await userResponse.json();
+          setUserId(userData.user?.id);
+          if (userData.user?.id) {
+            analytics.logBuildSessionStarted(userData.user.id, goalId);
+          }
+        }
+
         const response = await fetch(`/api/solution/details?goalId=${goalId}`);
         if (!response.ok) throw new Error('Failed to load goal');
         const { goal } = await response.json();
@@ -83,21 +97,30 @@ export default function BuildPage() {
     }
 
     loadGoal();
-  }, [goalId, router]);
+  }, [goalId, router, analytics]);
 
   async function handleStepComplete() {
     if (currentStep === 4) {
       // Complete the mission
       try {
         setLoading(true);
-        await fetch('/api/build/complete', {
+        const buildDurationMillis = Date.now() - buildStartTimeRef.current;
+        const sessionId = analytics.getSessionId();
+
+        const response = await fetch('/api/build/complete', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             goalId,
             stepData: inputs,
+            buildDurationMillis,
+            sessionId,
           }),
         });
+
+        if (response.ok && userId) {
+          analytics.logAssetCreated(userId, goalId, goalId);
+        }
 
         // Navigate to reflection
         router.push(`/reflection?goalId=${goalId}`);
@@ -130,6 +153,10 @@ export default function BuildPage() {
 
       const data = await response.json();
       setCoachResponses((prev) => ({ ...prev, [currentStep]: data.response }));
+
+      if (userId) {
+        analytics.logBuildStepCompleted(userId, goalId, currentStep, inputs[currentStep]);
+      }
 
       setCurrentStep(currentStep + 1);
       setError(null);

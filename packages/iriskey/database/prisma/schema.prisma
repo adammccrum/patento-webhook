@@ -40,6 +40,8 @@ model User {
   auditLogs     AuditLog[]
   credits       Credits?
   settings      Settings?
+  analyticsEvents AnalyticsEvent[]
+  sessionMetrics SessionMetrics[]
 
   @@index([email])
   @@index([createdAt])
@@ -223,6 +225,74 @@ model FeatureFlag {
   @@index([enabled])
 }
 
+// Analytics and Instrumentation
+
+model AnalyticsEvent {
+  id            String   @id @default(cuid())
+  eventType     String   // session_started, discover_completed, build_completed, etc.
+  sessionId     String   // Correlate all events in a session
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  goalId        String?
+  goal          LearnerGoal? @relation(fields: [goalId], references: [id], onDelete: SetNull)
+
+  // Event metadata (flexible JSON for different event types)
+  metadata      Json     @default("{}")
+
+  // Timestamps
+  createdAt     DateTime @default(now())
+
+  @@index([sessionId])
+  @@index([userId])
+  @@index([eventType])
+  @@index([goalId])
+  @@index([createdAt])
+}
+
+model SessionMetrics {
+  id                String   @id @default(cuid())
+  sessionId         String   @unique
+  userId            String
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  goalId            String?
+  goal              LearnerGoal? @relation(fields: [goalId], references: [id], onDelete: SetNull)
+
+  // Core metrics
+  confidenceBefore  Float?   // 0-1, captured at session start
+  confidenceAfter   Float?   // 0-1, captured at reflection
+
+  // Time metrics
+  startedAt         DateTime
+  completedAt       DateTime?
+  ttftMillis        Int?     // Time to First Transformation (reflection submission)
+  ttcMillis         Int?     // Time to Confidence (when learner felt capable)
+  buildDurationMillis Int?   // Time from build start to completion
+
+  // Session outcomes
+  completed         Boolean  @default(false)
+  assetCreated      Boolean  @default(false)
+  reflectionSubmitted Boolean @default(false)
+
+  // Return behavior
+  returnedWithin24h Boolean  @default(false)
+  returnedWithin7d  Boolean  @default(false)
+
+  // Learner voice
+  reflection        String?
+
+  // Quality signals
+  hasConfidenceLanguage Boolean @default(false)
+  pauseCount        Int      @default(0) // How many pauses during session
+  abandonmentPoint  String?  // Page where learner abandoned, if any
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([userId])
+  @@index([completedAt])
+  @@index([ttftMillis])
+}
+
 // LAO Learning Models
 
 model LearnerGoal {
@@ -245,6 +315,8 @@ model LearnerGoal {
 
   missions      Mission[]
   portfolio     Portfolio[]
+  analyticsEvents AnalyticsEvent[]
+  sessionMetrics SessionMetrics[]
 
   @@index([userId])
   @@index([status])

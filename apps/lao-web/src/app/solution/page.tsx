@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { getAnalytics } from '@/lib/analytics';
 
 export default function SolutionPage() {
   const router = useRouter();
@@ -13,6 +14,8 @@ export default function SolutionPage() {
   const [mission, setMission] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+  const analytics = getAnalytics();
 
   useEffect(() => {
     if (!goalId) {
@@ -23,6 +26,17 @@ export default function SolutionPage() {
     async function loadSolution() {
       try {
         setLoading(true);
+
+        // Get user
+        const userResponse = await fetch('/api/profile');
+        if (userResponse.ok) {
+          const userData = await userResponse.json();
+          setUserId(userData.user?.id);
+          if (userData.user?.id) {
+            analytics.setUser(userData.user.id);
+          }
+        }
+
         const response = await fetch(`/api/solution/details?goalId=${goalId}`);
 
         if (!response.ok) {
@@ -40,7 +54,7 @@ export default function SolutionPage() {
     }
 
     loadSolution();
-  }, [goalId, router]);
+  }, [goalId, router, userId, analytics]);
 
   if (loading) {
     return (

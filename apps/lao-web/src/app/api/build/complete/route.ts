@@ -11,7 +11,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { goalId, stepData } = body;
+    const { goalId, stepData, buildDurationMillis, sessionId } = body;
 
     if (!goalId) {
       return NextResponse.json({ error: 'Missing goalId' }, { status: 400 });
@@ -56,15 +56,35 @@ export async function POST(request: Request) {
     });
 
     // Update mission status
+    const timeSpentMinutes = buildDurationMillis ? Math.round(buildDurationMillis / 60000) : 25;
     await prisma.mission.update({
       where: { id: mission.id },
       data: {
         status: 'completed',
         completedAt: new Date(),
         confidenceAtEnd: 0.8,
-        timeSpent: 25, // Estimated time
+        timeSpent: timeSpentMinutes,
       },
     });
+
+    // Update SessionMetrics with build duration (Progress: did they keep moving?)
+    if (sessionId) {
+      await prisma.sessionMetrics.upsert({
+        where: { sessionId },
+        create: {
+          sessionId,
+          userId: session.user.id,
+          goalId,
+          startedAt: new Date(Date.now() - (buildDurationMillis || 0)),
+          buildDurationMillis: buildDurationMillis || undefined,
+          assetCreated: true,
+        },
+        update: {
+          buildDurationMillis: buildDurationMillis || undefined,
+          assetCreated: true,
+        },
+      });
+    }
 
     // Update learner state
     let learnerState = await prisma.learnerState.findUnique({

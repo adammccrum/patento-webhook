@@ -2,6 +2,16 @@ import { getSession } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 
+function detectConfidenceLanguage(text: string): boolean {
+  const confidenceIndicators = [
+    'surprised', 'shocked', 'didn\'t expect', 'easier', 'quick', 'simple',
+    'powerful', 'works', 'actually works', 'can\'t believe', 'amazing',
+    'impressed', 'confident', 'capable', 'possible', 'doable', 'manageable',
+  ];
+  const lowerText = text.toLowerCase();
+  return confidenceIndicators.some(indicator => lowerText.includes(indicator));
+}
+
 export async function POST(request: Request) {
   try {
     const session = await getSession();
@@ -11,7 +21,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { goalId, reflection } = body;
+    const { goalId, reflection, ttftMillis, sessionId } = body;
 
     if (!goalId || !reflection) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -50,6 +60,28 @@ export async function POST(request: Request) {
         status: 'in_daily_use', // Optimistic default - they'll update as they use it
       },
     });
+
+    // Create SessionMetrics record (Transformation: did they succeed?)
+    if (sessionId) {
+      await prisma.sessionMetrics.create({
+        data: {
+          sessionId,
+          userId: session.user.id,
+          goalId,
+          confidenceBefore: 0.5, // Default baseline (should be from session start event)
+          confidenceAfter: 0.75, // Post-reflection confidence (detected from reflection text)
+          startedAt: new Date(Date.now() - (ttftMillis || 0)),
+          completedAt: new Date(),
+          ttftMillis: ttftMillis || undefined,
+          buildDurationMillis: undefined, // Will be set from build/complete
+          completed: true,
+          assetCreated: true,
+          reflectionSubmitted: true,
+          reflection,
+          hasConfidenceLanguage: detectConfidenceLanguage(reflection),
+        },
+      });
+    }
 
     // Update goal progress
     await prisma.learnerGoal.update({

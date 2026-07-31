@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { getAnalytics } from '@/lib/analytics';
 
 // Page: "Let's Solve Something" (renamed from Discover)
 
@@ -21,6 +22,29 @@ export default function DiscoverPage() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+  const analytics = getAnalytics();
+
+  useEffect(() => {
+    // Get current user
+    async function initUser() {
+      try {
+        const response = await fetch('/api/profile');
+        if (response.ok) {
+          const data = await response.json();
+          setUserId(data.user?.id);
+          // Log session start with baseline confidence
+          if (data.user?.id) {
+            analytics.setUser(data.user.id);
+            analytics.logSessionStarted(data.user.id, 0.5); // Default baseline confidence
+          }
+        }
+      } catch (err) {
+        console.debug('Could not fetch user:', err);
+      }
+    }
+    initUser();
+  }, [analytics]);
 
   async function handleContinue() {
     if (!problem.trim()) {
@@ -49,6 +73,11 @@ export default function DiscoverPage() {
       }
 
       const { goalId } = await response.json();
+
+      // Log analytics: discover completed
+      if (userId) {
+        analytics.logDiscoverCompleted(userId, problem.trim(), goalId);
+      }
 
       // Navigate to coach conversation with this goal
       router.push(`/coach?goalId=${goalId}`);
