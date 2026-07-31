@@ -282,9 +282,11 @@ export class ProgressService implements IProgressService {
     // Extract unique dates
     const sessionDates = new Set<string>();
     for (const event of sessionEvents) {
-      const dateStr = (event.data as Record<string, unknown>).sessionStartedAt as string;
-      const date = dateStr.split('T')[0]; // Extract YYYY-MM-DD
-      sessionDates.add(date);
+      const dateStr = (event.data as Record<string, unknown>).sessionStartedAt;
+      if (typeof dateStr === 'string') {
+        const date: string = dateStr.split('T')[0]!; // Extract YYYY-MM-DD
+        sessionDates.add(date);
+      }
     }
 
     if (sessionDates.size === 0) {
@@ -297,13 +299,18 @@ export class ProgressService implements IProgressService {
     const today = new Date().toISOString().split('T')[0];
 
     // Start from today or yesterday (depending on whether there's activity today)
-    let currentDate = new Date(sortedDates[0]);
-    if (sortedDates[0] !== today) {
+    const firstDate = sortedDates[0];
+    if (!firstDate) return 0;
+
+    let currentDate = new Date(firstDate);
+    if (firstDate !== today) {
       currentDate.setDate(currentDate.getDate() - 1);
     }
 
     for (let i = 1; i < sortedDates.length; i++) {
-      const previousDate = new Date(sortedDates[i]);
+      const nextDateStr = sortedDates[i];
+      if (!nextDateStr) break;
+      const previousDate = new Date(nextDateStr);
       const dayDifference =
         (currentDate.getTime() - previousDate.getTime()) / (1000 * 60 * 60 * 24);
 
@@ -340,10 +347,14 @@ export class ProgressService implements IProgressService {
       return null;
     }
 
+    const startData = startEvent.data as Record<string, unknown>;
+    const lessonsTotal = (startData.lessonsTotal as number) || 0;
+
     let progress = MissionProgress.create({
       learnerId,
       missionId,
-      tenantId: 'tenant-default',
+      lessonsTotal,
+      tenantId: startEvent.tenantId,
     });
 
     // Replay events

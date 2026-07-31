@@ -199,8 +199,8 @@ export class ReadModelProjector {
     if (existing) {
       Object.assign(existing, summary);
     } else {
-      current.push({ goalId } as GoalSummary);
-      Object.assign(current[current.length - 1], summary);
+      const newGoal = { goalId, ...summary } as GoalSummary;
+      current.push(newGoal);
     }
 
     this.goalSummaries.set(learnerId, current);
@@ -253,8 +253,8 @@ export class ReadModelProjector {
     if (existing) {
       Object.assign(existing, status);
     } else {
-      current.push({ missionId } as MissionStatus);
-      Object.assign(current[current.length - 1], status);
+      const newMission = { missionId, ...status } as MissionStatus;
+      current.push(newMission);
     }
 
     this.missionStatus.set(learnerId, current);
@@ -296,10 +296,11 @@ export class ReadModelProjector {
 
     if (existing) {
       Object.assign(existing, skill);
-    } else {
-      current.skills.push({ skillId } as any);
-      Object.assign(current.skills[current.skills.length - 1], skill);
+    } else if (skill.name && skill.category && skill.proficiencyLevel && skill.acquiredAt !== undefined && skill.practiceCount !== undefined && skill.confidenceScore !== undefined) {
+      const newSkill = { skillId, ...skill } as any;
+      current.skills.push(newSkill);
     }
+    // Only add skill if we have all required fields
 
     this.skillProfiles.set(learnerId, current);
   }

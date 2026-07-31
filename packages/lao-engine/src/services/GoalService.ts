@@ -82,7 +82,7 @@ export class GoalService implements IGoalService {
       learnerId: data.learnerId,
       title: data.title,
       description: data.description,
-      goalType: data.goalType,
+      goalType: data.goalType as any,
       category: data.category,
       targetValue: data.targetValue,
       targetUnit: data.targetUnit,
@@ -397,7 +397,7 @@ export class GoalService implements IGoalService {
       learnerId: data.learnerId as string,
       title: data.title as string,
       description: data.description as string,
-      goalType: data.goalType as string,
+      goalType: (data.goalType as string) as any,
       category: data.category as string,
       targetValue: data.targetValue as number,
       targetUnit: data.targetUnit as string,
@@ -420,7 +420,7 @@ export class GoalService implements IGoalService {
         const status = eventData.status as string;
         const completedAt =
           status === 'achieved' ? (eventData.completedAt as string) : undefined;
-        goal = goal.withStatus(status, completedAt);
+        goal = goal.withStatus(status as any, completedAt);
       }
     }
 

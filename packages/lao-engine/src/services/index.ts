@@ -7,5 +7,4 @@ export * from './commands/LearnerCommands';
 export * from './commands/GoalCommands';
 export * from './commands/ProgressCommands';
 export * from './ReadModels';
-export * from './EventFlow';
 export * from './PerformanceMetrics';

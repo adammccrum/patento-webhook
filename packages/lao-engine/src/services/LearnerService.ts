@@ -52,6 +52,19 @@ export class LearnerService implements ILearnerService {
   }
 
   /**
+   * Create a new learner (interface method).
+   * Produces: LearnerRegistered, UserOnboarded
+   */
+  async createLearner(data: {
+    email: string;
+    name: string;
+    preferences: LearnerPreferences;
+    tenantId: string;
+  }): Promise<Learner> {
+    return this.registerLearner(data);
+  }
+
+  /**
    * Register a new learner.
    * Produces: LearnerRegistered, UserOnboarded
    */
@@ -228,7 +241,7 @@ export class LearnerService implements ILearnerService {
     await this.eventStore.append(event);
 
     // Update in-memory state
-    const updated = learner.withState(state);
+    const updated = learner.withState(state as any);
     this.cache.set(learnerId, updated);
     await this.repository.save(updated);
 
@@ -301,8 +314,8 @@ export class LearnerService implements ILearnerService {
       email: data.email as string,
       name: data.name as string,
       preferences: {
-        learningStyle: (data.learningStyle as string) || 'visual',
-        pacePreference: (data.pacePreference as string) || 'normal',
+        learningStyle: ((data.learningStyle as string) || 'visual') as any,
+        pacePreference: ((data.pacePreference as string) || 'normal') as any,
         availableHoursPerWeek: (data.availableHoursPerWeek as number) || 10,
         preferredLanguage: (data.preferredLanguage as string) || 'en',
         timezone: (data.timezone as string) || 'UTC',
@@ -316,12 +329,12 @@ export class LearnerService implements ILearnerService {
     for (const event of events) {
       if (event.eventType === 'LearnerStateChanged') {
         const eventData = event.data as Record<string, unknown>;
-        learner = learner.withState(eventData.toState as string);
+        learner = learner.withState(eventData.toState as any);
       } else if (event.eventType === 'LearnerPreferencesUpdated') {
         const eventData = event.data as Record<string, unknown>;
         learner = learner.withPreferences({
-          learningStyle: eventData.learningStyle as string,
-          pacePreference: eventData.pacePreference as string,
+          learningStyle: (eventData.learningStyle as string) as any,
+          pacePreference: (eventData.pacePreference as string) as any,
           availableHoursPerWeek: eventData.availableHoursPerWeek as number,
           timezone: eventData.timezone as string,
         });

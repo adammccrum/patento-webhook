@@ -84,7 +84,7 @@ export class MissionProgress {
    */
   withStatus(status: MissionProgressStatus, timestamp?: string): MissionProgress {
     const ts = timestamp || new Date().toISOString();
-    const updates: Partial<MissionProgress> = {
+    const updates: Record<string, unknown> = {
       status,
       updatedAt: ts,
     };
@@ -96,7 +96,7 @@ export class MissionProgress {
       updates.completedAt = ts;
     }
 
-    return new MissionProgress({ ...this, ...updates });
+    return new MissionProgress({ ...this, ...updates } as ConstructorParameters<typeof MissionProgress>[0]);
   }
 
   /**
