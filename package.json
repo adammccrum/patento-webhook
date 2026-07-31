@@ -1,1 +1,26 @@
-{"name": "patento-webhook", "version": "1.0.0", "description": "A Node.js application for handling webhooks.", "main": "index.js", "dependencies": {"claude-sdk": "^1.0.0", "webhook-tools": "^1.0.0"}, "scripts": {"start": "node index.js"}}
+{
+  "name": "lao",
+  "version": "0.1.0",
+  "description": "LAO - AI Learning Operating System",
+  "private": true,
+  "workspaces": [
+    "apps/web",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo run dev --parallel",
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "lint": "turbo run lint",
+    "type-check": "turbo run type-check",
+    "format": "prettier --write \"**/*.{ts,tsx,json,md}\"",
+    "db:migrate": "turbo run db:migrate",
+    "db:generate": "turbo run db:generate"
+  },
+  "devDependencies": {
+    "turbo": "^1.13.3",
+    "prettier": "^3.2.5",
+    "typescript": "^5.3.3",
+    "@types/node": "^20.10.6"
+  }
+}
