@@ -222,3 +222,182 @@ model FeatureFlag {
   @@index([productId])
   @@index([enabled])
 }
+
+// LAO Learning Models
+
+model LearnerGoal {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Goal details
+  description   String   // "What I want to achieve"
+  problem       String   // "What task takes too much time?"
+  timeframe     String   // "8 weeks", "3 months", etc.
+  confidence    Float    @default(0.5) // 0-1: learner's confidence in achieving goal
+
+  // Status
+  status        String   @default("active") // active, completed, paused
+  progress      Int      @default(0) // 0-100%
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  missions      Mission[]
+  portfolio     Portfolio[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model Mission {
+  id            String   @id @default(cuid())
+  goalId        String
+  goal          LearnerGoal @relation(fields: [goalId], references: [id], onDelete: Cascade)
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Mission details
+  title         String   // "Solve Your First Real Problem with AI"
+  problemArea   String   // "Writing", "Email", "Admin", etc.
+  solutionType  String   // "ContentAssistant", "EmailAssistant", "IdeaGenerator", etc.
+  solutionDescription String // "AI Content Assistant for LinkedIn"
+
+  // Instructions for the coach
+  instructions  String   // JSON: step-by-step guide for building
+
+  // Status
+  status        String   @default("active") // active, in_progress, completed, abandoned
+  startedAt     DateTime?
+  completedAt   DateTime?
+
+  // Learner interaction
+  confidenceAtStart Float?  // Confidence when starting mission
+  confidenceAtEnd   Float?  // Confidence after completion
+  timeSpent         Int?    // Minutes spent
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  assets        Asset[]
+  portfolio     Portfolio?
+
+  @@index([goalId])
+  @@index([userId])
+  @@index([status])
+  @@index([completedAt])
+}
+
+model Asset {
+  id            String   @id @default(cuid())
+  missionId     String
+  mission       Mission  @relation(fields: [missionId], references: [id], onDelete: Cascade)
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Asset details
+  name          String   // "AI Content Assistant", "Email Template", etc.
+  description   String   // What it does
+  type          String   // "assistant", "template", "workflow", "tool", etc.
+
+  // The actual built content
+  content       Json     // The artifact created (prompt, config, etc.)
+  metadata      Json     @default("{}")
+
+  // Usage
+  isInUseToday  Boolean  @default(false)
+  useCount      Int      @default(0)
+  lastUsedAt    DateTime?
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([missionId])
+  @@index([userId])
+  @@index([type])
+}
+
+model Portfolio {
+  id            String   @id @default(cuid())
+  missionId     String   @unique
+  mission       Mission  @relation(fields: [missionId], references: [id], onDelete: Cascade)
+  goalId        String
+  goal          LearnerGoal @relation(fields: [goalId], references: [id], onDelete: Cascade)
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // What they built
+  problemSolved String   // "Writing LinkedIn posts"
+  solutionCreated String // "AI Content Assistant"
+
+  // How they feel about it
+  reflection    String?  // Answer to "What surprised you?"
+  confidenceGained Float? // Change in confidence (0-1)
+
+  // Evidence for graph
+  timeSpentMinutes Int?
+  missionCompletedAt DateTime @default(now())
+  status        String   @default("in_daily_use") // in_daily_use, completed, planned
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([goalId])
+  @@index([userId])
+  @@index([missionCompletedAt])
+}
+
+model LearnerState {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Overall confidence in ability to learn and build
+  overallConfidence Float @default(0.5) // 0-1
+
+  // How many problems solved
+  problemsSolved Int @default(0)
+
+  // When will they likely return
+  predictedReturnDate DateTime?
+
+  // Graph-sourced state (updated by engine)
+  graphMasteryLevel Int? // 0-100, from knowledge engine
+  graphConfidence Float? // 0-1, from belief engine
+
+  // When was state last updated
+  lastUpdatedAt DateTime @default(now())
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+// AI Coach conversation state
+model CoachConversation {
+  id            String   @id @default(cuid())
+  missionId     String
+  userId        String
+
+  // Conversation flow
+  step          Int      @default(0) // 0: problem, 1: explore, 2: recommend, 3: build
+  messages      Json     @default("[]") // Array of {role: "user"|"coach", content: "..."}
+
+  // Learner's stated problem
+  problem       String?  // "What task takes too much time?"
+
+  // Coach's understanding
+  exploration   String?  // Notes from exploration
+  recommendedSolution String? // What the coach recommends
+
+  // Build state
+  buildingPhase String? // "setup", "configuration", "testing", "completion"
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  expiresAt     DateTime // Conversation expires after 24 hours
+
+  @@index([userId])
+  @@index([missionId])
+  @@index([expiresAt])
+}
