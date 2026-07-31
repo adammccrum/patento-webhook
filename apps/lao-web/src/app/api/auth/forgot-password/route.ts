@@ -1,13 +1,14 @@
 /**
  * Forgot password endpoint
+ * Uses IrisKey Platform infrastructure
  */
 
-import { PrismaClient } from '@prisma/client';
-import { generateVerificationToken } from '@iriskey/auth';
-import { type NextRequest, NextResponse } from 'next/server';
+import { type NextRequest } from 'next/server';
 import { z } from 'zod';
-
-const prisma = new PrismaClient();
+import { generateVerificationToken } from '@iriskey/auth';
+import { withErrorHandler, ApiResponseBuilder, validationError, toResponse } from '@iriskey/middleware';
+import { getAuditService } from '@iriskey/audit';
+import { db } from '@/lib/db';
 
 const schema = z.object({
   email: z.string().email('Invalid email address'),
@@ -17,34 +18,25 @@ const schema = z.object({
  * POST /api/auth/forgot-password
  * Send password reset email
  */
-export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json();
+export const POST = withErrorHandler(async (request: NextRequest, ctx) => {
+  const body = await request.json();
 
-    const validation = schema.safeParse(body);
-    if (!validation.success) {
-      return NextResponse.json(
-        { error: validation.error.errors[0].message },
-        { status: 400 }
-      );
-    }
+  const validation = schema.safeParse(body);
+  if (!validation.success) {
+    return validationError(validation.error.errors[0].message);
+  }
 
-    const { email } = validation.data;
+  const { email } = validation.data;
 
-    const user = await prisma.user.findUnique({
-      where: { email },
-    });
+  const user = await db.user.findUnique({
+    where: { email },
+  });
 
-    if (!user) {
-      return NextResponse.json(
-        { message: 'If an account exists, a reset link has been sent' },
-        { status: 200 }
-      );
-    }
-
+  // Don't reveal if email exists (security best practice)
+  if (user) {
     const resetToken = generateVerificationToken();
 
-    await prisma.verificationToken.create({
+    await db.verificationToken.create({
       data: {
         identifier: email,
         token: resetToken,
@@ -53,26 +45,12 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    await prisma.auditLog.create({
-      data: {
-        userId: user.id,
-        action: 'password_reset_requested',
-        resource: 'auth',
-        details: {
-          email,
-        },
-      },
-    });
-
-    return NextResponse.json(
-      { message: 'If an account exists, a reset link has been sent' },
-      { status: 200 }
-    );
-  } catch (error) {
-    console.error('Forgot password error:', error);
-    return NextResponse.json(
-      { error: 'Failed to process request' },
-      { status: 500 }
-    );
+    const auditService = getAuditService();
+    await auditService.logPasswordReset(user.id, ctx.productId);
   }
-}
+
+  return toResponse(
+    ApiResponseBuilder.success({ message: 'If an account exists, a reset link has been sent' }),
+    200
+  );
+});

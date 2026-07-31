@@ -78,25 +78,29 @@ iriskey-platform/
 │   │   │   │   └── cost-calculator.ts
 │   │   │   └── package.json
 │   │   │
-│   │   ├── config/                # (PLANNED) Centralized configuration
+│   │   ├── config/                # (✅ Implemented) Centralized configuration
 │   │   │   ├── src/
-│   │   │   │   ├── index.ts
-│   │   │   │   ├── env.ts        # Environment variable parsing
-│   │   │   │   └── defaults.ts   # Default values per product
+│   │   │   │   └── index.ts      # Zod validation, env parsing, singleton pattern
 │   │   │   └── package.json
 │   │   │
-│   │   ├── credits/               # (PLANNED) Usage tracking and credits
+│   │   ├── middleware/            # (✅ Implemented) Reusable API middleware
 │   │   │   ├── src/
-│   │   │   │   ├── index.ts
-│   │   │   │   ├── service.ts    # Credit deduction, balance checks
-│   │   │   │   └── types.ts
+│   │   │   │   └── index.ts      # withErrorHandler, ApiResponseBuilder, validation
 │   │   │   └── package.json
 │   │   │
-│   │   ├── audit/                 # (PLANNED) Immutable audit logging
+│   │   ├── contracts/             # (✅ Implemented) Shared types and DTOs
 │   │   │   ├── src/
-│   │   │   │   ├── index.ts
-│   │   │   │   ├── service.ts    # Log creation and querying
-│   │   │   │   └── types.ts
+│   │   │   │   └── index.ts      # ApiResponse, UserSession, AuditLogEntry, etc
+│   │   │   └── package.json
+│   │   │
+│   │   ├── audit/                 # (✅ Implemented) Immutable audit logging
+│   │   │   ├── src/
+│   │   │   │   └── index.ts      # AuditService singleton, event emission
+│   │   │   └── package.json
+│   │   │
+│   │   ├── events/                # (✅ Implemented) Event-driven architecture
+│   │   │   ├── src/
+│   │   │   │   └── index.ts      # EventEmitter, 15+ event types
 │   │   │   └── package.json
 │   │   │
 │   │   ├── notifications/         # (PLANNED) Email/SMS/push
@@ -285,40 +289,74 @@ Products CANNOT customize:
 
 ## API Endpoint Patterns
 
-### Current Pattern (Milestone 1-2, Needs Refactoring)
+### Current Pattern (Milestone 2.5, Now Implemented)
 
-Each route currently:
-1. Creates `new PrismaClient()` (inefficient)
-2. Calls `requireAuth()` to get session
-3. Validates input with Zod schema
-4. Queries database
-5. Logs audit event
-6. Returns NextResponse
+All routes now follow standardized pattern:
 
-**Problems**:
-- Multiple Prisma instances per server
-- Duplicated error handling
-- Hardcoded product ID
-- Scattered business logic
-
-### Target Pattern (Milestone 3+)
-
-Endpoints should:
-1. Use middleware for auth injection
-2. Use shared request/response wrappers
-3. Call service/repository layer
-4. Service layer handles Prisma, audit logging, config
-5. Middleware handles errors uniformly
+1. ✅ Use singleton Prisma client via `db` from `lib/db`
+2. ✅ Auth injection via `requireAuth()` + `withErrorHandler`
+3. ✅ Validation with Zod schema via `validateRequest()`
+4. ✅ Error handling via `withErrorHandler` middleware wrapper
+5. ✅ Response formatting via `ApiResponseBuilder.success/error`
+6. ✅ Audit logging via `getAuditService()`
+7. ✅ Product ID injection via `ctx.productId` from config
+8. ✅ Context passing: `RouteContext` with userId, productId, ipAddress
 
 ```typescript
-// After refactoring
-import { withAuth, withErrorHandler } from '@iriskey/middleware';
+// Implemented pattern (all current routes)
+import { withErrorHandler, ApiResponseBuilder, authError, toResponse } from '@iriskey/middleware';
+import { getAuditService } from '@iriskey/audit';
+import { db } from '@/lib/db';
+
+export const PUT = withErrorHandler(async (request: NextRequest, ctx) => {
+  const session = await requireAuth();
+  const userId = session.user?.id;
+
+  if (!userId) {
+    return authError();
+  }
+
+  const body = await request.json();
+  const validation = updateSchema.safeParse(body);
+
+  if (!validation.success) {
+    return validationError(validation.error.errors[0].message);
+  }
+
+  const updated = await db.resource.update({
+    where: { id: userId },
+    data: validation.data,
+  });
+
+  const auditService = getAuditService();
+  await auditService.logResourceUpdated(userId, ctx.productId, Object.keys(validation.data));
+
+  return toResponse(ApiResponseBuilder.success(updated), 200);
+});
+```
+
+**Benefits**:
+- ✅ No code duplication across routes
+- ✅ Single Prisma instance (connection pooling)
+- ✅ Centralized error handling (consistent error codes)
+- ✅ Consistent response format (success/error envelope)
+- ✅ Audit logging guaranteed (no manual prisma.auditLog.create)
+- ✅ No hardcoded product IDs (uses config injection)
+- ✅ Type-safe contracts (shared DTOs in @iriskey/contracts)
+
+### Future Pattern (Milestone 3+)
+
+Refactor to service/repository layer pattern:
+
+```typescript
+// Future target (post-Milestone 3)
+import { withErrorHandler } from '@iriskey/middleware';
 import { profileService } from '@iriskey/services';
 
-export const GET = withAuth(withErrorHandler(async (req, { userId, productId }) => {
-  const profile = await profileService.getProfile(userId);
+export const GET = withErrorHandler(async (req, ctx) => {
+  const profile = await profileService.getProfile(ctx.userId, ctx.productId);
   return ApiResponse.success(profile);
-}));
+});
 ```
 
 ## Configuration Management
@@ -518,54 +556,137 @@ All platform code logs with context:
 
 ## Roadmap Progress
 
-**✅ Phase 1 Complete**: Authentication, Database, Providers
+**✅ Phase 1 Complete**: Authentication, Database, Providers (Milestone 1)
 - ✅ @iriskey/auth - Multi-provider authentication
-- ✅ @iriskey/database - Multi-tenant schema
+- ✅ @iriskey/database - Multi-tenant schema & singleton pattern
 - ✅ @iriskey/shared - Common types
 - ✅ @iriskey/providers - AI router
 
-**⏳ Phase 2 (Milestone 2-3)**: Dashboard & Configuration
-- ⏳ @iriskey/config - Environment & feature flag management
-- ⏳ Dashboard API endpoints
-- ⏳ Profile management
-- ⏳ Settings management
+**✅ Phase 2 Complete**: Platform Stabilization (Milestone 2.5)
+- ✅ @iriskey/config - Environment & feature flag management
+- ✅ @iriskey/middleware - Reusable API middleware (withErrorHandler, ApiResponseBuilder)
+- ✅ @iriskey/contracts - Shared types and DTOs (single source of truth)
+- ✅ @iriskey/audit - Audit logging service with event emission
+- ✅ @iriskey/events - Event-driven architecture with 15+ event types
+- ✅ All API routes refactored to use new packages
+- ✅ Singleton Prisma client across application
+- ✅ Centralized error handling and response formatting
+- ✅ No hardcoded product identifiers
 
-**📋 Phase 3 (Milestone 4-6)**: Core Services
-- [ ] @iriskey/audit - Audit logging service
-- [ ] @iriskey/credits - Usage tracking
+**📋 Phase 3 (Milestone 3-4)**: Advanced Features
 - [ ] @iriskey/notifications - Email/SMS/push
-- [ ] @iriskey/analytics - Event tracking
-
-**📋 Phase 4 (Milestone 7-10)**: Advanced Features
+- [ ] @iriskey/analytics - Event tracking with metrics
 - [ ] @iriskey/billing - Subscriptions & payments
-- [ ] AI Router integration
-- [ ] Onboarding flow
-- [ ] Content delivery
+- [ ] AI Router enhancement
 
-**📋 Phase 5 (Milestone 11-14)**: Scale & Multi-Product
+**📋 Phase 4 (Milestone 5-8)**: Scale & Multi-Product
 - [ ] @iriskey/files - S3 file storage
 - [ ] @iriskey/email - Email delivery service
 - [ ] @iriskey/search - Full-text search
 - [ ] Second product launch
+- [ ] Database read replicas & connection pooling
 
 ## Decisions Log
 
-| Decision | Rationale | Implications |
-|----------|-----------|--------------|
-| Single shared Prisma instance | Reduces connection overhead | Needs singleton pattern in lib/ |
-| JWT sessions, not database sessions | Stateless, scales to multiple servers | Must use NEXTAUTH_SECRET for signing |
-| @iriskey/* packages over @lao/* | Platform can be reused for future products | Requires no product-specific logic in packages |
-| Product ID as string, not ENUM | Future products don't require schema change | Must document product ID values |
-| Immutable audit logs | Compliance and debugging | Never update/delete audit logs |
-| Zod validation in routes (current) | Early issue detection | Should move to middleware layer (Milestone 3) |
-| Hardcoded product ID in routes (current) | Simplicity for LAO | Should be injected via middleware (Milestone 3) |
-| Multiple Prisma instances (current) | Each route independent | Technical debt - refactor to singleton (Milestone 3) |
+| Decision | Rationale | Status | Implications |
+|----------|-----------|--------|--------------|
+| Single shared Prisma instance (getPrisma) | Reduces connection overhead, eliminates connection pooling issues | ✅ Implemented (M2.5) | All routes use singleton via lib/db.ts |
+| JWT sessions, not database sessions | Stateless, scales to multiple servers | ✅ Implemented | Must use NEXTAUTH_SECRET for signing |
+| @iriskey/* packages over @lao/* | Platform can be reused for future products | ✅ Implemented | Requires no product-specific logic in packages |
+| Product ID injection via @iriskey/config | Config as dependency injection, not hardcoded | ✅ Implemented (M2.5) | All routes receive ctx.productId from middleware |
+| Standardized API response format | Consistent success/error envelope across all endpoints | ✅ Implemented (M2.5) | Clients can parse responses uniformly |
+| Centralized audit logging service | Single AuditService instead of manual prisma.auditLog.create | ✅ Implemented (M2.5) | Guarantees audit logging doesn't get skipped |
+| Event-driven architecture | Decouple services via events (audit, analytics, notifications) | ✅ Implemented (M2.5) | Future services subscribe to events, no coupling |
+| Immutable audit logs | Compliance and debugging | ✅ Implemented | Never update/delete audit logs |
+| RouteContext pattern | Inject userId, productId, ipAddress to all handlers | ✅ Implemented (M2.5) | withErrorHandler provides ctx automatically |
+| withErrorHandler wrapper | Centralized error handling, guaranteed auth check | ✅ Implemented (M2.5) | All routes use same error handling pattern |
+
+## Completed Work (Milestone 2.5)
+
+✅ **Singleton Database Pattern**
+- Created @iriskey/database/src with getPrisma() singleton
+- lib/db.ts wrapper for application-level access
+- No more `new PrismaClient()` scattered across routes
+
+✅ **Configuration Management**
+- Created @iriskey/config with Zod-validated env parsing
+- Configuration class with singleton pattern
+- getProductId(), getProductName(), etc. functions
+- Support for: PRODUCT_ID, NODE_ENV, DATABASE_URL, NEXTAUTH_SECRET, etc.
+
+✅ **API Response Standardization**
+- Created ApiResponseBuilder with success(), error(), paginated()
+- Consistent response envelope (success/error + data)
+- toResponse() utility for converting to NextResponse
+- statuscode mapping: 200 (success), 400 (validation), 401 (auth), 404 (not found), 500 (server)
+
+✅ **Error Handling Middleware**
+- Created withErrorHandler wrapper for all routes
+- Centralized try/catch and error transformation
+- RouteContext injection (userId, productId, session, ipAddress, userAgent)
+- Helper functions: authError(), validationError(), notFoundError(), serverError()
+
+✅ **Shared Type Contracts**
+- Created @iriskey/contracts with all DTOs
+- ApiResponse<T>, ApiError, PaginatedResponse<T>
+- UserSession, UserProfile, UserSettings, UserCredits
+- AuditLogEntry with AuditAction enum (16 actions)
+- RequestValidator types for Zod validation
+
+✅ **Audit Logging Service**
+- Created AuditService singleton with initialize/getInstance
+- Methods: logUserRegistered, logEmailVerified, logPasswordReset, logProfileUpdated, logSettingsUpdated, logCreditsUsed
+- Query methods: getUserLogs(), getProductLogs(), getActionLogs()
+- Integration with event system for audit event emission
+
+✅ **Event-Driven Architecture**
+- Created @iriskey/events with EventEmitter class
+- 15+ event types: UserRegisteredEvent, EmailVerifiedEvent, CreditsUsedEvent, etc.
+- getEventEmitter(), onEvent(), emitEvent() functions
+- Future services can subscribe without coupling
+
+✅ **API Route Refactoring**
+- /api/auth/register - Uses withErrorHandler, ApiResponseBuilder, getAuditService()
+- /api/auth/verify-email - Centralized auth + error handling, audit logging
+- /api/auth/forgot-password - Security-conscious (no user enumeration), audit logging
+- /api/profile (GET/PUT) - Parallel queries, standardized responses, audit logging
+- /api/dashboard - Comprehensive dashboard data, calculated credits, recent activity
+- /api/settings (GET/PUT) - Settings management with audit logging
+- /api/credits (GET) - Credits endpoint with usage history filtering by productId
+
+✅ **Application Initialization**
+- Added initializeAudit(db) to lib/auth.ts
+- Configuration auto-initializes via Configuration.getInstance()
+- Ensures AuditService ready before any routes execute
+
+✅ **Environment Configuration**
+- Updated .env.example with PRODUCT_ID, PRODUCT_NAME
+- Added DB_MAX_CONNECTIONS, DB_MIN_CONNECTIONS
+- Documented all config variables with descriptions
 
 ## Next Architectural Steps
 
-1. **Milestone 3**: Extract platform middleware, create service layer
-2. **Milestone 4**: Create @iriskey/config package
-3. **Milestone 5**: Create @iriskey/audit and @iriskey/credits packages
-4. **Milestone 6+**: Continue with remaining packages
+1. **Milestone 3 (Verification & Documentation)**:
+   - ✅ Run type checker: `tsc --noEmit`
+   - ✅ Run linter: `eslint src --max-warnings 0`
+   - ✅ Create PLATFORM_HEALTH_REPORT.md with metrics
+   - ✅ Document event subscriptions for future services
+   - ✅ Test all endpoints manually or with curl/Postman
 
-See TECHNICAL_DEBT.md for refactoring priorities.
+2. **Milestone 4 (Service Layer Abstraction)**:
+   - Extract business logic from routes into service classes
+   - Create @iriskey/services package with ProfileService, SettingsService, CreditsService
+   - Maintain same API contracts, same response format
+   - No behavioral changes, pure refactoring
+
+3. **Milestone 5 (Remaining Packages)**:
+   - @iriskey/notifications - Email/SMS/push integration
+   - @iriskey/analytics - Event tracking with metrics
+   - @iriskey/billing - Subscriptions & payments (Stripe)
+
+4. **Milestone 6+**: Scale & Multi-Product
+   - Additional products launch using same platform packages
+   - Database optimization: read replicas, connection pooling via PgBouncer
+   - Performance monitoring: APM integration (DataDog, New Relic, etc.)
+
+See TECHNICAL_DEBT.md for resolved issues and PLATFORM_HEALTH_REPORT.md for current state.

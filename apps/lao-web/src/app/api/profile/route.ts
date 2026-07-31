@@ -1,14 +1,15 @@
 /**
  * LAO Profile API
  * Get and update user profile
+ * Uses IrisKey Platform infrastructure
  */
 
-import { PrismaClient } from '@prisma/client';
-import { type NextRequest, NextResponse } from 'next/server';
-import { requireAuth } from '@/lib/auth';
+import { type NextRequest } from 'next/server';
 import { z } from 'zod';
-
-const prisma = new PrismaClient();
+import { withErrorHandler, ApiResponseBuilder, authError, validationError, toResponse } from '@iriskey/middleware';
+import { getAuditService } from '@iriskey/audit';
+import { requireAuth } from '@/lib/auth';
+import { db } from '@/lib/db';
 
 const updateProfileSchema = z.object({
   name: z.string().min(2).optional(),
@@ -22,116 +23,96 @@ const updateProfileSchema = z.object({
  * GET /api/profile
  * Get user's profile
  */
-export async function GET(request: NextRequest) {
-  try {
-    const session = await requireAuth();
-    const userId = session.user?.id;
+export const GET = withErrorHandler(async (request: NextRequest, ctx) => {
+  const session = await requireAuth();
+  const userId = session.user?.id;
 
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+  if (!userId) {
+    return authError();
+  }
 
-    const [user, profile] = await Promise.all([
-      prisma.user.findUnique({
-        where: { id: userId },
-        select: {
-          id: true,
-          email: true,
-          name: true,
-          image: true,
-          emailVerified: true,
-          createdAt: true,
-        },
-      }),
-      prisma.profile.findUnique({
-        where: { userId },
-      }),
-    ]);
+  const [user, profile] = await Promise.all([
+    db.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        image: true,
+        emailVerified: true,
+        createdAt: true,
+      },
+    }),
+    db.profile.findUnique({
+      where: { userId },
+    }),
+  ]);
 
-    if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
-    }
-
-    return NextResponse.json({ user, profile });
-  } catch (error) {
-    console.error('Profile fetch error:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch profile' },
-      { status: 500 }
+  if (!user) {
+    return toResponse(
+      ApiResponseBuilder.error('USER_NOT_FOUND', 'User not found'),
+      404
     );
   }
-}
+
+  return toResponse(ApiResponseBuilder.success({ user, profile }), 200);
+});
 
 /**
  * PUT /api/profile
  * Update user's profile
  */
-export async function PUT(request: NextRequest) {
-  try {
-    const session = await requireAuth();
-    const userId = session.user?.id;
+export const PUT = withErrorHandler(async (request: NextRequest, ctx) => {
+  const session = await requireAuth();
+  const userId = session.user?.id;
 
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const body = await request.json();
-    const validation = updateProfileSchema.safeParse(body);
-
-    if (!validation.success) {
-      return NextResponse.json(
-        { error: validation.error.errors[0].message },
-        { status: 400 }
-      );
-    }
-
-    const { name, ...profileUpdates } = validation.data;
-
-    const [updatedUser, updatedProfile] = await Promise.all([
-      name
-        ? prisma.user.update({
-            where: { id: userId },
-            data: { name },
-            select: {
-              id: true,
-              email: true,
-              name: true,
-              image: true,
-              emailVerified: true,
-            },
-          })
-        : prisma.user.findUnique({
-            where: { id: userId },
-            select: {
-              id: true,
-              email: true,
-              name: true,
-              image: true,
-              emailVerified: true,
-            },
-          }),
-      prisma.profile.update({
-        where: { userId },
-        data: profileUpdates,
-      }),
-    ]);
-
-    await prisma.auditLog.create({
-      data: {
-        userId,
-        productId: 'lao',
-        action: 'profile_updated',
-        resource: 'profile',
-        details: { fields: Object.keys(validation.data) },
-      },
-    });
-
-    return NextResponse.json({ user: updatedUser, profile: updatedProfile });
-  } catch (error) {
-    console.error('Profile update error:', error);
-    return NextResponse.json(
-      { error: 'Failed to update profile' },
-      { status: 500 }
-    );
+  if (!userId) {
+    return authError();
   }
-}
+
+  const body = await request.json();
+  const validation = updateProfileSchema.safeParse(body);
+
+  if (!validation.success) {
+    return validationError(validation.error.errors[0].message);
+  }
+
+  const { name, ...profileUpdates } = validation.data;
+
+  const [updatedUser, updatedProfile] = await Promise.all([
+    name
+      ? db.user.update({
+          where: { id: userId },
+          data: { name },
+          select: {
+            id: true,
+            email: true,
+            name: true,
+            image: true,
+            emailVerified: true,
+          },
+        })
+      : db.user.findUnique({
+          where: { id: userId },
+          select: {
+            id: true,
+            email: true,
+            name: true,
+            image: true,
+            emailVerified: true,
+          },
+        }),
+    db.profile.update({
+      where: { userId },
+      data: profileUpdates,
+    }),
+  ]);
+
+  const auditService = getAuditService();
+  await auditService.logProfileUpdated(userId, ctx.productId, Object.keys(validation.data));
+
+  return toResponse(
+    ApiResponseBuilder.success({ user: updatedUser, profile: updatedProfile }),
+    200
+  );
+});
