@@ -1,16 +1,24 @@
 /**
- * Next.js middleware for authentication
+ * Next.js middleware for authentication and security
  */
 
 import { auth } from '@/lib/auth';
 import { type NextRequest, NextResponse } from 'next/server';
+import { withSecurityHeaders } from '@iriskey/security';
 
 const protectedRoutes = ['/dashboard', '/settings', '/courses', '/missions'];
 const publicRoutes = ['/auth/login', '/auth/register', '/auth/forgot-password'];
+const healthRoutes = ['/api/health', '/api/ready', '/api/alive'];
 
 export async function middleware(request: NextRequest) {
-  const session = await auth();
   const path = request.nextUrl.pathname;
+
+  // Skip security checks for health endpoints
+  if (healthRoutes.some((route) => path.startsWith(route))) {
+    return NextResponse.next();
+  }
+
+  const session = await auth();
 
   // Allow public routes
   if (publicRoutes.includes(path)) {

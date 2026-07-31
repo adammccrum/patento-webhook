@@ -8,6 +8,8 @@ import { z } from 'zod';
 import { generateVerificationToken } from '@iriskey/auth';
 import { withErrorHandler, ApiResponseBuilder, validationError, toResponse } from '@iriskey/middleware';
 import { getAuditService } from '@iriskey/audit';
+import { getRateLimitStore, RateLimitPresets } from '@iriskey/ratelimit';
+import { getLogger } from '@iriskey/monitoring';
 import { db } from '@/lib/db';
 
 const schema = z.object({
@@ -19,6 +21,29 @@ const schema = z.object({
  * Send password reset email
  */
 export const POST = withErrorHandler(async (request: NextRequest, ctx) => {
+  const logger = getLogger();
+  const rateLimitStore = getRateLimitStore();
+
+  // Apply rate limiting
+  const limiter = rateLimitStore.getLimiter('passwordReset', RateLimitPresets.passwordReset);
+  const rateLimitResult = await limiter.check(ctx.ipAddress);
+
+  if (!rateLimitResult.success) {
+    logger.warn('Password reset rate limit exceeded', {
+      context: {
+        ipAddress: ctx.ipAddress,
+        limit: rateLimitResult.limit,
+        current: rateLimitResult.current,
+      },
+    });
+    return toResponse(
+      ApiResponseBuilder.error('RATE_LIMIT_EXCEEDED', 'Too many password reset attempts. Please try again later.', {
+        retryAfter: rateLimitResult.retryAfter,
+      }),
+      429
+    );
+  }
+
   const body = await request.json();
 
   const validation = schema.safeParse(body);
@@ -47,6 +72,14 @@ export const POST = withErrorHandler(async (request: NextRequest, ctx) => {
 
     const auditService = getAuditService();
     await auditService.logPasswordReset(user.id, ctx.productId);
+
+    logger.info('Password reset requested', {
+      context: {
+        userId: user.id,
+        email,
+        productId: ctx.productId,
+      },
+    });
   }
 
   return toResponse(

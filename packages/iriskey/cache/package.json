@@ -1,0 +1,17 @@
+{
+  "name": "@iriskey/cache",
+  "version": "1.0.0",
+  "description": "IrisKey Platform - Cache service with in-memory and Redis support",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "type-check": "tsc --noEmit"
+  },
+  "optionalDependencies": {
+    "redis": "^4.6.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "@types/node": "^20.10.6"
+  }
+}

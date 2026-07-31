@@ -9,6 +9,8 @@ import { hashPassword, generateVerificationToken } from '@iriskey/auth';
 import { getProductId } from '@iriskey/config';
 import { withErrorHandler, ApiResponseBuilder, validationError, ApiErrorResponse, toResponse } from '@iriskey/middleware';
 import { getAuditService } from '@iriskey/audit';
+import { getRateLimitStore, RateLimitPresets } from '@iriskey/ratelimit';
+import { getLogger } from '@iriskey/monitoring';
 import { db } from '@/lib/db';
 
 const registerSchema = z.object({
@@ -22,6 +24,29 @@ const registerSchema = z.object({
  * Register a new user
  */
 export const POST = withErrorHandler(async (request: NextRequest, ctx) => {
+  const logger = getLogger();
+  const rateLimitStore = getRateLimitStore();
+
+  // Apply rate limiting
+  const limiter = rateLimitStore.getLimiter('registration', RateLimitPresets.registration);
+  const rateLimitResult = await limiter.check(ctx.ipAddress);
+
+  if (!rateLimitResult.success) {
+    logger.warn('Registration rate limit exceeded', {
+      context: {
+        ipAddress: ctx.ipAddress,
+        limit: rateLimitResult.limit,
+        current: rateLimitResult.current,
+      },
+    });
+    return toResponse(
+      ApiResponseBuilder.error('RATE_LIMIT_EXCEEDED', 'Too many registration attempts. Please try again later.', {
+        retryAfter: rateLimitResult.retryAfter,
+      }),
+      429
+    );
+  }
+
   const body = await request.json();
 
   const validation = registerSchema.safeParse(body);
@@ -75,6 +100,14 @@ export const POST = withErrorHandler(async (request: NextRequest, ctx) => {
   // Use audit service instead of manual logging
   const auditService = getAuditService();
   await auditService.logUserRegistered(user.id, email, ctx.productId, ctx.ipAddress);
+
+  logger.info('User registered successfully', {
+    context: {
+      userId: user.id,
+      email,
+      productId: ctx.productId,
+    },
+  });
 
   return toResponse(
     ApiResponseBuilder.success(

@@ -34,6 +34,11 @@
       "@iriskey/events": ["packages/iriskey/events/src"],
       "@iriskey/audit": ["packages/iriskey/audit/src"],
       "@iriskey/middleware": ["packages/iriskey/middleware/src"],
+      "@iriskey/security": ["packages/iriskey/security/src"],
+      "@iriskey/ratelimit": ["packages/iriskey/ratelimit/src"],
+      "@iriskey/monitoring": ["packages/iriskey/monitoring/src"],
+      "@iriskey/queue": ["packages/iriskey/queue/src"],
+      "@iriskey/cache": ["packages/iriskey/cache/src"],
       "@lao/ui": ["packages/lao/ui/src"]
     }
   },
