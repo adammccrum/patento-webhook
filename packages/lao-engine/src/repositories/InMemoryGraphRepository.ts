@@ -190,13 +190,13 @@ export class InMemoryGraphRepository implements IGraphRepository {
   async findPathBetweenNodes(fromNodeId: string, toNodeId: string, tenantId: string): Promise<string[]> {
     // Simple BFS to find path
     const visited = new Set<string>();
-    const queue = [[fromNodeId]];
+    const queue: string[][] = [[fromNodeId]];
 
     while (queue.length > 0) {
       const path = queue.shift();
-      if (!path) break;
+      if (!path || path.length === 0) break;
 
-      const current = path[path.length - 1];
+      const current = path[path.length - 1]!;
       if (current === toNodeId) return path;
 
       if (visited.has(current)) continue;
