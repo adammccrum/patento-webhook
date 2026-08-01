@@ -2,6 +2,9 @@ import { getSession } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 
+// Reads the session from request headers, so it can never be statically rendered.
+export const dynamic = 'force-dynamic';
+
 /** The toolbox: every solution this learner owns, most recently used first. */
 export async function GET(request: Request) {
   try {
@@ -12,14 +15,44 @@ export async function GET(request: Request) {
     }
 
     const { searchParams } = new URL(request.url);
-    const includeArchived = searchParams.get('includeArchived') === 'true';
+
+    // status: active (default), archived, or all — archived solutions must stay
+    // reachable, otherwise archiving silently loses them.
+    const statusParam = searchParams.get('status');
+    const status =
+      statusParam === 'archived' || statusParam === 'all' ? statusParam : 'active';
+
+    const search = searchParams.get('search')?.trim();
+    const area = searchParams.get('area')?.trim();
+
+    // sort: recent (default, by last use), name, or created
+    const sort = searchParams.get('sort');
+    const orderBy =
+      sort === 'name'
+        ? [{ name: 'asc' as const }]
+        : sort === 'created'
+          ? [{ createdAt: 'desc' as const }]
+          : [
+              { lastUsedAt: { sort: 'desc' as const, nulls: 'last' as const } },
+              { createdAt: 'desc' as const },
+            ];
 
     const solutions = await prisma.solution.findMany({
       where: {
         userId: session.user.id,
-        ...(includeArchived ? {} : { status: 'active' }),
+        ...(status === 'all' ? {} : { status }),
+        ...(area && area !== 'All' ? { problemArea: area } : {}),
+        ...(search
+          ? {
+              OR: [
+                { name: { contains: search, mode: 'insensitive' as const } },
+                { problem: { contains: search, mode: 'insensitive' as const } },
+                { content: { contains: search, mode: 'insensitive' as const } },
+              ],
+            }
+          : {}),
       },
-      orderBy: [{ lastUsedAt: { sort: 'desc', nulls: 'last' } }, { createdAt: 'desc' }],
+      orderBy,
       select: {
         id: true,
         name: true,
@@ -36,18 +69,34 @@ export async function GET(request: Request) {
       },
     });
 
-    const weeklyTimeSaved = solutions.reduce(
-      (total, s) => total + (s.useCount > 0 ? s.timeSavedMinutes : 0),
-      0
-    );
+    // The summary describes the whole toolbox, not the current filter, so the
+    // headline numbers don't shift while searching.
+    const all = await prisma.solution.findMany({
+      where: { userId: session.user.id, status: 'active' },
+      select: { useCount: true, timeSavedMinutes: true, totalTimeSavedMinutes: true },
+    });
+
+    const areas = await prisma.solution.findMany({
+      where: { userId: session.user.id },
+      select: { problemArea: true },
+      distinct: ['problemArea'],
+      orderBy: { problemArea: 'asc' },
+    });
 
     return NextResponse.json({
       solutions,
+      areas: areas.map((a) => a.problemArea),
       summary: {
-        total: solutions.length,
-        inDailyUse: solutions.filter((s) => s.useCount > 0).length,
-        weeklyTimeSaved,
-        totalTimeSaved: solutions.reduce((t, s) => t + s.totalTimeSavedMinutes, 0),
+        total: all.length,
+        inDailyUse: all.filter((s) => s.useCount > 0).length,
+        weeklyTimeSaved: all.reduce(
+          (total, s) => total + (s.useCount > 0 ? s.timeSavedMinutes : 0),
+          0
+        ),
+        totalTimeSaved: all.reduce((t, s) => t + s.totalTimeSavedMinutes, 0),
+        archived: await prisma.solution.count({
+          where: { userId: session.user.id, status: 'archived' },
+        }),
       },
     });
   } catch (error) {

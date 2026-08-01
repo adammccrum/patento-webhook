@@ -23,13 +23,25 @@ export default function SolutionsPage() {
   const router = useRouter();
   const [solutions, setSolutions] = useState<SolutionSummary[]>([]);
   const [summary, setSummary] = useState<any>(null);
+  const [areas, setAreas] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const [search, setSearch] = useState('');
+  const [area, setArea] = useState('All');
+  const [status, setStatus] = useState<'active' | 'archived'>('active');
+  const [sort, setSort] = useState<'recent' | 'name' | 'created'>('recent');
+
   useEffect(() => {
+    let cancelled = false;
+
     async function load() {
       try {
-        const response = await fetch('/api/solutions');
+        const params = new URLSearchParams({ status, sort });
+        if (search.trim()) params.set('search', search.trim());
+        if (area !== 'All') params.set('area', area);
+
+        const response = await fetch(`/api/solutions?${params}`);
         if (!response.ok) {
           if (response.status === 401) {
             router.push('/auth/login');
@@ -38,16 +50,25 @@ export default function SolutionsPage() {
           throw new Error('Failed to load your toolbox');
         }
         const data = await response.json();
+        if (cancelled) return;
         setSolutions(data.solutions);
         setSummary(data.summary);
+        setAreas(data.areas ?? []);
+        setError(null);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred');
+        if (!cancelled) setError(err instanceof Error ? err.message : 'An error occurred');
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     }
-    load();
-  }, [router]);
+
+    // Debounce so typing in the search box doesn't fire a request per keystroke.
+    const timer = setTimeout(load, search ? 250 : 0);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [router, search, area, status, sort]);
 
   if (loading) {
     return (
@@ -87,6 +108,45 @@ export default function SolutionsPage() {
           </Link>
         </div>
 
+        {/* Find things once the toolbox grows */}
+        <div className="flex flex-wrap gap-3 mb-6">
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search your solutions"
+            className="flex-1 min-w-[200px] px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+          />
+          <select
+            value={area}
+            onChange={(e) => setArea(e.target.value)}
+            className="px-3 py-2 border border-slate-300 rounded-lg bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="All">All areas</option>
+            {areas.map((a) => (
+              <option key={a} value={a}>
+                {a}
+              </option>
+            ))}
+          </select>
+          <select
+            value={sort}
+            onChange={(e) => setSort(e.target.value as typeof sort)}
+            className="px-3 py-2 border border-slate-300 rounded-lg bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="recent">Recently used</option>
+            <option value="name">Name</option>
+            <option value="created">Newest</option>
+          </select>
+          <button
+            onClick={() => setStatus(status === 'active' ? 'archived' : 'active')}
+            className="px-3 py-2 border border-slate-300 rounded-lg text-sm text-slate-700 hover:bg-slate-100 transition"
+          >
+            {status === 'active'
+              ? `Archived${summary?.archived ? ` (${summary.archived})` : ''}`
+              : 'Back to active'}
+          </button>
+        </div>
+
         {error && (
           <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
             <p className="text-sm text-red-700">{error}</p>
@@ -95,15 +155,23 @@ export default function SolutionsPage() {
 
         {solutions.length === 0 ? (
           <div className="bg-white rounded-lg border border-slate-200 p-12 text-center">
-            <p className="text-slate-900 font-medium mb-2">Nothing in your toolbox yet</p>
-            <p className="text-sm text-slate-600 mb-6">
-              Solve a problem and the tool you build lands here.
-            </p>
-            <Link href="/course/1">
-              <button className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition text-sm font-medium">
-                Solve a Problem
-              </button>
-            </Link>
+            {status === 'archived' ? (
+              <p className="text-slate-900 font-medium">Nothing archived</p>
+            ) : search || area !== 'All' ? (
+              <p className="text-slate-900 font-medium">No solutions match that</p>
+            ) : (
+              <>
+                <p className="text-slate-900 font-medium mb-2">Nothing in your toolbox yet</p>
+                <p className="text-sm text-slate-600 mb-6">
+                  Solve a problem and the tool you build lands here.
+                </p>
+                <Link href="/course/1">
+                  <button className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition text-sm font-medium">
+                    Solve a Problem
+                  </button>
+                </Link>
+              </>
+            )}
           </div>
         ) : (
           <div className="space-y-3">

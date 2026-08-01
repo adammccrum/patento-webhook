@@ -2,6 +2,9 @@ import { getSession } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 
+// Reads the session from request headers, so it can never be statically rendered.
+export const dynamic = 'force-dynamic';
+
 const COURSE_1_DATA = {
   title: 'Building AI Assistants for Your Work',
   description:

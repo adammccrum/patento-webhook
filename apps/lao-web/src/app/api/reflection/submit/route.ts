@@ -2,6 +2,9 @@ import { getSession } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 
+// Reads the session from request headers, so it can never be statically rendered.
+export const dynamic = 'force-dynamic';
+
 function detectConfidenceLanguage(text: string): boolean {
   const confidenceIndicators = [
     'surprised', 'shocked', 'didn\'t expect', 'easier', 'quick', 'simple',

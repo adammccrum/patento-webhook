@@ -66,6 +66,7 @@ export default function SolutionWorkspacePage() {
   const [notesDirty, setNotesDirty] = useState(false);
 
   const [showHistory, setShowHistory] = useState(false);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
 
   const load = useCallback(async () => {
     try {
@@ -192,6 +193,23 @@ export default function SolutionWorkspacePage() {
       await load();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
+    }
+  };
+
+  /** Deleting destroys version history, so it takes two clicks. */
+  const handleDelete = async () => {
+    if (!confirmingDelete) {
+      setConfirmingDelete(true);
+      setStatus(null);
+      return;
+    }
+    try {
+      const response = await fetch(`/api/solutions/${solutionId}`, { method: 'DELETE' });
+      if (!response.ok) throw new Error('Failed to delete');
+      router.push('/solutions');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+      setConfirmingDelete(false);
     }
   };
 
@@ -535,6 +553,18 @@ export default function SolutionWorkspacePage() {
                 >
                   {solution.status === 'archived' ? 'Restore to toolbox' : 'Archive'}
                 </button>
+                <button
+                  onClick={handleDelete}
+                  className="w-full text-left px-3 py-2 rounded hover:bg-red-50 text-red-700 text-sm transition"
+                >
+                  {confirmingDelete ? 'Click again to confirm' : 'Delete'}
+                </button>
+                {confirmingDelete && (
+                  <p className="px-3 text-xs text-slate-600">
+                    This removes the solution and all {solution.versions.length} version
+                    {solution.versions.length === 1 ? '' : 's'} permanently. Archiving keeps it.
+                  </p>
+                )}
               </div>
             </div>
           </div>

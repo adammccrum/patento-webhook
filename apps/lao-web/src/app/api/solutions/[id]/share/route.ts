@@ -3,6 +3,9 @@ import { prisma } from '@/lib/prisma';
 import { generateShareId } from '@/lib/solutions';
 import { NextResponse } from 'next/server';
 
+// Reads the session from request headers, so it can never be statically rendered.
+export const dynamic = 'force-dynamic';
+
 /** Publish a read-only link to this solution, or withdraw one. */
 export async function POST(
   request: Request,

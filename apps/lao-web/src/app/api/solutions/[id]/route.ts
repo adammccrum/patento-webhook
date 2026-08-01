@@ -3,6 +3,9 @@ import { prisma } from '@/lib/prisma';
 import { getCollaboratorPrompt } from '@/lib/solutions';
 import { NextResponse } from 'next/server';
 
+// Reads the session from request headers, so it can never be statically rendered.
+export const dynamic = 'force-dynamic';
+
 /** The workspace: the solution, its story, and what we've noticed about it. */
 export async function GET(
   request: Request,
@@ -78,27 +81,38 @@ export async function PATCH(
     const contentChanged =
       typeof content === 'string' && content.trim() && content.trim() !== existing.content;
 
-    if (contentChanged) {
-      const nextVersion = existing.currentVersion + 1;
-      data.content = content.trim();
-      data.currentVersion = nextVersion;
-      data.versions = {
-        create: {
-          version: nextVersion,
-          content: content.trim(),
-          changeNote: typeof changeNote === 'string' && changeNote.trim() ? changeNote.trim() : null,
-        },
-      };
+    if (!contentChanged && Object.keys(data).length === 0) {
+      return NextResponse.json({ solution: existing, versioned: false });
     }
 
-    if (Object.keys(data).length === 0) {
-      return NextResponse.json({ solution: existing });
-    }
+    // Version numbers are unique per solution, so derive the next one inside a
+    // transaction. Two people improving at once would otherwise collide.
+    const solution = await prisma.$transaction(async (tx) => {
+      if (contentChanged) {
+        const latest = await tx.solutionVersion.findFirst({
+          where: { solutionId: params.id },
+          orderBy: { version: 'desc' },
+          select: { version: true },
+        });
 
-    const solution = await prisma.solution.update({
-      where: { id: params.id },
-      data,
-      include: { versions: { orderBy: { version: 'desc' } } },
+        const nextVersion = (latest?.version ?? existing.currentVersion) + 1;
+        data.content = content.trim();
+        data.currentVersion = nextVersion;
+        data.versions = {
+          create: {
+            version: nextVersion,
+            content: content.trim(),
+            changeNote:
+              typeof changeNote === 'string' && changeNote.trim() ? changeNote.trim() : null,
+          },
+        };
+      }
+
+      return tx.solution.update({
+        where: { id: params.id },
+        data,
+        include: { versions: { orderBy: { version: 'desc' } } },
+      });
     });
 
     return NextResponse.json({ solution, versioned: contentChanged });

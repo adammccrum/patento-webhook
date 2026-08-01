@@ -2,6 +2,9 @@ import { getSession } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 
+// Reads the session from request headers, so it can never be statically rendered.
+export const dynamic = 'force-dynamic';
+
 /**
  * Bring an earlier version back as the current one.
  *
@@ -43,22 +46,32 @@ export async function POST(
       return NextResponse.json({ solution: existing, restored: false });
     }
 
-    const nextVersion = existing.currentVersion + 1;
+    // Derive the next version inside a transaction so a concurrent improve
+    // cannot claim the same number.
+    const solution = await prisma.$transaction(async (tx) => {
+      const latest = await tx.solutionVersion.findFirst({
+        where: { solutionId: params.id },
+        orderBy: { version: 'desc' },
+        select: { version: true },
+      });
 
-    const solution = await prisma.solution.update({
-      where: { id: params.id },
-      data: {
-        content: target.content,
-        currentVersion: nextVersion,
-        versions: {
-          create: {
-            version: nextVersion,
-            content: target.content,
-            changeNote: `Restored from v${versionNumber}`,
+      const nextVersion = (latest?.version ?? existing.currentVersion) + 1;
+
+      return tx.solution.update({
+        where: { id: params.id },
+        data: {
+          content: target.content,
+          currentVersion: nextVersion,
+          versions: {
+            create: {
+              version: nextVersion,
+              content: target.content,
+              changeNote: `Restored from v${versionNumber}`,
+            },
           },
         },
-      },
-      include: { versions: { orderBy: { version: 'desc' } } },
+        include: { versions: { orderBy: { version: 'desc' } } },
+      });
     });
 
     return NextResponse.json({ solution, restored: true });
