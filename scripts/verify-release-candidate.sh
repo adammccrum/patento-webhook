@@ -288,13 +288,29 @@ ok "solution in the toolbox: ${SOLUTION_NAME:-untitled}"
 
 expect "open solution" 200 GET "/api/solutions/${SOLUTION_ID}"
 
-# With no provider configured the collaborator must decline in plain language,
-# not fall over. 503 is the correct answer; 500 is a defect.
+# With no provider configured the collaborator answers 200 and says plainly
+# that it cannot suggest an improvement. It does not fail, and it does not
+# invent one. 503 is only for a configured provider that could not be reached.
 call POST "/api/solutions/${SOLUTION_ID}/collaborate" \
   '{"intent":"improve","message":"Make this shorter."}'
 case "$CODE" in
-  200) ok "collaborator → 200 (a provider is configured)" ;;
-  503) ok "collaborator → 503, declines honestly with no provider configured" ;;
+  200)
+    REPLY="$(json message.content)" || fail "Collaborator replied with no content"
+    if [[ "$(json degraded || echo false)" == "true" ]]; then
+      json message.proposedContent >/dev/null 2>&1 \
+        && fail "Collaborator proposed content with no provider configured"
+      ok "collaborator → 200, says plainly it cannot suggest an improvement"
+    else
+      ok "collaborator → 200, a provider is configured and answered"
+    fi
+    # Provider independence is not negotiable. The workspace must never name
+    # who served the request.
+    if grep -qiE 'claude|anthropic|openai|gpt-|gemini|llama|qwen|deepseek|mistral' <<<"$REPLY"; then
+      fail "Collaborator reply names a provider: $(head -c 200 <<<"$REPLY")"
+    fi
+    ok "collaborator names no provider"
+    ;;
+  503) ok "collaborator → 503, a configured provider was unreachable" ;;
   *)   fail "collaborator → HTTP ${CODE} :: $(head -c 300 "$BODY_FILE")" ;;
 esac
 
@@ -302,8 +318,15 @@ expect "record a use" 200 POST "/api/solutions/${SOLUTION_ID}/run" '{}'
 
 expect "export my data" 200 GET /api/account/export
 grep -q "$EMAIL" "$BODY_FILE" || fail "Export does not contain the learner's own account"
-grep -q "$SOLUTION_ID" "$BODY_FILE" || fail "Export does not contain the learner's solution"
-ok "export contains the account and its solutions"
+# The export deliberately carries no internal ids — it is for the person, not
+# for re-import — so check it by what they would recognise.
+EXPORTED_NAME="$(json solutions.0.name)" || fail "Export contains no solutions"
+[[ "$EXPORTED_NAME" == "$SOLUTION_NAME" ]] \
+  || fail "Export lists '${EXPORTED_NAME}', expected '${SOLUTION_NAME}'"
+json solutions.0.content >/dev/null || fail "Exported solution has no content"
+json solutions.0.versions.length >/dev/null || fail "Exported solution has no version history"
+json solutions.0.uses.length >/dev/null || fail "Exported solution has no usage history"
+ok "export contains '${EXPORTED_NAME}' with its content, versions and uses"
 
 expect "delete my account" 200 DELETE /api/account "{\"confirmEmail\":\"${EMAIL}\"}"
 
