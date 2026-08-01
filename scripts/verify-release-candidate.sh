@@ -45,6 +45,12 @@ cleanup() {
   if [[ -n "$SERVER_PID" ]] && kill -0 "$SERVER_PID" 2>/dev/null; then
     kill "$SERVER_PID" 2>/dev/null || true
     wait "$SERVER_PID" 2>/dev/null || true
+    # Do not leave until the port is actually free, or the next run probes a
+    # server that is on its way out and reports someone else's results.
+    for _ in $(seq 1 20); do
+      curl -s -o /dev/null --max-time 1 "${BASE}/api/alive" 2>/dev/null || break
+      sleep 0.5
+    done
   fi
   if [[ $status -ne 0 ]]; then
     printf '\n\033[31mRelease candidate verification FAILED at step %d.\033[0m\n' "$STEP"
@@ -177,7 +183,19 @@ ok "production build succeeded"
 
 step "Run"
 
-( cd "${CHECKOUT}/apps/lao-web" && PORT="$PORT" npm run start >"$SERVER_LOG" 2>&1 ) &
+# Refuse to start on an occupied port. Without this, `next start` fails with
+# EADDRINUSE while the probe below cheerfully succeeds against whatever is
+# already listening — and the whole journey then runs against the wrong build.
+# That happened, and it read as a product bug for a good ten minutes.
+if curl -s -o /dev/null --max-time 2 "${BASE}/api/alive" 2>/dev/null; then
+  fail "Something is already listening on ${PORT}. Stop it, or set RC_PORT."
+fi
+
+# `exec` so SERVER_PID is the server itself. Backgrounding `npm run start`
+# leaves npm as the parent and `next start` as a grandchild that survives the
+# kill in cleanup — which is exactly how the stale server above came to exist.
+( cd "${CHECKOUT}/apps/lao-web" && exec ../../node_modules/.bin/next start -p "$PORT" ) \
+  >"$SERVER_LOG" 2>&1 &
 SERVER_PID=$!
 
 for i in $(seq 1 60); do
@@ -186,7 +204,7 @@ for i in $(seq 1 60); do
   [[ $i -eq 60 ]] && fail "Server did not become ready within 60s"
   sleep 1
 done
-ok "server responding on ${BASE}"
+ok "server responding on ${BASE}, pid ${SERVER_PID}"
 
 HEALTH=$(curl -s "${BASE}/api/health")
 echo "$HEALTH" | grep -q '"database"' || fail "Health check does not report on the database"
