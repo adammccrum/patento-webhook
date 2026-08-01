@@ -22,6 +22,16 @@ export const GET = withCapability('solution.read', async (request: Request, { pa
       return NextResponse.json({ error: 'Solution not found' }, { status: 404 });
     }
 
+    // "Solutions opened" is one of the four numbers that say whether we are
+    // becoming indispensable, so opening is recorded — but only for the owner,
+    // since a support visit is not the learner returning.
+    if (solution.userId === principal.userId) {
+      await prisma.solution.update({
+        where: { id: params.id },
+        data: { openCount: { increment: 1 }, lastOpenedAt: new Date() },
+      });
+    }
+
     return NextResponse.json({
       solution,
       collaborator: getCollaboratorPrompt(solution),

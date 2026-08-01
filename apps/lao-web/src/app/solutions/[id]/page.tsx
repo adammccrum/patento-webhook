@@ -21,6 +21,14 @@ interface SolutionRun {
   ranAt: string;
 }
 
+interface ConversationMessage {
+  id: string;
+  role: 'learner' | 'collaborator';
+  content: string;
+  proposedContent: string | null;
+  acceptedVersion: number | null;
+}
+
 interface Solution {
   id: string;
   name: string;
@@ -68,6 +76,13 @@ export default function SolutionWorkspacePage() {
   const [showHistory, setShowHistory] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
 
+  // The conversation
+  const [messages, setMessages] = useState<ConversationMessage[]>([]);
+  const [say, setSay] = useState('');
+  const [talking, setTalking] = useState(false);
+  const [accepting, setAccepting] = useState<string | null>(null);
+  const [degraded, setDegraded] = useState(false);
+
   const load = useCallback(async () => {
     try {
       const response = await fetch(`/api/solutions/${solutionId}`);
@@ -91,9 +106,24 @@ export default function SolutionWorkspacePage() {
     }
   }, [solutionId, router]);
 
+  const loadConversation = useCallback(async () => {
+    try {
+      const response = await fetch(`/api/solutions/${solutionId}/collaborate`);
+      if (response.ok) {
+        const data = await response.json();
+        setMessages(data.messages ?? []);
+      }
+    } catch {
+      // A missing thread should never block the workspace.
+    }
+  }, [solutionId]);
+
   useEffect(() => {
-    if (solutionId) load();
-  }, [solutionId, load]);
+    if (solutionId) {
+      load();
+      loadConversation();
+    }
+  }, [solutionId, load, loadConversation]);
 
   /** Copy the tool and record that it was genuinely used. */
   const handleUse = async () => {
@@ -193,6 +223,70 @@ export default function SolutionWorkspacePage() {
       await load();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
+    }
+  };
+
+  /** Say something to the collaborator about this tool. */
+  const handleSend = async (text: string, intent: string) => {
+    const trimmed = text.trim();
+    if (!trimmed || talking) return;
+
+    setSay('');
+    setTalking(true);
+    setError(null);
+
+    // Show the learner's turn immediately; the reply replaces the optimistic id.
+    const optimistic: ConversationMessage = {
+      id: `pending-${Date.now()}`,
+      role: 'learner',
+      content: trimmed,
+      proposedContent: null,
+      acceptedVersion: null,
+    };
+    setMessages((prev) => [...prev, optimistic]);
+
+    try {
+      const response = await fetch(`/api/solutions/${solutionId}/collaborate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ intent, message: trimmed }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setMessages((prev) => prev.filter((m) => m.id !== optimistic.id));
+        setSay(trimmed);
+        throw new Error(data.error || 'The collaborator is unavailable');
+      }
+
+      setDegraded(Boolean(data.degraded));
+      await loadConversation();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setTalking(false);
+    }
+  };
+
+  /** Accept a proposal — this is what creates a new version. */
+  const handleAccept = async (messageId: string) => {
+    setAccepting(messageId);
+    try {
+      const response = await fetch(`/api/solutions/${solutionId}/collaborate/accept`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messageId }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Could not save that');
+
+      setStatus(`Saved as v${data.version}.`);
+      await Promise.all([load(), loadConversation()]);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setAccepting(null);
     }
   };
 
@@ -304,26 +398,121 @@ export default function SolutionWorkspacePage() {
           <p className="text-slate-600">{solution.problem}</p>
         </div>
 
-        {/* What we've noticed */}
-        {collaborator && (
-          <div className="mb-6 p-4 bg-white border border-slate-200 rounded-lg">
-            <p className="text-sm text-slate-900">{collaborator.observation}</p>
-            <div className="flex items-center justify-between gap-4 mt-1 flex-wrap">
-              <p className="text-sm text-slate-600">{collaborator.question}</p>
-              {!improving && (
-                <button
-                  onClick={() => {
-                    setDraft(solution.content);
-                    setImproving(true);
-                  }}
-                  className="text-sm text-blue-600 font-medium hover:underline whitespace-nowrap"
-                >
-                  Improve it
-                </button>
+        {/* The conversation. This is the product. */}
+        <div className="mb-6 bg-white border border-slate-200 rounded-lg">
+          {collaborator && messages.length === 0 && (
+            <div className="p-4 border-b border-slate-100">
+              <p className="text-sm text-slate-900">{collaborator.observation}</p>
+              <p className="text-sm text-slate-600 mt-1">{collaborator.question}</p>
+            </div>
+          )}
+
+          {messages.length > 0 && (
+            <div className="p-4 space-y-4 max-h-[26rem] overflow-y-auto">
+              {messages.map((m) => (
+                <div key={m.id} className={m.role === 'learner' ? 'text-right' : ''}>
+                  <div
+                    className={`inline-block text-left max-w-[42rem] px-4 py-2 rounded-lg text-sm ${
+                      m.role === 'learner'
+                        ? 'bg-blue-50 text-slate-900'
+                        : 'bg-slate-50 text-slate-800'
+                    }`}
+                  >
+                    <p className="whitespace-pre-wrap">{m.content}</p>
+
+                    {m.proposedContent && (
+                      <div className="mt-3 pt-3 border-t border-slate-200">
+                        {m.acceptedVersion ? (
+                          <p className="text-xs text-green-700 font-medium">
+                            ✓ Saved as v{m.acceptedVersion}
+                          </p>
+                        ) : (
+                          <>
+                            <p className="text-xs font-semibold text-slate-700 mb-2">
+                              Suggested change
+                            </p>
+                            <pre className="text-xs bg-white border border-slate-200 rounded p-3 overflow-x-auto whitespace-pre-wrap font-mono max-h-56">
+                              {m.proposedContent}
+                            </pre>
+                            <div className="flex gap-2 mt-2">
+                              <button
+                                onClick={() => handleAccept(m.id)}
+                                disabled={accepting === m.id}
+                                className="px-3 py-1 bg-blue-500 text-white rounded text-xs font-medium hover:bg-blue-600 disabled:opacity-50"
+                              >
+                                {accepting === m.id ? 'Saving...' : 'Use this'}
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setDraft(m.proposedContent!);
+                                  setImproving(true);
+                                }}
+                                className="px-3 py-1 border border-slate-300 text-slate-700 rounded text-xs hover:bg-slate-100"
+                              >
+                                Edit first
+                              </button>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+              {talking && (
+                <p className="text-sm text-slate-500">Thinking about your {solution.name}...</p>
               )}
             </div>
+          )}
+
+          {/* Openers phrased as things people actually say about their work */}
+          <div className="p-4 border-t border-slate-100">
+            {messages.length === 0 && !talking && (
+              <div className="flex flex-wrap gap-2 mb-3">
+                {[
+                  { label: 'Make this simpler', intent: 'improve' as const },
+                  { label: 'My workflow has changed', intent: 'improve' as const },
+                  { label: "This isn't working right", intent: 'diagnose' as const },
+                  { label: 'How does this work?', intent: 'explain' as const },
+                ].map((s) => (
+                  <button
+                    key={s.label}
+                    onClick={() => handleSend(s.label, s.intent)}
+                    className="px-3 py-1.5 border border-slate-300 rounded-full text-xs text-slate-700 hover:bg-slate-100 transition"
+                  >
+                    {s.label}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            <div className="flex gap-2">
+              <input
+                value={say}
+                onChange={(e) => setSay(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && say.trim() && !talking) handleSend(say, 'improve');
+                }}
+                placeholder="Tell me how it's going..."
+                className="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <button
+                onClick={() => handleSend(say, 'improve')}
+                disabled={talking || !say.trim()}
+                className="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm font-medium hover:bg-blue-600 disabled:opacity-50"
+              >
+                Send
+              </button>
+            </div>
+
+            {degraded && (
+              <p className="text-xs text-slate-500 mt-2">
+                No collaborator is connected right now, so suggestions aren&apos;t available. You
+                can still edit this yourself.
+              </p>
+            )}
           </div>
-        )}
+        </div>
 
         {status && (
           <div className="mb-4 p-3 bg-slate-100 border border-slate-200 rounded-lg">

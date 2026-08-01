@@ -13,6 +13,7 @@ const nextConfig = {
     '@lao/ui',
     '@iriskey/auth',
     '@iriskey/authz',
+    '@iriskey/llm',
     '@iriskey/database',
     '@iriskey/shared',
     '@iriskey/providers',

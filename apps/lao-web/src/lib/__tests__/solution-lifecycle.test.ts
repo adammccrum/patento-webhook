@@ -362,3 +362,169 @@ describe('Collaborator prompts reflect real usage', () => {
     expect(p.observation).toContain('12 times');
   });
 });
+
+describeIfDb('Collaborator persistence', () => {
+  let userId: string;
+
+  beforeAll(async () => {
+    const user = await prisma.user.create({
+      data: { email: `collab-${Date.now()}@test.local` },
+    });
+    userId = user.id;
+  });
+
+  afterAll(async () => {
+    await prisma.user.deleteMany({ where: { id: userId } });
+  });
+
+  async function withConversation() {
+    const solution = await prisma.solution.create({
+      data: {
+        userId,
+        name: 'Email Assistant',
+        problem: 'inbox triage',
+        content: 'v1 content',
+        versions: { create: { version: 1, content: 'v1 content', changeNote: 'Created' } },
+      },
+    });
+    const conversation = await prisma.solutionConversation.create({
+      data: { solutionId: solution.id },
+    });
+    return { solution, conversation };
+  }
+
+  it('keeps one thread per solution, so it outlives a visit', async () => {
+    const { solution } = await withConversation();
+
+    // A second visit reuses the same thread rather than starting over.
+    const again = await prisma.solutionConversation.upsert({
+      where: { solutionId: solution.id },
+      update: {},
+      create: { solutionId: solution.id },
+    });
+
+    const count = await prisma.solutionConversation.count({
+      where: { solutionId: solution.id },
+    });
+    expect(count).toBe(1);
+    expect(again.solutionId).toBe(solution.id);
+  });
+
+  it('records both sides of the conversation in order', async () => {
+    const { conversation } = await withConversation();
+
+    await prisma.solutionMessage.create({
+      data: { conversationId: conversation.id, role: 'learner', content: 'Make this simpler', intent: 'improve' },
+    });
+    await prisma.solutionMessage.create({
+      data: {
+        conversationId: conversation.id,
+        role: 'collaborator',
+        content: 'Shortened it.',
+        proposedContent: 'v2 content',
+        servedByModel: 'scripted:local',
+      },
+    });
+
+    const messages = await prisma.solutionMessage.findMany({
+      where: { conversationId: conversation.id },
+      orderBy: { createdAt: 'asc' },
+    });
+
+    expect(messages.map((m) => m.role)).toEqual(['learner', 'collaborator']);
+    expect(messages[1]?.proposedContent).toBe('v2 content');
+    expect(messages[1]?.acceptedVersion).toBeNull();
+  });
+
+  it('a proposal changes nothing until the learner accepts', async () => {
+    const { solution, conversation } = await withConversation();
+
+    await prisma.solutionMessage.create({
+      data: {
+        conversationId: conversation.id,
+        role: 'collaborator',
+        content: 'Try this.',
+        proposedContent: 'PROPOSED BUT NOT ACCEPTED',
+      },
+    });
+
+    const unchanged = await prisma.solution.findUnique({ where: { id: solution.id } });
+    expect(unchanged?.content).toBe('v1 content');
+    expect(unchanged?.currentVersion).toBe(1);
+  });
+
+  it('accepting a proposal creates a version and marks it accepted', async () => {
+    const { solution, conversation } = await withConversation();
+
+    const message = await prisma.solutionMessage.create({
+      data: {
+        conversationId: conversation.id,
+        role: 'collaborator',
+        content: 'Shortened it.',
+        proposedContent: 'ACCEPTED CONTENT',
+      },
+    });
+
+    // Mirrors the accept route.
+    const updated = await prisma.$transaction(async (tx) => {
+      const latest = await tx.solutionVersion.findFirst({
+        where: { solutionId: solution.id },
+        orderBy: { version: 'desc' },
+        select: { version: true },
+      });
+      const next = (latest?.version ?? solution.currentVersion) + 1;
+
+      const s = await tx.solution.update({
+        where: { id: solution.id },
+        data: {
+          content: 'ACCEPTED CONTENT',
+          currentVersion: next,
+          versions: {
+            create: { version: next, content: 'ACCEPTED CONTENT', changeNote: 'Improved with the collaborator' },
+          },
+        },
+        include: { versions: true },
+      });
+      await tx.solutionMessage.update({
+        where: { id: message.id },
+        data: { acceptedVersion: next },
+      });
+      return s;
+    });
+
+    expect(updated.content).toBe('ACCEPTED CONTENT');
+    expect(updated.currentVersion).toBe(2);
+    // The original is still there — improvement never destroys history.
+    expect(updated.versions.find((v) => v.version === 1)?.content).toBe('v1 content');
+
+    const marked = await prisma.solutionMessage.findUnique({ where: { id: message.id } });
+    expect(marked?.acceptedVersion).toBe(2);
+  });
+
+  it('deleting a solution takes its conversation with it', async () => {
+    const { solution, conversation } = await withConversation();
+    await prisma.solutionMessage.create({
+      data: { conversationId: conversation.id, role: 'learner', content: 'hi' },
+    });
+
+    await prisma.solution.delete({ where: { id: solution.id } });
+
+    expect(await prisma.solutionConversation.count({ where: { solutionId: solution.id } })).toBe(0);
+    expect(await prisma.solutionMessage.count({ where: { conversationId: conversation.id } })).toBe(0);
+  });
+
+  it('counts opens, which is one of the four founder numbers', async () => {
+    const { solution } = await withConversation();
+
+    for (let i = 0; i < 3; i++) {
+      await prisma.solution.update({
+        where: { id: solution.id },
+        data: { openCount: { increment: 1 }, lastOpenedAt: new Date() },
+      });
+    }
+
+    const after = await prisma.solution.findUnique({ where: { id: solution.id } });
+    expect(after?.openCount).toBe(3);
+    expect(after?.lastOpenedAt).not.toBeNull();
+  });
+});

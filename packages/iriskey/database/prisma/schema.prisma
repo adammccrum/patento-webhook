@@ -614,11 +614,60 @@ model Solution {
 
   versions      SolutionVersion[]
   runs          SolutionRun[]
+  conversation  SolutionConversation?
+
+  // Collaborator engagement — how often this solution is opened, which is the
+  // difference between a tool someone owns and one they rely on.
+  openCount     Int      @default(0)
+  lastOpenedAt  DateTime?
 
   @@index([userId])
   @@index([userId, status])
   @@index([lastUsedAt])
   @@index([originMissionId])
+}
+
+// One ongoing conversation per solution. The collaborator is a teammate on
+// this tool, not a chat session, so the thread belongs to the solution and
+// outlives any single visit.
+model SolutionConversation {
+  id            String   @id @default(cuid())
+  solutionId    String   @unique
+  solution      Solution @relation(fields: [solutionId], references: [id], onDelete: Cascade)
+
+  messages      SolutionMessage[]
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([solutionId])
+}
+
+model SolutionMessage {
+  id             String   @id @default(cuid())
+  conversationId String
+  conversation   SolutionConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  // 'learner' or 'collaborator' — never a vendor or model name.
+  role           String
+  content        String
+
+  // What the learner was trying to do: improve, explain, diagnose, draft.
+  intent         String?
+
+  // A revision offered by the collaborator, before the learner decides.
+  proposedContent String?
+
+  // Set to the new version number once the learner accepts a proposal.
+  acceptedVersion Int?
+
+  // Which model served this turn. Operational only; never shown to a learner.
+  servedByModel  String?
+
+  createdAt      DateTime @default(now())
+
+  @@index([conversationId])
+  @@index([createdAt])
 }
 
 // Every solution remembers its own story. Nothing is ever finished.

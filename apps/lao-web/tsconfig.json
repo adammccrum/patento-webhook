@@ -75,6 +75,9 @@
       ],
       "@iriskey/authz": [
         "../../packages/iriskey/authz/src"
+      ],
+      "@iriskey/llm": [
+        "../../packages/iriskey/llm/src"
       ]
     }
   },
