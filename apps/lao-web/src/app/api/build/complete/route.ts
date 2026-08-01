@@ -1,17 +1,12 @@
-import { getSession } from '@/lib/auth';
+import { withCapability, canAccessResourceOf } from '@/lib/authorization';
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 
 // Reads the session from request headers, so it can never be statically rendered.
 export const dynamic = 'force-dynamic';
 
-export async function POST(request: Request) {
+export const POST = withCapability('mission.complete', async (request: Request, { principal }: any) => {
   try {
-    const session = await getSession();
-
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
 
     const body = await request.json();
     const { goalId, stepData, buildDurationMillis, sessionId } = body;
@@ -25,13 +20,13 @@ export async function POST(request: Request) {
       where: { id: goalId },
     });
 
-    if (!goal || goal.userId !== session.user.id) {
+    if (!goal || !canAccessResourceOf(principal, goal.userId)) {
       return NextResponse.json({ error: 'Goal not found' }, { status: 404 });
     }
 
     // Get the mission
     const mission = await prisma.personalMission.findFirst({
-      where: { goalId, userId: session.user.id },
+      where: { goalId, userId: principal.userId },
       orderBy: { createdAt: 'desc' },
     });
 
@@ -43,7 +38,7 @@ export async function POST(request: Request) {
     const asset = await prisma.asset.create({
       data: {
         missionId: mission.id,
-        userId: session.user.id,
+        userId: principal.userId,
         name: 'AI Assistant',
         description: `AI assistant for: ${goal.problem}`,
         type: 'assistant',
@@ -76,7 +71,7 @@ export async function POST(request: Request) {
         where: { sessionId },
         create: {
           sessionId,
-          userId: session.user.id,
+          userId: principal.userId,
           goalId,
           startedAt: new Date(Date.now() - (buildDurationMillis || 0)),
           buildDurationMillis: buildDurationMillis || undefined,
@@ -91,20 +86,20 @@ export async function POST(request: Request) {
 
     // Update learner state
     let learnerState = await prisma.learnerState.findUnique({
-      where: { userId: session.user.id },
+      where: { userId: principal.userId },
     });
 
     if (!learnerState) {
       learnerState = await prisma.learnerState.create({
         data: {
-          userId: session.user.id,
+          userId: principal.userId,
           overallConfidence: 0.7,
           problemsSolved: 1,
         },
       });
     } else {
       await prisma.learnerState.update({
-        where: { userId: session.user.id },
+        where: { userId: principal.userId },
         data: {
           problemsSolved: (learnerState.problemsSolved || 0) + 1,
           overallConfidence: Math.min(1, (learnerState.overallConfidence || 0.5) + 0.2),
@@ -124,4 +119,4 @@ export async function POST(request: Request) {
       { status: 500 }
     );
   }
-}
+});

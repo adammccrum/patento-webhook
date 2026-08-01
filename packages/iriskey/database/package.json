@@ -9,7 +9,8 @@
     "db:studio": "prisma studio",
     "db:push": "prisma db push",
     "db:reset": "prisma migrate reset --force",
-    "seed": "tsx src/seed.ts"
+    "seed": "tsx src/seed.ts",
+    "grant-role": "tsx src/grant-role.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.7.1"

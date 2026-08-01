@@ -25,7 +25,8 @@
     "@iriskey/providers": "*",
     "@iriskey/middleware": "*",
     "axios": "^1.6.2",
-    "zod": "^3.22.4"
+    "zod": "^3.22.4",
+    "@iriskey/authz": "*"
   },
   "devDependencies": {
     "typescript": "^5.3.3",

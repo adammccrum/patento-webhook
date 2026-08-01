@@ -1,4 +1,4 @@
-import { getSession } from '@/lib/auth';
+import { withCapability } from '@/lib/authorization';
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 
@@ -166,13 +166,8 @@ Solve it. You know how.`,
   ],
 };
 
-export async function POST() {
+export const POST = withCapability('content.seed', async (_request: Request) => {
   try {
-    const session = await getSession();
-
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
 
     // Check if Course 1 already exists
     const existingCourse = await prisma.course.findFirst({
@@ -227,4 +222,4 @@ export async function POST() {
       { status: 500 }
     );
   }
-}
+});

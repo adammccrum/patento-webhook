@@ -8,7 +8,7 @@ import { type NextRequest } from 'next/server';
 import { z } from 'zod';
 import { withErrorHandler, ApiResponseBuilder, authError, validationError, toResponse, notFoundError } from '@iriskey/middleware';
 import { getAuditService } from '@iriskey/audit';
-import { requireAuth } from '@/lib/auth';
+import { requireCapability } from '@/lib/authorization';
 import { db } from '@/lib/db';
 
 // Reads the session from request headers, so it can never be statically rendered.
@@ -27,8 +27,8 @@ const updateSettingsSchema = z.object({
  * Get user's settings
  */
 export const GET = withErrorHandler(async (request: NextRequest, ctx) => {
-  const session = await requireAuth();
-  const userId = session.user?.id;
+  const principal = await requireCapability('account.read');
+  const userId = principal.userId;
 
   if (!userId) {
     return authError();
@@ -50,8 +50,8 @@ export const GET = withErrorHandler(async (request: NextRequest, ctx) => {
  * Update user's settings
  */
 export const PUT = withErrorHandler(async (request: NextRequest, ctx) => {
-  const session = await requireAuth();
-  const userId = session.user?.id;
+  const principal = await requireCapability('account.write');
+  const userId = principal.userId;
 
   if (!userId) {
     return authError();

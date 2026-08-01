@@ -1,3 +1,5 @@
+// PUBLIC ROUTE — deliberately requires no capability. See the authorization
+// coverage test, which fails if a route is neither capability-gated nor listed.
 /**
  * Forgot password endpoint
  * Uses IrisKey Platform infrastructure

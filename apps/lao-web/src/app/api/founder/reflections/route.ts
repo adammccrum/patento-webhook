@@ -1,16 +1,12 @@
-import { getSession } from '@/lib/auth';
+import { withCapability } from '@/lib/authorization';
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 
 // Reads the session from request headers, so it can never be statically rendered.
 export const dynamic = 'force-dynamic';
 
-export async function GET(request: Request) {
+export const GET = withCapability('metrics.read', async (request: Request) => {
   try {
-    const session = await getSession();
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
 
     const { searchParams } = new URL(request.url);
     const limit = parseInt(searchParams.get('limit') || '20', 10);
@@ -62,4 +58,4 @@ export async function GET(request: Request) {
       { status: 500 }
     );
   }
-}
+});

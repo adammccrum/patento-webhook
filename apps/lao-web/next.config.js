@@ -12,6 +12,7 @@ const nextConfig = {
   transpilePackages: [
     '@lao/ui',
     '@iriskey/auth',
+    '@iriskey/authz',
     '@iriskey/database',
     '@iriskey/shared',
     '@iriskey/providers',

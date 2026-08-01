@@ -1,17 +1,12 @@
-import { getSession } from '@/lib/auth';
+import { withCapability, canAccessResourceOf } from '@/lib/authorization';
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 
 // Reads the session from request headers, so it can never be statically rendered.
 export const dynamic = 'force-dynamic';
 
-export async function GET(request: Request) {
+export const GET = withCapability('course.read', async (request: Request, { principal }: any) => {
   try {
-    const session = await getSession();
-
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
 
     const { searchParams } = new URL(request.url);
     const goalId = searchParams.get('goalId');
@@ -28,13 +23,13 @@ export async function GET(request: Request) {
       },
     });
 
-    if (!goal || goal.userId !== session.user.id) {
+    if (!goal || !canAccessResourceOf(principal, goal.userId)) {
       return NextResponse.json({ error: 'Goal not found' }, { status: 404 });
     }
 
     // Check if conversation exists
     let conversation = await prisma.coachConversation.findFirst({
-      where: { goalId, userId: session.user.id },
+      where: { goalId, userId: principal.userId },
       orderBy: { createdAt: 'desc' },
     });
 
@@ -42,7 +37,7 @@ export async function GET(request: Request) {
     if (!conversation) {
       conversation = await prisma.coachConversation.create({
         data: {
-          userId: session.user.id,
+          userId: principal.userId,
           goalId,
           step: 0,
           messages: JSON.stringify([]),
@@ -68,4 +63,4 @@ Let's understand it better: **How much time does this actually take you?** Is it
       { status: 500 }
     );
   }
-}
+});

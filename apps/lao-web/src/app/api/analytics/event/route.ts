@@ -1,4 +1,4 @@
-import { getSession } from '@/lib/auth';
+import { withCapability } from '@/lib/authorization';
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 
@@ -14,7 +14,7 @@ interface AnalyticsEventPayload {
   metadata?: Record<string, any>;
 }
 
-export async function POST(request: Request) {
+export const POST = withCapability('account.read', async (request: Request, { principal }: any) => {
   try {
     const body: AnalyticsEventPayload = await request.json();
     const { eventType, sessionId, userId, goalId, timestamp, metadata } = body;
@@ -23,34 +23,36 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    // Verify user is authenticated (but don't require it - some events may come from unauthenticated flow)
-    const session = await getSession();
-    if (session?.user?.id && session.user.id !== userId) {
+    // Events are always attributed to the caller, never to whoever the body
+    // claims. A learner cannot write events into someone else's history.
+    if (principal.userId !== userId) {
       return NextResponse.json({ error: 'User mismatch' }, { status: 403 });
     }
 
-    // Store event in database
-    // Create table if needed: AnalyticsEvent
-    // For now, log to console as placeholder
-    console.log(`[ANALYTICS] ${eventType}`, {
-      sessionId,
-      userId,
-      goalId,
-      timestamp,
-      metadata,
-    });
+    // goalId is a real foreign key; a stale one from the client would fail the
+    // insert and lose the event, so only keep it if the goal still exists and
+    // belongs to this learner.
+    const linkedGoalId = goalId
+      ? (
+          await prisma.learnerGoal.findFirst({
+            where: { id: goalId, userId: principal.userId },
+            select: { id: true },
+          })
+        )?.id ?? null
+      : null;
 
-    // TODO: Persist to AnalyticsEvent table
-    // await prisma.analyticsEvent.create({
-    //   data: {
-    //     eventType,
-    //     sessionId,
-    //     userId,
-    //     goalId,
-    //     timestamp: new Date(timestamp),
-    //     metadata: metadata || {},
-    //   },
-    // });
+    await prisma.analyticsEvent.create({
+      data: {
+        eventType,
+        sessionId,
+        userId: principal.userId,
+        goalId: linkedGoalId,
+        metadata: metadata ?? {},
+        // The client's clock is not trusted for ordering, but the reported
+        // time is worth keeping alongside the server's own createdAt.
+        ...(timestamp ? { metadata: { ...(metadata ?? {}), clientTimestamp: timestamp } } : {}),
+      },
+    });
 
     return NextResponse.json({ success: true });
   } catch (error) {
@@ -58,4 +60,4 @@ export async function POST(request: Request) {
     // Never fail the event - analytics should never impact learner experience
     return NextResponse.json({ success: true });
   }
-}
+});

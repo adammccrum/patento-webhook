@@ -1,17 +1,12 @@
-import { getSession } from '@/lib/auth';
+import { withCapability, canAccessResourceOf } from '@/lib/authorization';
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 
 // Reads the session from request headers, so it can never be statically rendered.
 export const dynamic = 'force-dynamic';
 
-export async function POST(request: Request) {
+export const POST = withCapability('mission.complete', async (request: Request, { principal }: any) => {
   try {
-    const session = await getSession();
-
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
 
     const body = await request.json();
     const { goalId, messages, recommendation, step } = body;
@@ -25,7 +20,7 @@ export async function POST(request: Request) {
       where: { id: goalId },
     });
 
-    if (!goal || goal.userId !== session.user.id) {
+    if (!goal || !canAccessResourceOf(principal, goal.userId)) {
       return NextResponse.json({ error: 'Goal not found' }, { status: 404 });
     }
 
@@ -33,7 +28,7 @@ export async function POST(request: Request) {
     await prisma.coachConversation.updateMany({
       where: {
         goalId,
-        userId: session.user.id,
+        userId: principal.userId,
       },
       data: {
         messages: JSON.stringify(messages),
@@ -48,7 +43,7 @@ export async function POST(request: Request) {
       mission = await prisma.personalMission.create({
         data: {
           goalId,
-          userId: session.user.id,
+          userId: principal.userId,
           title: 'Solve Your First Real Problem with AI',
           problemArea: 'general',
           solutionType: 'AIAssistant',
@@ -77,4 +72,4 @@ export async function POST(request: Request) {
       { status: 500 }
     );
   }
-}
+});

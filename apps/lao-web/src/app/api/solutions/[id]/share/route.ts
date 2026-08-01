@@ -1,4 +1,4 @@
-import { getSession } from '@/lib/auth';
+import { withCapability, canAccessResourceOf } from '@/lib/authorization';
 import { prisma } from '@/lib/prisma';
 import { generateShareId } from '@/lib/solutions';
 import { NextResponse } from 'next/server';
@@ -7,20 +7,12 @@ import { NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
 
 /** Publish a read-only link to this solution, or withdraw one. */
-export async function POST(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export const POST = withCapability('solution.share', async (request: Request, { params, principal }: any) => {
   try {
-    const session = await getSession();
-
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
 
     const existing = await prisma.solution.findUnique({ where: { id: params.id } });
 
-    if (!existing || existing.userId !== session.user.id) {
+    if (!existing || !canAccessResourceOf(principal, existing.userId)) {
       return NextResponse.json({ error: 'Solution not found' }, { status: 404 });
     }
 
@@ -43,4 +35,4 @@ export async function POST(
     console.error('Error updating sharing:', error);
     return NextResponse.json({ error: 'Failed to update sharing' }, { status: 500 });
   }
-}
+});

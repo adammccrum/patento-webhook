@@ -1,4 +1,4 @@
-import { getSession } from '@/lib/auth';
+import { withCapability, canAccessResourceOf } from '@/lib/authorization';
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 
@@ -15,13 +15,8 @@ function detectConfidenceLanguage(text: string): boolean {
   return confidenceIndicators.some(indicator => lowerText.includes(indicator));
 }
 
-export async function POST(request: Request) {
+export const POST = withCapability('mission.complete', async (request: Request, { principal }: any) => {
   try {
-    const session = await getSession();
-
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
 
     const body = await request.json();
     const { goalId, reflection, ttftMillis, sessionId } = body;
@@ -35,13 +30,13 @@ export async function POST(request: Request) {
       where: { id: goalId },
     });
 
-    if (!goal || goal.userId !== session.user.id) {
+    if (!goal || !canAccessResourceOf(principal, goal.userId)) {
       return NextResponse.json({ error: 'Goal not found' }, { status: 404 });
     }
 
     // Get the mission
     const mission = await prisma.personalMission.findFirst({
-      where: { goalId, userId: session.user.id, status: 'completed' },
+      where: { goalId, userId: principal.userId, status: 'completed' },
       orderBy: { createdAt: 'desc' },
     });
 
@@ -54,7 +49,7 @@ export async function POST(request: Request) {
       data: {
         missionId: mission.id,
         goalId,
-        userId: session.user.id,
+        userId: principal.userId,
         problemSolved: goal.problem,
         solutionCreated: 'AI Assistant',
         reflection,
@@ -69,7 +64,7 @@ export async function POST(request: Request) {
       await prisma.sessionMetrics.create({
         data: {
           sessionId,
-          userId: session.user.id,
+          userId: principal.userId,
           goalId,
           confidenceBefore: 0.5, // Default baseline (should be from session start event)
           confidenceAfter: 0.75, // Post-reflection confidence (detected from reflection text)
@@ -106,4 +101,4 @@ export async function POST(request: Request) {
       { status: 500 }
     );
   }
-}
+});

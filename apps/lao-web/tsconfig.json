@@ -1,7 +1,11 @@
 {
   "compilerOptions": {
     "target": "ES2020",
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "lib": [
+      "ES2020",
+      "DOM",
+      "DOM.Iterable"
+    ],
     "module": "ESNext",
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
@@ -14,27 +18,74 @@
     "forceConsistentCasingInFileNames": true,
     "esModuleInterop": true,
     "incremental": true,
-    "plugins": [{ "name": "next" }],
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"],
-      "@iriskey/auth": ["../../packages/iriskey/auth/src"],
-      "@iriskey/database": ["../../packages/iriskey/database/src"],
-      "@iriskey/shared": ["../../packages/iriskey/shared/src"],
-      "@iriskey/providers": ["../../packages/iriskey/providers/src"],
-      "@iriskey/contracts": ["../../packages/iriskey/contracts/src"],
-      "@iriskey/config": ["../../packages/iriskey/config/src"],
-      "@iriskey/events": ["../../packages/iriskey/events/src"],
-      "@iriskey/audit": ["../../packages/iriskey/audit/src"],
-      "@iriskey/middleware": ["../../packages/iriskey/middleware/src"],
-      "@iriskey/security": ["../../packages/iriskey/security/src"],
-      "@iriskey/ratelimit": ["../../packages/iriskey/ratelimit/src"],
-      "@iriskey/monitoring": ["../../packages/iriskey/monitoring/src"],
-      "@iriskey/queue": ["../../packages/iriskey/queue/src"],
-      "@iriskey/cache": ["../../packages/iriskey/cache/src"],
-      "@lao/ui": ["../../packages/lao/ui/src"]
+      "@/*": [
+        "./src/*"
+      ],
+      "@iriskey/auth": [
+        "../../packages/iriskey/auth/src"
+      ],
+      "@iriskey/database": [
+        "../../packages/iriskey/database/src"
+      ],
+      "@iriskey/shared": [
+        "../../packages/iriskey/shared/src"
+      ],
+      "@iriskey/providers": [
+        "../../packages/iriskey/providers/src"
+      ],
+      "@iriskey/contracts": [
+        "../../packages/iriskey/contracts/src"
+      ],
+      "@iriskey/config": [
+        "../../packages/iriskey/config/src"
+      ],
+      "@iriskey/events": [
+        "../../packages/iriskey/events/src"
+      ],
+      "@iriskey/audit": [
+        "../../packages/iriskey/audit/src"
+      ],
+      "@iriskey/middleware": [
+        "../../packages/iriskey/middleware/src"
+      ],
+      "@iriskey/security": [
+        "../../packages/iriskey/security/src"
+      ],
+      "@iriskey/ratelimit": [
+        "../../packages/iriskey/ratelimit/src"
+      ],
+      "@iriskey/monitoring": [
+        "../../packages/iriskey/monitoring/src"
+      ],
+      "@iriskey/queue": [
+        "../../packages/iriskey/queue/src"
+      ],
+      "@iriskey/cache": [
+        "../../packages/iriskey/cache/src"
+      ],
+      "@lao/ui": [
+        "../../packages/lao/ui/src"
+      ],
+      "@iriskey/authz": [
+        "../../packages/iriskey/authz/src"
+      ]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules", ".next"]
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    ".next"
+  ]
 }

@@ -6,7 +6,7 @@
 
 import { type NextRequest } from 'next/server';
 import { withErrorHandler, ApiResponseBuilder, authError, toResponse, notFoundError } from '@iriskey/middleware';
-import { requireAuth } from '@/lib/auth';
+import { requireCapability } from '@/lib/authorization';
 import { db } from '@/lib/db';
 
 // Reads the session from request headers, so it can never be statically rendered.
@@ -17,8 +17,8 @@ export const dynamic = 'force-dynamic';
  * Get user's credit details
  */
 export const GET = withErrorHandler(async (request: NextRequest, ctx) => {
-  const session = await requireAuth();
-  const userId = session.user?.id;
+  const principal = await requireCapability('credits.read');
+  const userId = principal.userId;
 
   if (!userId) {
     return authError();

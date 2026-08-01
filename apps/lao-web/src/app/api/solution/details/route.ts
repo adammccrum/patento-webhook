@@ -1,17 +1,12 @@
-import { getSession } from '@/lib/auth';
+import { withCapability, canAccessResourceOf } from '@/lib/authorization';
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 
 // Reads the session from request headers, so it can never be statically rendered.
 export const dynamic = 'force-dynamic';
 
-export async function GET(request: Request) {
+export const GET = withCapability('solution.read', async (request: Request, { principal }: any) => {
   try {
-    const session = await getSession();
-
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
 
     const { searchParams } = new URL(request.url);
     const goalId = searchParams.get('goalId');
@@ -25,13 +20,13 @@ export async function GET(request: Request) {
       where: { id: goalId },
     });
 
-    if (!goal || goal.userId !== session.user.id) {
+    if (!goal || !canAccessResourceOf(principal, goal.userId)) {
       return NextResponse.json({ error: 'Goal not found' }, { status: 404 });
     }
 
     // Get the associated mission
     const mission = await prisma.personalMission.findFirst({
-      where: { goalId, userId: session.user.id },
+      where: { goalId, userId: principal.userId },
       orderBy: { createdAt: 'desc' },
     });
 
@@ -50,4 +45,4 @@ export async function GET(request: Request) {
       { status: 500 }
     );
   }
-}
+});

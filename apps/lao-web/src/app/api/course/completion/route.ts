@@ -1,17 +1,12 @@
-import { getSession } from '@/lib/auth';
+import { withCapability } from '@/lib/authorization';
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 
 // Reads the session from request headers, so it can never be statically rendered.
 export const dynamic = 'force-dynamic';
 
-export async function POST(request: Request) {
+export const POST = withCapability('mission.complete', async (request: Request, { principal }: any) => {
   try {
-    const session = await getSession();
-
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
 
     const { courseId, successAnswer } = await request.json();
 
@@ -26,7 +21,7 @@ export async function POST(request: Request) {
     const enrollment = await prisma.courseEnrollment.findUnique({
       where: {
         userId_courseId: {
-          userId: session.user.id,
+          userId: principal.userId,
           courseId,
         },
       },
@@ -43,7 +38,7 @@ export async function POST(request: Request) {
     const updatedEnrollment = await prisma.courseEnrollment.update({
       where: {
         userId_courseId: {
-          userId: session.user.id,
+          userId: principal.userId,
           courseId,
         },
       },
@@ -55,7 +50,7 @@ export async function POST(request: Request) {
     });
 
     // Log the success answer
-    console.log(`Course ${courseId} completed by user ${session.user.id}. Success answer: ${successAnswer}`);
+    console.log(`Course ${courseId} completed by user ${principal.userId}. Success answer: ${successAnswer}`);
 
     return NextResponse.json(
       {
@@ -71,4 +66,4 @@ export async function POST(request: Request) {
       { status: 500 }
     );
   }
-}
+});

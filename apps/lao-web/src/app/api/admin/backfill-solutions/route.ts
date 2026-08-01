@@ -1,4 +1,4 @@
-import { getSession } from '@/lib/auth';
+import { withCapability } from '@/lib/authorization';
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 
@@ -21,15 +21,10 @@ interface LegacyToolkitItem {
  *
  * Safe to run more than once: a mission that already has a Solution is skipped.
  */
-export async function POST() {
+export const POST = withCapability('data.backfill', async (_request: Request, { principal }: any) => {
   try {
-    const session = await getSession();
 
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const userId = session.user.id;
+    const userId = principal.userId;
 
     const enrollments = await prisma.courseEnrollment.findMany({ where: { userId } });
 
@@ -96,4 +91,4 @@ export async function POST() {
     console.error('Error backfilling solutions:', error);
     return NextResponse.json({ error: 'Failed to backfill solutions' }, { status: 500 });
   }
-}
+});

@@ -1,4 +1,4 @@
-import { getSession } from '@/lib/auth';
+import { withCapability } from '@/lib/authorization';
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 
@@ -6,13 +6,8 @@ import { NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
 
 /** The toolbox: every solution this learner owns, most recently used first. */
-export async function GET(request: Request) {
+export const GET = withCapability('solution.read', async (request: Request, { principal }: any) => {
   try {
-    const session = await getSession();
-
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
 
     const { searchParams } = new URL(request.url);
 
@@ -39,7 +34,7 @@ export async function GET(request: Request) {
 
     const solutions = await prisma.solution.findMany({
       where: {
-        userId: session.user.id,
+        userId: principal.userId,
         ...(status === 'all' ? {} : { status }),
         ...(area && area !== 'All' ? { problemArea: area } : {}),
         ...(search
@@ -72,12 +67,12 @@ export async function GET(request: Request) {
     // The summary describes the whole toolbox, not the current filter, so the
     // headline numbers don't shift while searching.
     const all = await prisma.solution.findMany({
-      where: { userId: session.user.id, status: 'active' },
+      where: { userId: principal.userId, status: 'active' },
       select: { useCount: true, timeSavedMinutes: true, totalTimeSavedMinutes: true },
     });
 
     const areas = await prisma.solution.findMany({
-      where: { userId: session.user.id },
+      where: { userId: principal.userId },
       select: { problemArea: true },
       distinct: ['problemArea'],
       orderBy: { problemArea: 'asc' },
@@ -95,7 +90,7 @@ export async function GET(request: Request) {
         ),
         totalTimeSaved: all.reduce((t, s) => t + s.totalTimeSavedMinutes, 0),
         archived: await prisma.solution.count({
-          where: { userId: session.user.id, status: 'archived' },
+          where: { userId: principal.userId, status: 'archived' },
         }),
       },
     });
@@ -103,16 +98,11 @@ export async function GET(request: Request) {
     console.error('Error listing solutions:', error);
     return NextResponse.json({ error: 'Failed to load solutions' }, { status: 500 });
   }
-}
+});
 
 /** Create a solution directly in the toolbox, outside any course. */
-export async function POST(request: Request) {
+export const POST = withCapability('solution.write', async (request: Request, { principal }: any) => {
   try {
-    const session = await getSession();
-
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
 
     const { name, problem, problemArea, content, timeSavedMinutes } = await request.json();
 
@@ -125,7 +115,7 @@ export async function POST(request: Request) {
 
     const solution = await prisma.solution.create({
       data: {
-        userId: session.user.id,
+        userId: principal.userId,
         name: name.trim(),
         problem: problem.trim(),
         problemArea: problemArea?.trim() || 'General',
@@ -146,4 +136,4 @@ export async function POST(request: Request) {
     console.error('Error creating solution:', error);
     return NextResponse.json({ error: 'Failed to create solution' }, { status: 500 });
   }
-}
+});

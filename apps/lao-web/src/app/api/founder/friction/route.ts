@@ -1,4 +1,4 @@
-import { getSession } from '@/lib/auth';
+import { withCapability } from '@/lib/authorization';
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 
@@ -12,12 +12,8 @@ interface FrictionIssue {
   recommendation: string;
 }
 
-export async function GET() {
+export const GET = withCapability('metrics.read', async (_request: Request) => {
   try {
-    const session = await getSession();
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
 
     const issues: FrictionIssue[] = [];
 
@@ -146,4 +142,4 @@ export async function GET() {
       { status: 500 }
     );
   }
-}
+});

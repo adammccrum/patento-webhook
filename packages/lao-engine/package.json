@@ -1,7 +1,7 @@
 {
   "name": "@lao/engine",
   "version": "0.1.0",
-  "description": "LAO Intelligence Engine - Core learning platform",
+  "description": "IrisKey Core (frozen). See FROZEN.md - preserved and kept green, not developed, not consumed by LAO.",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

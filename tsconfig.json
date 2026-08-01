@@ -75,6 +75,9 @@
       ],
       "@lao/ui": [
         "packages/lao/ui/src"
+      ],
+      "@iriskey/authz": [
+        "packages/iriskey/authz/src"
       ]
     },
     "jsx": "react-jsx"

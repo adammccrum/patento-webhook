@@ -18,8 +18,8 @@ Before this sprint the repository could not be installed, built, type-checked, t
 | `prisma generate` | ❌ schema invalid | ✅ (automatic via `postinstall`) |
 | `prisma migrate deploy` | ❌ never worked | ✅ verified against PostgreSQL 16 |
 | `npm run build` | ❌ syntax + type errors | ✅ 2/2 tasks |
-| `turbo run type-check` | ❌ 15/15 failing | ✅ 15/15 |
-| `turbo run test` | ❌ no runner existed | ✅ 8/8 tasks, 188 tests |
+| `turbo run type-check` | ❌ 15/15 failing | ✅ 16/16 |
+| `turbo run test` | ❌ no runner existed | ✅ 9/9 tasks, 234 tests |
 
 **Maturity by area:**
 
@@ -27,33 +27,29 @@ Before this sprint the repository could not be installed, built, type-checked, t
 |---|---|---|
 | Solution toolbox (the product) | **Beta-ready** | Full lifecycle, 17 integration tests against a real DB |
 | Course → mission → solution flow | **Alpha** | Works end to end; no automated coverage |
-| Auth | **Alpha** | Functional; authorization gaps below |
+| Auth & authorization | **Beta-ready** | Central policy engine; all 38 routes gated, enforced by test |
 | Platform packages (`@iriskey/*`) | **Mixed** | Some solid, some unused, one was silently inert |
-| `lao-engine` | **Orphaned** | 111 passing tests, zero integration, no persistence |
-| Analytics / founder metrics | **Non-functional** | Writes are commented out; dashboards are always empty |
+| `lao-engine` | **Frozen** | Preserved as IrisKey Core; kept green, not consumed |
+| Analytics / founder metrics | **Alpha** | Events now persist; dashboards need real traffic to validate |
 | LLM collaborator | **Not started** | No provider integration exists anywhere |
 
 ---
 
 ## 2. Known blockers
 
-Ordered by severity. The first three block public beta outright.
+Ordered by severity. B1 and B2 were resolved after this review was first written; they are kept, struck through, so the delta is auditable.
 
-### B1. Admin and founder endpoints check authentication, not authorization — **critical**
+### ~~B1. Admin and founder endpoints check authentication, not authorization~~ — **RESOLVED**
 
-`/api/admin/seed-course-1`, `/api/admin/backfill-solutions` and all five `/api/founder/*` routes check only `session?.user?.id`. Any registered user can:
+Was: `/api/admin/*` and all five `/api/founder/*` routes checked only `session?.user?.id`, so any registered user could re-seed the course, run backfills, or read company-wide metrics.
 
-- re-seed Course 1,
-- run the solutions backfill,
-- read company-wide metrics intended for the founder.
+Now: a central policy engine (`@iriskey/authz`). All 38 API routes either declare a required capability or sit on an explicit public allowlist, enforced by a test that fails the build otherwise. Roles are data (grantable without a deploy); capabilities are code (changeable only under review). `admin` and `founder` are separated — operating the platform and reading the company's numbers are different jobs. See `AUTHORIZATION.md`.
 
-A `Role` model exists in the schema but no route consults it. **Not fixed in this sprint** because it requires deciding the authorization model (role names, assignment, seeding) — that is a product decision, not a mechanical fix.
+### ~~B2. Analytics are never persisted~~ — **RESOLVED**
 
-### B2. Analytics are never persisted — **critical for the stated KPI**
+Was: `/api/analytics/event` logged to `console.log` with the database write commented out, while three founder dashboards read that table — so they returned zeroes and always had.
 
-`/api/analytics/event` logs to `console.log` and the database write is commented out (`// TODO: Persist to AnalyticsEvent table`). Meanwhile `/api/founder/funnel`, `/api/founder/friction` and `/api/founder/today` all *read* `analyticsEvent`.
-
-Consequence: the founder dashboards that answer "Who changed their life last week?" return zeroes and always have. The metric the company says it is run by is not being collected.
+Now: events are written to `AnalyticsEvent`, attributed to the authenticated caller rather than to whatever `userId` the request body claims. A stale `goalId` is dropped rather than failing the insert and losing the event.
 
 ### B3. No LLM provider exists — **blocks the collaborator**
 
@@ -71,13 +67,19 @@ No `.github/workflows`, no pipeline of any kind. Everything verified in this spr
 
 ## 3. Architectural weaknesses
 
-### W1. `lao-engine` is a parallel universe
+### W1. `lao-engine` — frozen as IrisKey Core
+
+**Resolved by decision, 2026-08-01:** frozen, not developed, not deleted, not consumed. See `packages/lao-engine/FROZEN.md`. A guard test fails if the product imports it. Real learner behaviour decides when Core becomes necessary.
+
+The original finding follows, for context.
+
+### W1a. Why it was flagged
 
 `packages/lao-engine` contains a well-structured event-sourced domain model — aggregates, an event store, a knowledge-state service, 111 passing tests. It is **imported by nothing**. Its only repository implementations are `MockRepositories` (in-memory); there is no database-backed repository. It was not even a workspace member until this sprint, so its tests had never run.
 
 This is the single largest architectural liability: a substantial, tested body of domain logic that has no path to production, sitting alongside an app that reimplements simpler versions of the same concepts directly against Prisma.
 
-**Decision needed:** integrate it, or retire it. Maintaining both is the worst option.
+**Decision taken:** frozen. Preserved and kept green; no speculative integration.
 
 ### W2. Two parallel learning models
 
@@ -163,10 +165,10 @@ What is missing:
 
 | ID | Debt | Impact | Effort |
 |---|---|---|---|
-| T1 | `lao-engine` unintegrated, mock-only persistence | High | Large |
+| ~~T1~~ | `lao-engine` unintegrated | — | **Frozen as IrisKey Core** |
 | T2 | Two parallel learning models (goal-based vs course-based) | High | Medium |
-| T3 | Analytics not persisted; founder dashboards empty | High | Small |
-| T4 | Admin/founder routes lack role checks | High | Small |
+| ~~T3~~ | Analytics not persisted | — | **Fixed** |
+| ~~T4~~ | Admin/founder routes lack role checks | — | **Fixed — central policy engine** |
 | T5 | No CI | High | Small |
 | T6 | `toolkitItems` JSON duplicates the `Solution` table | Medium | Small |
 | T7 | Packages ship raw TS with no build | Medium | Medium |
@@ -208,8 +210,8 @@ Assumes one engineer, and that "public beta" means real users on real data witho
 
 | Work | Estimate |
 |---|---|
-| Role-based authorization for admin/founder routes (B1, T4) | 3 days |
-| Persist analytics; verify founder dashboards populate (B2, T3) | 2 days |
+| ~~Role-based authorization (B1, T4)~~ | **done** |
+| ~~Persist analytics (B2, T3)~~ | **done** |
 | CI: install, migrate, type-check, test, build on every PR (B4, T5) | 2 days |
 | Secret validation at boot; regenerate example secrets (B5) | 1 day |
 | LLM provider layer per the specification, one provider live (B3) | 5–8 days |
@@ -221,7 +223,7 @@ Assumes one engineer, and that "public beta" means real users on real data witho
 
 | Work | Estimate |
 |---|---|
-| Decide and act on `lao-engine`: integrate or retire (T1) | 5 days (retire) / 3+ weeks (integrate) |
+| ~~Decide on `lao-engine`~~ | **done — frozen** |
 | Retire or finish the goal-based flow (T2) | 3 days |
 | Replace hard-coded transformation stories with real, consented ones (T10) | 2 days |
 | Drop `toolkitItems` JSON in favour of `Solution` (T6) | 1 day |
@@ -230,8 +232,7 @@ Assumes one engineer, and that "public beta" means real users on real data witho
 
 ### Realistic call
 
-**6–8 weeks to public beta** if `lao-engine` is retired and the goal-based flow is removed.
-**10–14 weeks** if `lao-engine` is integrated.
+**4–6 weeks to public beta.** Authorization, analytics and the engine decision are done, which removed roughly two weeks and the single largest open question. What remains before users: the LLM collaborator, CI, secret validation, rate limits on Solution endpoints, and a deployment rehearsal.
 
 The toolbox itself — the thing the founder identified as the product — is the most solid part of the codebase and is close to beta-ready. What stands between it and users is authorization, measurement, CI, and the collaborator.
 

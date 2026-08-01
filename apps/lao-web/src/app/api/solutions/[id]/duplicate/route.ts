@@ -1,4 +1,4 @@
-import { getSession } from '@/lib/auth';
+import { withCapability, canAccessResourceOf } from '@/lib/authorization';
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 
@@ -11,20 +11,12 @@ export const dynamic = 'force-dynamic';
  * The copy starts fresh: its own version 1, no usage history, not shared.
  * Useful when a tool almost fits a second job but shouldn't change for the first.
  */
-export async function POST(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export const POST = withCapability('solution.write', async (request: Request, { params, principal }: any) => {
   try {
-    const session = await getSession();
-
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
 
     const source = await prisma.solution.findUnique({ where: { id: params.id } });
 
-    if (!source || source.userId !== session.user.id) {
+    if (!source || !canAccessResourceOf(principal, source.userId)) {
       return NextResponse.json({ error: 'Solution not found' }, { status: 404 });
     }
 
@@ -36,7 +28,7 @@ export async function POST(
 
     const solution = await prisma.solution.create({
       data: {
-        userId: session.user.id,
+        userId: principal.userId,
         name,
         problem: source.problem,
         problemArea: source.problemArea,
@@ -60,4 +52,4 @@ export async function POST(
     console.error('Error duplicating solution:', error);
     return NextResponse.json({ error: 'Failed to duplicate solution' }, { status: 500 });
   }
-}
+});

@@ -1,0 +1,22 @@
+{
+  "name": "@iriskey/authz",
+  "version": "0.1.0",
+  "private": true,
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "description": "IrisKey Platform - Central authorization policy engine",
+  "scripts": {
+    "lint": "eslint src",
+    "type-check": "tsc --noEmit",
+    "test": "jest --forceExit"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.7.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.2",
+    "@types/jest": "^29.5.11"
+  }
+}

@@ -1,17 +1,12 @@
-import { getSession } from '@/lib/auth';
+import { withCapability } from '@/lib/authorization';
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 
 // Reads the session from request headers, so it can never be statically rendered.
 export const dynamic = 'force-dynamic';
 
-export async function POST(request: Request) {
+export const POST = withCapability('mission.complete', async (request: Request, { principal }: any) => {
   try {
-    const session = await getSession();
-
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
 
     const { missionId, courseId, reflection, problem, content } = await request.json();
 
@@ -35,7 +30,7 @@ export async function POST(request: Request) {
     let enrollment = await prisma.courseEnrollment.findUnique({
       where: {
         userId_courseId: {
-          userId: session.user.id,
+          userId: principal.userId,
           courseId,
         },
       },
@@ -86,7 +81,7 @@ export async function POST(request: Request) {
 
     const solution = await prisma.solution.create({
       data: {
-        userId: session.user.id,
+        userId: principal.userId,
         name: mission.toolkitName,
         problem:
           typeof problem === 'string' && problem.trim() ? problem.trim() : mission.description,
@@ -110,7 +105,7 @@ export async function POST(request: Request) {
     const updatedEnrollment = await prisma.courseEnrollment.update({
       where: {
         userId_courseId: {
-          userId: session.user.id,
+          userId: principal.userId,
           courseId,
         },
       },
@@ -127,7 +122,7 @@ export async function POST(request: Request) {
     });
 
     // Log the reflection (could also save to SessionMetrics or a dedicated reflection table)
-    console.log(`Mission ${missionId} completed by user ${session.user.id}. Reflection: ${reflection}`);
+    console.log(`Mission ${missionId} completed by user ${principal.userId}. Reflection: ${reflection}`);
 
     return NextResponse.json(
       {
@@ -144,4 +139,4 @@ export async function POST(request: Request) {
       { status: 500 }
     );
   }
-}
+});

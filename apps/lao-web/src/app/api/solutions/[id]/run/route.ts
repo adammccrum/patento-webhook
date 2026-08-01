@@ -1,4 +1,4 @@
-import { getSession } from '@/lib/auth';
+import { withCapability, canAccessResourceOf } from '@/lib/authorization';
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 
@@ -12,20 +12,12 @@ export const dynamic = 'force-dynamic';
  * and it is the difference between a finished assignment and a tool someone
  * relies on.
  */
-export async function POST(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export const POST = withCapability('solution.write', async (request: Request, { params, principal }: any) => {
   try {
-    const session = await getSession();
-
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
 
     const existing = await prisma.solution.findUnique({ where: { id: params.id } });
 
-    if (!existing || existing.userId !== session.user.id) {
+    if (!existing || !canAccessResourceOf(principal, existing.userId)) {
       return NextResponse.json({ error: 'Solution not found' }, { status: 404 });
     }
 
@@ -61,4 +53,4 @@ export async function POST(
     console.error('Error recording solution run:', error);
     return NextResponse.json({ error: 'Failed to record use' }, { status: 500 });
   }
-}
+});

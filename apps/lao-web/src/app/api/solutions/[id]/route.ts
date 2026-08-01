@@ -1,4 +1,4 @@
-import { getSession } from '@/lib/auth';
+import { withCapability, canAccessResourceOf } from '@/lib/authorization';
 import { prisma } from '@/lib/prisma';
 import { getCollaboratorPrompt } from '@/lib/solutions';
 import { NextResponse } from 'next/server';
@@ -7,16 +7,8 @@ import { NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
 
 /** The workspace: the solution, its story, and what we've noticed about it. */
-export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export const GET = withCapability('solution.read', async (request: Request, { params, principal }: any) => {
   try {
-    const session = await getSession();
-
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
 
     const solution = await prisma.solution.findUnique({
       where: { id: params.id },
@@ -26,7 +18,7 @@ export async function GET(
       },
     });
 
-    if (!solution || solution.userId !== session.user.id) {
+    if (!solution || !canAccessResourceOf(principal, solution.userId)) {
       return NextResponse.json({ error: 'Solution not found' }, { status: 404 });
     }
 
@@ -38,7 +30,7 @@ export async function GET(
     console.error('Error loading solution:', error);
     return NextResponse.json({ error: 'Failed to load solution' }, { status: 500 });
   }
-}
+});
 
 /**
  * Update a solution.
@@ -47,20 +39,12 @@ export async function GET(
  * different — that is the solution evolving, so it always creates a new
  * version and leaves the old one intact.
  */
-export async function PATCH(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export const PATCH = withCapability('solution.write', async (request: Request, { params, principal }: any) => {
   try {
-    const session = await getSession();
-
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
 
     const existing = await prisma.solution.findUnique({ where: { id: params.id } });
 
-    if (!existing || existing.userId !== session.user.id) {
+    if (!existing || !canAccessResourceOf(principal, existing.userId)) {
       return NextResponse.json({ error: 'Solution not found' }, { status: 404 });
     }
 
@@ -120,22 +104,14 @@ export async function PATCH(
     console.error('Error updating solution:', error);
     return NextResponse.json({ error: 'Failed to update solution' }, { status: 500 });
   }
-}
+});
 
-export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export const DELETE = withCapability('solution.delete', async (request: Request, { params, principal }: any) => {
   try {
-    const session = await getSession();
-
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
 
     const existing = await prisma.solution.findUnique({ where: { id: params.id } });
 
-    if (!existing || existing.userId !== session.user.id) {
+    if (!existing || !canAccessResourceOf(principal, existing.userId)) {
       return NextResponse.json({ error: 'Solution not found' }, { status: 404 });
     }
 
@@ -146,4 +122,4 @@ export async function DELETE(
     console.error('Error deleting solution:', error);
     return NextResponse.json({ error: 'Failed to delete solution' }, { status: 500 });
   }
-}
+});

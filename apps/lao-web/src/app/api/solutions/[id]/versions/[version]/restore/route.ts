@@ -1,4 +1,4 @@
-import { getSession } from '@/lib/auth';
+import { withCapability, canAccessResourceOf } from '@/lib/authorization';
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 
@@ -11,20 +11,12 @@ export const dynamic = 'force-dynamic';
  * This moves the story forward rather than rewriting it: the old content
  * returns as a brand new version, so nothing in the history is lost.
  */
-export async function POST(
-  request: Request,
-  { params }: { params: { id: string; version: string } }
-) {
+export const POST = withCapability('solution.write', async (request: Request, { params, principal }: any) => {
   try {
-    const session = await getSession();
-
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
 
     const existing = await prisma.solution.findUnique({ where: { id: params.id } });
 
-    if (!existing || existing.userId !== session.user.id) {
+    if (!existing || !canAccessResourceOf(principal, existing.userId)) {
       return NextResponse.json({ error: 'Solution not found' }, { status: 404 });
     }
 
@@ -79,4 +71,4 @@ export async function POST(
     console.error('Error restoring version:', error);
     return NextResponse.json({ error: 'Failed to restore version' }, { status: 500 });
   }
-}
+});
