@@ -11,21 +11,21 @@ const COURSE_1_DATA = {
   missions: [
     {
       title: 'Win Back One Hour',
-      tagline: 'Automate a task that eats your time',
+      tagline: 'Free up an hour every week',
       description:
-        'Pick a task you do regularly that takes up your time. Build an AI assistant to do it for you and reclaim that hour each week.',
+        'Identify a task you do regularly that steals your time. Solve it with AI and reclaim that hour each week.',
       position: 1,
       problemArea: 'General',
       toolkitName: 'Personal Assistant',
-      overview: `You already know how to build AI assistants. In this mission, you'll apply that skill to solve your first real problem.
+      overview: `What takes up your time?
 
-Pick something you do regularly that takes up your time. Something that would free up 30 minutes in your week if you could automate it.
+Pick something you do regularly that you'd love to stop doing. Something you'd skip if you could.
 
-Then build an AI assistant to do it for you.`,
+Then solve it with AI. Not with perfect AI. With AI that's good enough to let you focus on what matters.`,
       coachPrompt:
-        'What\'s one task at work that takes up your time? Something repetitive that you wish you could skip?',
+        'What\'s a task at work that wastes your time? Something you do over and over that you\'d love to skip?',
       reflectionPrompt:
-        'Did it work? What surprised you about building this? How will you use it this week?',
+        'Does this actually work? What surprised you? What will you do with the extra hour each week?',
       buildTemplate: null,
       achievement: 'You saved 1 hour per week',
       timeSavedMinutes: 60,
@@ -38,23 +38,21 @@ Then build an AI assistant to do it for you.`,
     },
     {
       title: 'Clear Your Inbox Faster',
-      tagline: 'Let AI handle your email triage',
+      tagline: 'Reclaim your inbox time',
       description:
-        'Build an AI assistant that reads your emails and extracts what matters. Summarizes action items, flags urgency, and categories messages.',
+        'Email drowns your day. Solve it: let AI triage what matters, summarize action items, and help you clear your inbox before lunch.',
       position: 2,
       problemArea: 'Email',
       toolkitName: 'Email Assistant',
-      overview: `Email is a constant source of interruption. In this mission, you'll build an AI assistant that reads your emails and does the thinking for you.
+      overview: `Email is a constant source of interruption.
 
-You'll create a tool that:
-- Summarizes long emails into key action items
-- Flags urgent messages
-- Categorizes by type
-- Drafts quick responses`,
+Instead of reading every email, what if AI could read them for you? Summarize what matters. Flag what's urgent. Help you focus on what actually needs your attention.
+
+You'll solve the problem: "Email eats my day."`,
       coachPrompt:
-        'What\'s your biggest email headache? Too many emails? Hard to find what\'s important? Too long to read?',
+        'What\'s the real email problem you\'re solving? Too many arriving? Hard to find what\'s urgent? Takes too long to process?',
       reflectionPrompt:
-        'How much time could this save you each week? What would you do with that time?',
+        'Does this actually clear your inbox faster? What surprised you? What time does this give you back?',
       buildTemplate: `Task: Read email and extract action items
 Instructions:
 1. Look for deadlines and urgency signals
@@ -72,23 +70,21 @@ Instructions:
     },
     {
       title: 'Create Content That Sounds Like You',
-      tagline: 'Write faster. Sound better.',
+      tagline: 'Write faster, keep your voice',
       description:
-        'Build an AI assistant that helps you write faster and better. Improves tone and clarity, expands brief ideas, adapts your voice.',
+        'Writing takes time. Solve it: let AI handle the rough draft, improve your tone, adapt to your audience — while you focus on what you want to say.',
       position: 3,
       problemArea: 'Writing',
       toolkitName: 'Content Assistant',
-      overview: `Whether you write emails, reports, or social media, an AI assistant can help you write faster and more clearly.
+      overview: `You have something to say. You just don't want to spend an hour writing it.
 
-In this mission, you'll build a writing assistant that:
-- Improves tone and clarity
-- Expands brief ideas into full thoughts
-- Adapts your voice to different audiences
-- Checks for common mistakes`,
+What if AI could handle the draft? Improve the tone. Keep your voice. Adapt it to whoever you're writing to.
+
+You'll solve the problem: "Writing takes too long."`,
       coachPrompt:
-        'What type of writing takes you the longest? Reports? Emails? Social media? Something else?',
+        'What writing problem are you solving? Too slow to draft? Tone issues? Struggling to adapt to your audience?',
       reflectionPrompt:
-        'Did it make your writing better? Faster? How will this change your daily work?',
+        'Is your writing actually faster now? Does it still sound like you? What can you do with the time you saved?',
       buildTemplate: `Task: Improve and expand written content
 Instructions:
 1. Check for clarity and tone
@@ -107,23 +103,21 @@ Instructions:
     },
     {
       title: 'Find Insights In Minutes',
-      tagline: 'Turn raw data into action',
+      tagline: 'Let AI read your data',
       description:
-        'Build an AI assistant that finds patterns you would miss. Analyzes data, highlights anomalies, calculates metrics, suggests what to do.',
+        'Your data holds answers. Solve it: let AI find patterns you\'d miss, surface anomalies, calculate metrics, tell you what to do.',
       position: 4,
       problemArea: 'Analysis',
       toolkitName: 'Research Assistant',
-      overview: `You collect data every day. Sales numbers, metrics, feedback. But extracting insights takes time.
+      overview: `You look at data every day. Sales numbers. Metrics. Feedback. But turning data into insight takes time.
 
-In this mission, you'll build an analysis assistant that:
-- Finds patterns you would miss
-- Highlights anomalies
-- Calculates key metrics
-- Suggests what to do about trends`,
+What if AI could read it for you? Find patterns. Surface anomalies. Calculate what matters. Tell you what to do.
+
+You'll solve the problem: "I can't extract insights fast enough."`,
       coachPrompt:
-        'What data do you look at regularly but find hard to analyze? Sales? Metrics? Customer feedback? Logs?',
+        'What data problem are you solving? Can\'t find insights? Spend too long analyzing? Overwhelmed by the volume?',
       reflectionPrompt:
-        'What insight surprised you? How will you act on what you learned?',
+        'Did you find insights you missed before? What surprised you? What will you do differently now?',
       buildTemplate: `Task: Analyze data and provide insights
 Instructions:
 1. Read and understand the data format
@@ -141,22 +135,22 @@ Instructions:
       ]),
     },
     {
-      title: 'Build Your Own AI Assistant',
-      tagline: 'You know how. Now solve YOUR problem.',
+      title: 'Solve Your Own Problem',
+      tagline: 'Pick any problem. You know how now.',
       description:
-        'Pick the next problem you want to solve. It could be work, personal, creative—anything. You know the process. You know it works.',
+        'You've solved four real problems. Now solve the one that actually matters to you. Work. Personal. Creative. Anything.',
       position: 5,
       problemArea: 'Your Choice',
-      toolkitName: 'Custom Assistant',
-      overview: `You've built four AI assistants. You understand the process. You've seen what's possible.
+      toolkitName: 'Custom Solution',
+      overview: `You've solved four problems with AI. You've felt it work. You understand the pattern.
 
-Now pick the next problem you want to solve. It could be something you thought of while building the first four. Or something completely new.
+Now pick the problem that's been nagging at you. The one you thought about while solving the first four. The one you really wish would go away.
 
-Whatever it is, you know how to build it.`,
+Solve it. You know how.`,
       coachPrompt:
-        'What\'s the next problem you want an AI assistant to solve? It could be anything—work, personal, creative.',
+        'What problem keeps coming back to you? The one that\'s really slowing you down? Work, personal, creative—whatever it is.',
       reflectionPrompt:
-        'You\'ve now built five working AI assistants. How has that changed what you think is possible? What will you build next?',
+        'You've now solved five real problems. What could change in your life if you kept using these solutions? What\'s next?',
       buildTemplate: null,
       achievement: 'You solved your own problem',
       timeSavedMinutes: 120,
