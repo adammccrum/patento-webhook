@@ -14,12 +14,15 @@ import { db } from '@/lib/db';
 // Reads the session from request headers, so it can never be statically rendered.
 export const dynamic = 'force-dynamic';
 
+// Only real columns. emailOnLogin and emailOnSecurityAlert were accepted here
+// but do not exist on the Settings model, so any save including them threw a
+// 500 — which is exactly what the settings form sent.
 const updateSettingsSchema = z.object({
   twoFactorEnabled: z.boolean().optional(),
   emailNotifications: z.boolean().optional(),
+  publicProfile: z.boolean().optional(),
+  // Deprecated; accepted so an older client cannot break, ignored otherwise.
   darkMode: z.boolean().optional(),
-  emailOnLogin: z.boolean().optional(),
-  emailOnSecurityAlert: z.boolean().optional(),
 });
 
 /**

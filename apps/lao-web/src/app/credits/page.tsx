@@ -175,14 +175,13 @@ export default function CreditsPage() {
           </div>
         </div>
 
-        <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
-          <h3 className="text-lg font-semibold text-blue-900 mb-2">Need More Credits?</h3>
-          <p className="text-blue-800 mb-4">
-            Purchase additional credits to increase your monthly allocation or get priority support.
+        <div className="mt-8 border border-hairline rounded-card p-6">
+          <h3 className="font-medium text-ink mb-2">Need more credits?</h3>
+          <p className="text-base leading-relaxed text-ink-body">
+            There is nothing to buy during private beta. Your allocation resets
+            each month, and if you run out before then, tell us — we will top you
+            up and we would like to know what you were building.
           </p>
-          <button className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition">
-            Purchase Credits
-          </button>
         </div>
       </main>
     </div>

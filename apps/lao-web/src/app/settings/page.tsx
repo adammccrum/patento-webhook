@@ -10,21 +10,9 @@ export default function SettingsPage() {
   const [settings, setSettings] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [confirmEmail, setConfirmEmail] = useState('');
   const [deleteError, setDeleteError] = useState<string | null>(null);
-  const [formData, setFormData] = useState({
-    twoFactorEnabled: false,
-    emailNotifications: true,
-    // Deprecated. LAO's identity is a clean, bright workspace, so there is
-    // no dark theme and no toggle. Kept in state only so saving settings does
-    // not clear the stored column. See /brand/AUDIT.md A12.
-    darkMode: false,
-    emailOnLogin: false,
-    emailOnSecurityAlert: true,
-  });
-
   useEffect(() => {
     async function fetchSettings() {
       try {
@@ -38,13 +26,6 @@ export default function SettingsPage() {
         }
         const data = await response.json();
         setSettings(data);
-        setFormData({
-          twoFactorEnabled: data.twoFactorEnabled || false,
-          emailNotifications: data.emailNotifications !== false,
-          darkMode: data.darkMode || false,
-          emailOnLogin: data.emailOnLogin || false,
-          emailOnSecurityAlert: data.emailOnSecurityAlert !== false,
-        });
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
       } finally {
@@ -54,31 +35,6 @@ export default function SettingsPage() {
 
     fetchSettings();
   }, [router]);
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setSaving(true);
-
-    try {
-      const response = await fetch('/api/settings', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to update settings');
-      }
-
-      const data = await response.json();
-      setSettings(data);
-      setError(null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-    } finally {
-      setSaving(false);
-    }
-  }
 
   if (loading) {
     return (
@@ -136,96 +92,17 @@ export default function SettingsPage() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-8">
-            <div>
-              <h3 className="text-lg font-semibold text-slate-900 mb-4">Security</h3>
-              <div className="space-y-4">
-                <label className="flex items-center p-4 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 transition">
-                  <input
-                    type="checkbox"
-                    checked={formData.twoFactorEnabled}
-                    onChange={(e) =>
-                      setFormData({ ...formData, twoFactorEnabled: e.target.checked })
-                    }
-                    className="w-4 h-4 rounded border-slate-300 text-blue-600"
-                  />
-                  <div className="ml-3">
-                    <p className="font-medium text-slate-900">Two-Factor Authentication</p>
-                    <p className="text-sm text-slate-600">
-                      Add an extra layer of security to your account
-                    </p>
-                  </div>
-                </label>
-
-                <label className="flex items-center p-4 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 transition">
-                  <input
-                    type="checkbox"
-                    checked={formData.emailOnSecurityAlert}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        emailOnSecurityAlert: e.target.checked,
-                      })
-                    }
-                    className="w-4 h-4 rounded border-slate-300 text-blue-600"
-                  />
-                  <div className="ml-3">
-                    <p className="font-medium text-slate-900">Security Alerts</p>
-                    <p className="text-sm text-slate-600">
-                      Get notified of suspicious account activity
-                    </p>
-                  </div>
-                </label>
-              </div>
-            </div>
-
-            <div className="border-t border-slate-200 pt-8">
-              <h3 className="text-lg font-semibold text-slate-900 mb-4">Notifications</h3>
-              <div className="space-y-4">
-                <label className="flex items-center p-4 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 transition">
-                  <input
-                    type="checkbox"
-                    checked={formData.emailNotifications}
-                    onChange={(e) =>
-                      setFormData({ ...formData, emailNotifications: e.target.checked })
-                    }
-                    className="w-4 h-4 rounded border-slate-300 text-blue-600"
-                  />
-                  <div className="ml-3">
-                    <p className="font-medium text-slate-900">Email Notifications</p>
-                    <p className="text-sm text-slate-600">
-                      Receive emails about your learning progress
-                    </p>
-                  </div>
-                </label>
-
-                <label className="flex items-center p-4 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 transition">
-                  <input
-                    type="checkbox"
-                    checked={formData.emailOnLogin}
-                    onChange={(e) =>
-                      setFormData({ ...formData, emailOnLogin: e.target.checked })
-                    }
-                    className="w-4 h-4 rounded border-slate-300 text-blue-600"
-                  />
-                  <div className="ml-3">
-                    <p className="font-medium text-slate-900">Login Notifications</p>
-                    <p className="text-sm text-slate-600">
-                      Be notified when your account is accessed
-                    </p>
-                  </div>
-                </label>
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={saving}
-              className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 transition"
-            >
-              {saving ? 'Saving...' : 'Save Settings'}
-            </button>
-          </form>
+          <div className="border border-hairline rounded-card p-5">
+            <h3 className="font-medium text-ink mb-2">Notifications and security</h3>
+            <p className="text-base leading-relaxed text-ink-body">
+              There is nothing to configure yet. During private beta the only
+              emails we send are the ones you ask for — a password reset, or
+              confirming your address — and there is no two-factor option.
+            </p>
+            <p className="text-sm text-ink-muted mt-3">
+              These settings will appear here when they do something.
+            </p>
+          </div>
 
           <div className="mt-8 pt-8 border-t border-slate-200">
             <h3 className="text-lg font-semibold text-ink mb-2">Your data</h3>

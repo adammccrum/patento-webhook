@@ -79,3 +79,6 @@ export { Database };
  * Default export
  */
 export default getPrisma;
+
+// Canonical seed content, shared with the app's re-seed endpoint.
+export { COURSE_1 } from './seed-data';

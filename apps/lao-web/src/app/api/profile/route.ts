@@ -17,7 +17,10 @@ export const dynamic = 'force-dynamic';
 const updateProfileSchema = z.object({
   name: z.string().min(2).optional(),
   bio: z.string().max(500).optional(),
-  avatar: z.string().url().optional(),
+  // An empty string is the normal state for a learner with no avatar, and
+  // .url() rejected it — so saving a profile failed for everyone who had not
+  // set one.
+  avatar: z.union([z.string().url(), z.literal('')]).optional(),
   timezone: z.string().optional(),
   language: z.string().length(2).optional(),
 });

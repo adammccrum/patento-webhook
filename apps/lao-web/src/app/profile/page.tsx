@@ -167,50 +167,6 @@ export default function ProfilePage() {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-900 mb-2">
-                  Timezone
-                </label>
-                <select
-                  value={formData.timezone}
-                  onChange={(e) => setFormData({ ...formData, timezone: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">Select timezone</option>
-                  <option value="UTC">UTC</option>
-                  <option value="EST">Eastern Time (EST)</option>
-                  <option value="CST">Central Time (CST)</option>
-                  <option value="MST">Mountain Time (MST)</option>
-                  <option value="PST">Pacific Time (PST)</option>
-                  <option value="GMT">GMT</option>
-                  <option value="IST">India Standard Time (IST)</option>
-                  <option value="SGT">Singapore Time (SGT)</option>
-                  <option value="JST">Japan Standard Time (JST)</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-900 mb-2">
-                  Language
-                </label>
-                <select
-                  value={formData.language}
-                  onChange={(e) => setFormData({ ...formData, language: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">Select language</option>
-                  <option value="en">English</option>
-                  <option value="es">Español</option>
-                  <option value="fr">Français</option>
-                  <option value="de">Deutsch</option>
-                  <option value="zh">中文</option>
-                  <option value="ja">日本語</option>
-                  <option value="ar">العربية</option>
-                </select>
-              </div>
-            </div>
-
             <button
               type="submit"
               disabled={saving}
