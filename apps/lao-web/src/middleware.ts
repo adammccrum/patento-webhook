@@ -6,7 +6,26 @@ import { auth } from '@/lib/auth';
 import { type NextRequest, NextResponse } from 'next/server';
 import { withSecurityHeaders } from '@iriskey/security';
 
-const protectedRoutes = ['/dashboard', '/settings', '/courses', '/missions'];
+// Every signed-in surface. These must match real route paths — earlier entries
+// read '/courses' and '/missions', which no page ever served, so those pages
+// were never actually protected here.
+// Deliberately public: '/', '/auth/*', '/s/[shareId]' (shared solutions).
+const protectedRoutes = [
+  '/dashboard',
+  '/settings',
+  '/profile',
+  '/credits',
+  '/course',
+  '/mission',
+  '/solution',
+  '/solutions',
+  '/build',
+  '/coach',
+  '/discover',
+  '/reflection',
+  '/transformations',
+  '/founder',
+];
 const publicRoutes = ['/auth/login', '/auth/register', '/auth/forgot-password'];
 const healthRoutes = ['/api/health', '/api/ready', '/api/alive'];
 
