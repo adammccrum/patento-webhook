@@ -132,25 +132,6 @@ export default function MissionPage() {
       </nav>
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Progress indicator */}
-        <div className="mb-8">
-          <div className="w-full bg-slate-200 rounded-full h-2">
-            <div
-              className="bg-blue-500 h-2 rounded-full transition-all duration-300"
-              style={{
-                width: `${
-                  step === 'overview'
-                    ? '25%'
-                    : step === 'coach'
-                      ? '50%'
-                      : step === 'build'
-                        ? '75%'
-                        : '100%'
-                }%`,
-              }}
-            />
-          </div>
-        </div>
 
         {/* Overview Step */}
         {step === 'overview' && (
@@ -328,39 +309,24 @@ export default function MissionPage() {
           </div>
         )}
 
-        {/* Celebration Moment */}
+        {/* Quiet Acknowledgement */}
         {step === 'celebration' && mission && (
-          <div className="fixed inset-0 bg-gradient-to-br from-green-50 to-emerald-50 flex items-center justify-center z-50">
-            <div className="max-w-2xl w-full mx-4 text-center">
-              <div className="text-6xl mb-6 animate-bounce">✓</div>
-
-              <h2 className="text-4xl font-bold text-green-900 mb-4">
-                You've Solved It
-              </h2>
-
-              <p className="text-xl text-green-800 mb-8">
-                {problemInput} is no longer a problem.
-              </p>
-
-              <div className="bg-white rounded-lg p-8 mb-8 shadow-lg">
-                <p className="text-lg text-slate-700 mb-3">
-                  <span className="font-semibold">You created</span> a solution that works.
-                </p>
-                <p className="text-slate-600 mb-6">
-                  Every week, {mission.achievement.toLowerCase()}.
-                </p>
-                <p className="text-lg font-semibold text-green-900 mb-2">
-                  You are now someone who solves problems with AI.
-                </p>
-                <p className="text-slate-600 text-sm">
-                  That's not a small thing. That changes what's possible for you.
-                </p>
-              </div>
-
-              <p className="text-sm text-slate-600">
-                Taking you back to your journey...
-              </p>
+          <div className="bg-white rounded-lg shadow p-8 text-center">
+            <div className="mb-6">
+              <p className="text-2xl font-semibold text-slate-900">✓ Solution saved</p>
             </div>
+
+            <div className="mb-8 p-6 bg-slate-50 rounded-lg border border-slate-200">
+              <p className="text-slate-700 mb-2">{mission.achievement.toLowerCase().charAt(0).toUpperCase() + mission.achievement.toLowerCase().slice(1)}.</p>
+              <p className="text-sm text-slate-600">Ready for the next problem?</p>
+            </div>
+
+            <button
+              onClick={() => router.push(`/course/${mission?.courseId}`)}
+              className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition text-sm font-medium"
+            >
+              See What's Next
+            </button>
           </div>
         )}
       </main>

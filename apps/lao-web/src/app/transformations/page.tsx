@@ -73,55 +73,42 @@ export default function TransformationsPage() {
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Header */}
         <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-slate-900 mb-4">
-            How People Changed
+          <h2 className="text-3xl font-bold text-slate-900 mb-4">
+            Community Solutions
           </h2>
-          <p className="text-xl text-slate-600 max-w-2xl mx-auto">
-            These are real people who discovered they could solve problems with AI.
-            Their transformations show what's possible.
+          <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+            Real problems people solved. Maybe you have one.
           </p>
         </div>
 
-        {/* Transformations Grid */}
+        {/* Solutions Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
           {transformations.map((story) => (
             <div
               key={story.id}
-              className="bg-white rounded-lg border-2 border-blue-200 p-8 hover:shadow-lg transition"
+              className="bg-white rounded-lg border border-slate-200 p-6 hover:shadow transition"
             >
-              {/* Learner Name */}
+              {/* The Problem */}
               <div className="mb-6">
-                <p className="text-sm font-semibold text-blue-600 uppercase">Transformation</p>
-                <h3 className="text-xl font-bold text-slate-900">{story.learner}</h3>
+                <p className="text-xs text-slate-600 font-semibold uppercase mb-2">Problem</p>
+                <p className="text-slate-900 font-medium">{story.problem}</p>
               </div>
 
-              {/* The Journey */}
-              <div className="space-y-4">
-                <div className="border-l-4 border-red-300 pl-4">
-                  <p className="text-xs font-semibold text-slate-600 uppercase">The Problem</p>
-                  <p className="text-slate-700 font-medium">{story.problem}</p>
-                </div>
-
-                <div className="border-l-4 border-blue-300 pl-4">
-                  <p className="text-xs font-semibold text-slate-600 uppercase">What They Built</p>
-                  <p className="text-slate-700 font-medium">{story.solution}</p>
-                </div>
-
-                <div className="border-l-4 border-green-300 pl-4">
-                  <p className="text-xs font-semibold text-slate-600 uppercase">The Outcome</p>
-                  <p className="text-slate-700 font-bold text-lg">{story.outcome}</p>
-                </div>
-
-                <div className="bg-slate-50 rounded p-4 border-l-4 border-purple-300">
-                  <p className="text-xs font-semibold text-slate-600 uppercase mb-1">What Changed</p>
-                  <p className="text-slate-700 italic">"{story.impact}"</p>
-                </div>
+              {/* The Solution */}
+              <div className="mb-6 p-4 bg-slate-50 rounded">
+                <p className="text-xs text-slate-600 font-semibold uppercase mb-2">Solution</p>
+                <p className="text-slate-700 text-sm">{story.solution}</p>
               </div>
 
-              <p className="text-xs text-slate-500 mt-6">
+              {/* The Result */}
+              <div className="mb-4">
+                <p className="text-xs text-slate-600 font-semibold uppercase mb-2">Result</p>
+                <p className="text-slate-900 font-medium">{story.outcome}</p>
+              </div>
+
+              <p className="text-xs text-slate-500">
                 {new Date(story.date).toLocaleDateString('en-US', {
-                  year: 'numeric',
-                  month: 'long',
+                  month: 'short',
                   day: 'numeric',
                 })}
               </p>
@@ -130,26 +117,15 @@ export default function TransformationsPage() {
         </div>
 
         {/* Call to Action */}
-        <div className="bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-200 rounded-lg p-8 text-center">
-          <h3 className="text-2xl font-bold text-slate-900 mb-3">
-            Your transformation could be here
-          </h3>
+        <div className="bg-white border border-slate-200 rounded-lg p-8 text-center mt-12">
           <p className="text-slate-600 mb-6 max-w-2xl mx-auto">
-            These aren't special people. They're ordinary people who took one hour to solve a real problem.
-            That made them extraordinary.
+            See a problem you have? Solve it.
           </p>
           <Link href="/course/1">
-            <button className="px-8 py-3 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 transition">
-              Start Your Transformation
+            <button className="px-8 py-3 bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-600 transition">
+              Build a Solution
             </button>
           </Link>
-        </div>
-
-        {/* Wall of Transformations Note */}
-        <div className="mt-12 p-6 bg-blue-50 border border-blue-200 rounded-lg">
-          <p className="text-sm text-slate-700">
-            <span className="font-semibold">This wall shows our real metric:</span> Not courses completed or features built, but real people whose lives changed because they solved a problem with AI.
-          </p>
         </div>
       </main>
     </div>

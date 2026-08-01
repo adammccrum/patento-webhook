@@ -67,13 +67,10 @@ export default function DashboardPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
           <h1 className="text-2xl font-bold text-slate-900">LAO</h1>
           <div className="flex items-center gap-4">
-            <Link href="/transformations" className="text-slate-600 hover:text-slate-900 font-medium text-sm">
-              See Transformations
-            </Link>
-            <span className="text-slate-600">{user.email}</span>
+            <span className="text-sm text-slate-600">{user.email}</span>
             <button
               onClick={handleSignOut}
-              className="px-4 py-2 border border-slate-200 rounded-lg hover:bg-slate-50 text-slate-700 font-medium transition"
+              className="px-4 py-2 border border-slate-200 rounded-lg hover:bg-slate-50 text-slate-700 text-sm transition"
             >
               Sign Out
             </button>
@@ -81,100 +78,70 @@ export default function DashboardPage() {
         </div>
       </nav>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Coach Welcome */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Workbench Header */}
         <div className="mb-8">
-          <div>
-            <h2 className="text-3xl font-bold text-slate-900 mb-2">
-              {learnerState.problemsSolved === 0
-                ? "Welcome"
-                : "Welcome back"}
-            </h2>
-            <p className="text-lg text-slate-600">
-              {learnerState.problemsSolved === 0
-                ? "You're about to become someone who solves problems with AI."
-                : learnerState.problemsSolved === 1
-                ? "You've proven you can do this. Let's build your confidence."
-                : `You've now solved ${learnerState.problemsSolved} problems. You're becoming an expert.`}
-            </p>
-          </div>
+          <h2 className="text-2xl font-bold text-slate-900">
+            Good morning{learnerState.problemsSolved > 0 ? '.' : '. What are we solving today?'}
+          </h2>
         </div>
 
-        {/* Impact Cards - Emotional Wins */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg shadow p-6 border-2 border-green-200">
-            <h3 className="text-sm font-semibold text-slate-600 mb-2">Time You've Won Back</h3>
-            <p className="text-4xl font-bold text-green-700 mb-2">
-              {learnerState.problemsSolved > 0 ? `${learnerState.problemsSolved * 30}+` : '0'} min/week
-            </p>
-            <p className="text-slate-700">
-              {learnerState.problemsSolved === 0
-                ? 'Solve your first problem and start reclaiming time'
-                : learnerState.problemsSolved === 1
-                ? 'One solution. Keep building for compounding results.'
-                : 'Your solutions are saving you time every single week.'}
-            </p>
-          </div>
+        {/* Current Metrics - What's Real */}
+        {learnerState.problemsSolved > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+            <div className="bg-white rounded-lg shadow p-6 border border-slate-200">
+              <p className="text-sm text-slate-600 font-medium mb-1">Problems solved</p>
+              <p className="text-3xl font-bold text-slate-900">{learnerState.problemsSolved}</p>
+            </div>
 
-          <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg shadow p-6 border-2 border-blue-200">
-            <h3 className="text-sm font-semibold text-slate-600 mb-2">Problems Solved</h3>
-            <p className="text-4xl font-bold text-blue-700 mb-2">
-              {learnerState.problemsSolved || 0}
-            </p>
-            <p className="text-slate-700">
-              {learnerState.problemsSolved === 0
-                ? 'Each solution changes how you work.'
-                : learnerState.problemsSolved === 1
-                ? 'One down. The pattern is real. Build another.'
-                : `${Math.min(5 - learnerState.problemsSolved, 5)} more to complete your toolkit.`}
-            </p>
+            <div className="bg-white rounded-lg shadow p-6 border border-slate-200">
+              <p className="text-sm text-slate-600 font-medium mb-1">Solutions in daily use</p>
+              <p className="text-3xl font-bold text-slate-900">{portfolio?.length || 0}</p>
+            </div>
+
+            <div className="bg-white rounded-lg shadow p-6 border border-slate-200">
+              <p className="text-sm text-slate-600 font-medium mb-1">Time saved each week</p>
+              <p className="text-3xl font-bold text-slate-900">
+                {learnerState.problemsSolved > 0 ? `${Math.floor(learnerState.problemsSolved * 30 / 60)}h ${(learnerState.problemsSolved * 30) % 60}m` : '—'}
+              </p>
+            </div>
           </div>
-        </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
             <div className="bg-white rounded-lg shadow p-6">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold text-slate-900">What I've Created</h3>
-                <span className="text-sm text-slate-500">{portfolio?.length || 0} solution{portfolio?.length !== 1 ? 's' : ''} I built</span>
-              </div>
-              <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-slate-900 mb-6">Your Toolbox</h3>
+              <div className="space-y-3">
                 {portfolio && portfolio.length > 0 ? (
                   portfolio.map((item: any) => (
                     <div
                       key={item.id}
-                      className="p-4 border border-slate-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition"
+                      className="p-4 border border-slate-200 rounded-lg hover:border-slate-300 transition"
                     >
-                      <div className="flex items-start justify-between mb-2">
-                        <div className="flex-1">
-                          <p className="font-semibold text-slate-900">{item.problemSolved}</p>
-                          <p className="text-sm text-slate-600 mt-1">✓ Built: {item.solutionCreated}</p>
+                      <div className="flex items-start justify-between gap-4 mb-2">
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-slate-900 text-sm break-words">{item.problemSolved}</p>
+                          <p className="text-xs text-slate-600 mt-1">{item.problemArea || 'Solution'}</p>
                         </div>
-                        <span className={`text-xs font-medium px-2 py-1 rounded whitespace-nowrap ml-2 ${
-                          item.status === 'in_daily_use'
-                            ? 'bg-green-100 text-green-800'
-                            : item.status === 'completed'
-                              ? 'bg-blue-100 text-blue-800'
-                              : 'bg-yellow-100 text-yellow-800'
-                        }`}>
-                          {item.status === 'in_daily_use' ? 'Using It' : item.status === 'completed' ? 'Done' : 'Next'}
-                        </span>
+                        <button className="px-3 py-1 text-xs font-medium text-blue-600 hover:bg-blue-50 rounded whitespace-nowrap">
+                          Open
+                        </button>
                       </div>
-                      {item.reflection && (
-                        <p className="text-sm text-slate-600 mt-2 italic">&quot;{item.reflection}&quot;</p>
-                      )}
-                      <p className="text-xs text-slate-500 mt-2">
-                        {new Date(item.missionCompletedAt).toLocaleDateString()}
-                      </p>
+                      <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-100">
+                        <p className="text-xs text-slate-600">Saves ~{Math.ceil((item.impact?.match(/\d+/)?.[0] || 30) / 60)} hours/week</p>
+                        <button className="px-2 py-1 text-xs text-slate-600 hover:bg-slate-100 rounded">
+                          Improve
+                        </button>
+                      </div>
                     </div>
                   ))
                 ) : (
                   <div className="text-center py-12">
-                    <p className="text-slate-700 font-medium mb-2">Your journey starts with one problem solved.</p>
-                    <p className="text-slate-600 text-sm mb-6">Pick something that wastes your time, and solve it with AI.</p>
+                    <p className="text-slate-700 font-medium mb-4">Build your first solution</p>
                     <Link href="/course/1">
-                      <button className="inline-flex px-6 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition text-sm font-medium">
-                        Solve Your First Problem
+                      <button className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition text-sm font-medium">
+                        Start
                       </button>
                     </Link>
                   </div>
@@ -184,53 +151,47 @@ export default function DashboardPage() {
           </div>
 
           <div>
-            <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg shadow p-6 mb-6 border-2 border-purple-200">
-              <h3 className="text-lg font-semibold text-slate-900 mb-3">
-                {learnerState.problemsSolved === 0 ? "Your Next Problem" : "Keep Building"}
-              </h3>
-              {portfolio && portfolio.length > 0 ? (
-                <div className="space-y-3">
-                  <p className="text-sm text-slate-700 leading-relaxed">
-                    {learnerState.problemsSolved === 1
-                      ? "You felt it work once. Build another. The pattern becomes unstoppable."
-                      : `You've solved ${learnerState.problemsSolved}. Each solution compounds. What problem did you think about while building?`}
-                  </p>
-                  <Link href={learnerState.problemsSolved >= 5 ? "/course/1" : "/course/1"}>
-                    <button className="w-full px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition text-sm font-medium">
-                      {learnerState.problemsSolved >= 5 ? "See Your Toolkit" : "Solve Your Next Problem"}
-                    </button>
-                  </Link>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  <p className="text-sm text-slate-700 leading-relaxed">
-                    Most people think AI is complicated. It's not. Pick a problem that wastes your time right now, and solve it in 25 minutes.
-                  </p>
-                  <Link href="/course/1">
-                    <button className="w-full px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition text-sm font-medium">
-                      Solve Your First Problem
-                    </button>
-                  </Link>
-                </div>
-              )}
+            <div className="bg-white rounded-lg shadow p-6 mb-6">
+              <h3 className="text-lg font-semibold text-slate-900 mb-4">What's Next</h3>
+              <div className="space-y-3">
+                {portfolio && portfolio.length > 0 ? (
+                  <>
+                    <p className="text-sm text-slate-600">You've solved {learnerState.problemsSolved}. What's your next problem?</p>
+                    <Link href="/course/1">
+                      <button className="w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition text-sm font-medium">
+                        Solve Another
+                      </button>
+                    </Link>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-sm text-slate-600">Find one problem that wastes your time. Solve it.</p>
+                    <Link href="/course/1">
+                      <button className="w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition text-sm font-medium">
+                        Start
+                      </button>
+                    </Link>
+                  </>
+                )}
+              </div>
             </div>
 
             <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-lg font-semibold text-slate-900 mb-4">Account</h3>
+              <h3 className="text-sm font-semibold text-slate-900 mb-4">Settings</h3>
               <div className="space-y-2">
                 <Link href="/profile">
-                  <button className="w-full text-left px-3 py-2 rounded hover:bg-slate-100 text-slate-700 text-sm font-medium transition">
+                  <button className="w-full text-left px-3 py-2 rounded hover:bg-slate-100 text-slate-700 text-sm transition">
                     Profile
                   </button>
                 </Link>
                 <Link href="/settings">
-                  <button className="w-full text-left px-3 py-2 rounded hover:bg-slate-100 text-slate-700 text-sm font-medium transition">
+                  <button className="w-full text-left px-3 py-2 rounded hover:bg-slate-100 text-slate-700 text-sm transition">
                     Settings
                   </button>
                 </Link>
-                <Link href="/credits">
-                  <button className="w-full text-left px-3 py-2 rounded hover:bg-slate-100 text-slate-700 text-sm font-medium transition">
-                    Credits
+                <Link href="/settings">
+                  <button className="w-full text-left px-3 py-2 rounded hover:bg-slate-100 text-slate-700 text-sm transition">
+                    Billing
                   </button>
                 </Link>
               </div>
