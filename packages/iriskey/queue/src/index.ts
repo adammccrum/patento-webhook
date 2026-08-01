@@ -72,7 +72,7 @@ export type JobHandler = (job: QueueJob) => Promise<unknown>;
 /**
  * In-memory queue (for single instance)
  */
-class InMemoryQueue {
+export class InMemoryQueue {
   private jobs: Map<string, QueueJob> = new Map();
   private handlers: Map<JobType, JobHandler> = new Map();
   private processingJobs: Set<string> = new Set();

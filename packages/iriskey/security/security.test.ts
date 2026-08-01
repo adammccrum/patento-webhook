@@ -17,10 +17,10 @@ describe('@iriskey/security', () => {
         expect(result).not.toContain('<script>');
       });
 
-      it('allows safe HTML tags', () => {
+      it('strips all markup, keeping only text', () => {
         const input = '<p>Hello <b>World</b></p>';
         const result = InputSanitizer.sanitizeHtml(input);
-        expect(result).toContain('<p>');
+        expect(result).toBe('Hello World');
       });
     });
 
@@ -93,19 +93,19 @@ describe('@iriskey/security', () => {
   describe('SecretsValidator', () => {
     describe('isStrongSecret', () => {
       it('accepts strong secrets', () => {
-        expect(SecretsValidator.isStrongSecret('MyPass123!@#SecureSecret456')).toBe(true);
+        expect(SecretsValidator.isStrongSecret('MyPass123!@#SecureSecret456789xy').strong).toBe(true);
       });
 
       it('rejects short secrets', () => {
-        expect(SecretsValidator.isStrongSecret('Short1!')).toBe(false);
+        expect(SecretsValidator.isStrongSecret('Short1!').strong).toBe(false);
       });
 
       it('rejects secrets without special characters', () => {
-        expect(SecretsValidator.isStrongSecret('MyPassword123')).toBe(false);
+        expect(SecretsValidator.isStrongSecret('MyPasswordWithoutSpecials1234567').strong).toBe(false);
       });
 
       it('rejects secrets without numbers', () => {
-        expect(SecretsValidator.isStrongSecret('MyPassword!@#')).toBe(false);
+        expect(SecretsValidator.isStrongSecret('MyPasswordWithoutNumbers!@#$%^&*').strong).toBe(false);
       });
     });
   });

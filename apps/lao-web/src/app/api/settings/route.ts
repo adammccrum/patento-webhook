@@ -11,6 +11,9 @@ import { getAuditService } from '@iriskey/audit';
 import { requireAuth } from '@/lib/auth';
 import { db } from '@/lib/db';
 
+// Reads the session from request headers, so it can never be statically rendered.
+export const dynamic = 'force-dynamic';
+
 const updateSettingsSchema = z.object({
   twoFactorEnabled: z.boolean().optional(),
   emailNotifications: z.boolean().optional(),

@@ -30,7 +30,7 @@ describe('EventBus', () => {
 
       const event = new DomainEventBuilder('UserOnboarded', 'learner-123', 'Learner')
         .setTenantId('tenant-1')
-        .setData({})
+        .setData({ recorded: true })
         .build();
 
       await eventBus.publish(event);
@@ -44,12 +44,12 @@ describe('EventBus', () => {
 
       const event1 = new DomainEventBuilder('UserOnboarded', 'learner-123', 'Learner')
         .setTenantId('tenant-1')
-        .setData({})
+        .setData({ recorded: true })
         .build();
 
       const event2 = new DomainEventBuilder('GoalCreated', 'goal-123', 'Goal')
         .setTenantId('tenant-1')
-        .setData({})
+        .setData({ recorded: true })
         .build();
 
       await eventBus.publish(event1);
@@ -64,7 +64,7 @@ describe('EventBus', () => {
 
       const event = new DomainEventBuilder('UserOnboarded', 'learner-123', 'Learner')
         .setTenantId('tenant-1')
-        .setData({})
+        .setData({ recorded: true })
         .build();
 
       await eventBus.publish(event);
@@ -85,7 +85,7 @@ describe('EventBus', () => {
 
       const event = new DomainEventBuilder('UserOnboarded', 'learner-123', 'Learner')
         .setTenantId('tenant-1')
-        .setData({})
+        .setData({ recorded: true })
         .build();
 
       // Should not throw, should invoke both handlers
@@ -136,7 +136,7 @@ describe('EventBus', () => {
     it('should record published events', async () => {
       const event = new DomainEventBuilder('UserOnboarded', 'learner-123', 'Learner')
         .setTenantId('tenant-1')
-        .setData({})
+        .setData({ recorded: true })
         .build();
 
       await mockBus.publish(event);
@@ -148,12 +148,12 @@ describe('EventBus', () => {
     it('should filter events by type', async () => {
       const event1 = new DomainEventBuilder('UserOnboarded', 'learner-123', 'Learner')
         .setTenantId('tenant-1')
-        .setData({})
+        .setData({ recorded: true })
         .build();
 
       const event2 = new DomainEventBuilder('GoalCreated', 'goal-123', 'Goal')
         .setTenantId('tenant-1')
-        .setData({})
+        .setData({ recorded: true })
         .build();
 
       await mockBus.publish(event1);
@@ -167,7 +167,7 @@ describe('EventBus', () => {
     it('should allow clearing events', async () => {
       const event = new DomainEventBuilder('UserOnboarded', 'learner-123', 'Learner')
         .setTenantId('tenant-1')
-        .setData({})
+        .setData({ recorded: true })
         .build();
 
       await mockBus.publish(event);

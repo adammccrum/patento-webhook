@@ -107,7 +107,9 @@ export class DomainEventBuilder {
     if (!this.event.data || Object.keys(this.event.data).length === 0) {
       throw new Error('Event data cannot be empty');
     }
-    return this.event;
+    // Events are facts about the past — freeze so the readonly contract is
+    // enforced at runtime, not just by the type system.
+    return Object.freeze(this.event);
   }
 }
 
@@ -145,7 +147,11 @@ export function validateEvent(event: DomainEvent): void {
   if (typeof event.version !== 'number' || event.version < 1) {
     throw new Error('Invalid version');
   }
-  if (!event.data || typeof event.data !== 'object') {
+  if (
+    !event.data ||
+    typeof event.data !== 'object' ||
+    Object.keys(event.data).length === 0
+  ) {
     throw new Error('Invalid data payload');
   }
 }

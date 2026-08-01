@@ -19,12 +19,12 @@ describe('DomainEvent', () => {
     it('should generate unique eventIds', () => {
       const event1 = new DomainEventBuilder('UserOnboarded', 'learner-1', 'Learner')
         .setTenantId('tenant-1')
-        .setData({})
+        .setData({ recorded: true })
         .build();
 
       const event2 = new DomainEventBuilder('UserOnboarded', 'learner-2', 'Learner')
         .setTenantId('tenant-1')
-        .setData({})
+        .setData({ recorded: true })
         .build();
 
       expect(event1.eventId).not.toBe(event2.eventId);
@@ -61,7 +61,7 @@ describe('DomainEvent', () => {
     it('should set source info', () => {
       const event = new DomainEventBuilder('UserOnboarded', 'learner-123', 'Learner')
         .setTenantId('tenant-1')
-        .setData({})
+        .setData({ recorded: true })
         .setSourceInfo('LearnerService', '1.0.0')
         .build();
 
@@ -72,7 +72,7 @@ describe('DomainEvent', () => {
     it('should set network info', () => {
       const event = new DomainEventBuilder('UserOnboarded', 'learner-123', 'Learner')
         .setTenantId('tenant-1')
-        .setData({})
+        .setData({ recorded: true })
         .setNetworkInfo('Mozilla/5.0', '192.168.1.1')
         .build();
 

@@ -188,9 +188,13 @@ export class AIRouter {
     const sorted = entries.sort((a, b) => a[1] - b[1]);
     const total = sorted.reduce((sum, [, cost]) => sum + cost, 0);
 
+    // sorted is non-empty here; entries was checked before this point.
+    const cheapest = sorted[0]!;
+    const mostExpensive = sorted[sorted.length - 1]!;
+
     return {
-      cheapest: { providerId: sorted[0][0], cost: sorted[0][1] },
-      mostExpensive: { providerId: sorted[sorted.length - 1][0], cost: sorted[sorted.length - 1][1] },
+      cheapest: { providerId: cheapest[0], cost: cheapest[1] },
+      mostExpensive: { providerId: mostExpensive[0], cost: mostExpensive[1] },
       average: total / sorted.length,
     };
   }

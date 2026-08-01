@@ -2,7 +2,7 @@
  * Cache package tests
  */
 
-import { InMemoryCache, DefaultTTL, CacheKeyPrefixes } from './src/index';
+import { Cache, InMemoryCache, DefaultTTL, CacheKeyPrefixes } from './src/index';
 
 describe('@iriskey/cache', () => {
   describe('InMemoryCache', () => {
@@ -22,20 +22,20 @@ describe('@iriskey/cache', () => {
       await cache.delete('test-key');
       const result = await cache.get('test-key');
 
-      expect(result).toBeNull();
+      expect(result).toBeUndefined();
     });
 
     it('respects TTL expiration', async () => {
       const cache = new InMemoryCache();
 
-      await cache.set('test-key', 'test-data', 100); // 100ms TTL
+      await cache.set('test-key', 'test-data', 0.1); // 100ms, TTL is in seconds
       let result = await cache.get('test-key');
       expect(result).toBe('test-data');
 
       // Wait for TTL to expire
       await new Promise((resolve) => setTimeout(resolve, 150));
       result = await cache.get('test-key');
-      expect(result).toBeNull();
+      expect(result).toBeUndefined();
     });
 
     it('checks if key exists', async () => {
@@ -57,8 +57,8 @@ describe('@iriskey/cache', () => {
       const result1 = await cache.get('key-1');
       const result2 = await cache.get('key-2');
 
-      expect(result1).toBeNull();
-      expect(result2).toBeNull();
+      expect(result1).toBeUndefined();
+      expect(result2).toBeUndefined();
     });
 
     it('handles concurrent operations', async () => {
@@ -80,53 +80,53 @@ describe('@iriskey/cache', () => {
 
   describe('DefaultTTL', () => {
     it('has session TTL', () => {
-      expect(DefaultTTL.SESSION).toBe(30 * 24 * 60 * 60 * 1000); // 30 days
+      expect(DefaultTTL.SESSION).toBe(30 * 24 * 60 * 60); // 30 days, in seconds
     });
 
     it('has user profile TTL', () => {
-      expect(DefaultTTL.USER_PROFILE).toBe(5 * 60 * 1000); // 5 minutes
+      expect(DefaultTTL.USER_PROFILE).toBe(5 * 60); // 5 minutes, in seconds
     });
 
     it('has feature flag TTL', () => {
-      expect(DefaultTTL.FEATURE_FLAG).toBe(60 * 60 * 1000); // 1 hour
+      expect(DefaultTTL.FEATURE_FLAG).toBe(60 * 60); // 1 hour, in seconds
     });
 
     it('has configuration TTL', () => {
-      expect(DefaultTTL.CONFIGURATION).toBe(24 * 60 * 60 * 1000); // 24 hours
+      expect(DefaultTTL.CONFIGURATION).toBe(24 * 60 * 60); // 24 hours, in seconds
     });
   });
 
   describe('CacheKeyPrefixes', () => {
     it('has session prefix', () => {
-      expect(CacheKeyPrefixes.SESSION).toBe('session');
+      expect(CacheKeyPrefixes.SESSION).toBe('session:');
     });
 
     it('has user prefix', () => {
-      expect(CacheKeyPrefixes.USER).toBe('user');
+      expect(CacheKeyPrefixes.USER).toBe('user:');
     });
 
     it('has feature flag prefix', () => {
-      expect(CacheKeyPrefixes.FEATURE_FLAG).toBe('feature_flag');
+      expect(CacheKeyPrefixes.FEATURE_FLAG).toBe('feature:');
     });
 
     it('has configuration prefix', () => {
-      expect(CacheKeyPrefixes.CONFIGURATION).toBe('config');
+      expect(CacheKeyPrefixes.CONFIGURATION).toBe('config:');
     });
   });
 
   describe('Cache-aside pattern', () => {
     it('implements get-or-set pattern', async () => {
-      const cache = new InMemoryCache();
+      const cache = new Cache();
 
       const fetchData = jest.fn().mockResolvedValue({ id: '123', name: 'Test' });
 
       // First call - misses cache, calls fetchData
-      let result = await cache.getOrSet('test-key', fetchData, 60000);
+      let result = await cache.getOrSet('test-key', fetchData, 60);
       expect(result).toEqual({ id: '123', name: 'Test' });
       expect(fetchData).toHaveBeenCalledTimes(1);
 
       // Second call - hits cache, doesn't call fetchData
-      result = await cache.getOrSet('test-key', fetchData, 60000);
+      result = await cache.getOrSet('test-key', fetchData, 60);
       expect(result).toEqual({ id: '123', name: 'Test' });
       expect(fetchData).toHaveBeenCalledTimes(1); // Still 1, not 2
     });

@@ -208,7 +208,9 @@ class Configuration {
     const match = timeStr.match(/^(\d+)([dhms])$/);
     if (!match) return 86400000; // Default to 24 hours
 
-    const [, value, unit] = match;
+    // The regex guarantees both groups when it matches.
+    const value = match[1]!;
+    const unit = match[2]!;
     const num = parseInt(value, 10);
 
     switch (unit) {

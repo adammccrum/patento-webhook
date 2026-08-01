@@ -25,7 +25,8 @@ export class CostCalculator {
     );
 
     providers.forEach((p, i) => {
-      costs.set(p.id, estimates[i]);
+      // estimates is built by mapping over providers, so index i always exists.
+      costs.set(p.id, estimates[i]!);
     });
 
     return costs;
@@ -68,7 +69,8 @@ export class CostCalculator {
       }))
       .sort((a, b) => a.latency - b.latency);
 
-    return capabilities[0].provider;
+    // providers was checked non-empty above.
+    return capabilities[0]!.provider;
   }
 
   /**
@@ -90,7 +92,7 @@ export class CostCalculator {
     }
 
     if (providers.length === 1) {
-      return providers[0];
+      return providers[0]!;
     }
 
     // Default: balance cost and speed

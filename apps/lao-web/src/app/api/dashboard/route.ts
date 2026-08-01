@@ -9,6 +9,9 @@ import { withErrorHandler, ApiResponseBuilder, authError, toResponse } from '@ir
 import { requireAuth } from '@/lib/auth';
 import { db } from '@/lib/db';
 
+// Reads the session from request headers, so it can never be statically rendered.
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/dashboard
  * Get user's dashboard data

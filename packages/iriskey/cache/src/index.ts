@@ -32,7 +32,7 @@ export const DefaultTTL = {
 /**
  * In-memory cache (for single instance)
  */
-class InMemoryCache {
+export class InMemoryCache {
   private store: Map<string, { value: unknown; expiresAt?: number }> = new Map();
 
   set(key: string, value: unknown, ttlSeconds?: number): void {

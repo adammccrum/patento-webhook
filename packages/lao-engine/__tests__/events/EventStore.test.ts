@@ -26,12 +26,12 @@ describe('EventStore', () => {
     it('should increment sequence numbers', async () => {
       const event1 = new DomainEventBuilder('UserOnboarded', 'learner-123', 'Learner')
         .setTenantId('tenant-1')
-        .setData({})
+        .setData({ recorded: true })
         .build();
 
       const event2 = new DomainEventBuilder('GoalCreated', 'goal-123', 'Goal')
         .setTenantId('tenant-1')
-        .setData({})
+        .setData({ recorded: true })
         .build();
 
       const result1 = await store.append(event1);
@@ -44,7 +44,7 @@ describe('EventStore', () => {
     it('should be idempotent (same event appended twice)', async () => {
       const event = new DomainEventBuilder('UserOnboarded', 'learner-123', 'Learner')
         .setTenantId('tenant-1')
-        .setData({})
+        .setData({ recorded: true })
         .build();
 
       const result1 = await store.append(event);
@@ -52,18 +52,18 @@ describe('EventStore', () => {
 
       expect(result1.eventId).toBe(result2.eventId);
       expect(result1.sequenceNumber).toBe(result2.sequenceNumber);
-      expect(await store.count()).toBe(1);
+      expect((await store.getAllEvents()).length).toBe(1);
     });
 
     it('should batch append events', async () => {
       const events = [
         new DomainEventBuilder('UserOnboarded', 'learner-123', 'Learner')
           .setTenantId('tenant-1')
-          .setData({})
+          .setData({ recorded: true })
           .build(),
         new DomainEventBuilder('GoalCreated', 'goal-123', 'Goal')
           .setTenantId('tenant-1')
-          .setData({})
+          .setData({ recorded: true })
           .build(),
       ];
 
@@ -164,10 +164,11 @@ describe('EventStore', () => {
 
   describe('Event validation', () => {
     it('should reject invalid events on append', async () => {
-      const invalidEvent = new DomainEventBuilder('UserOnboarded', 'learner-123', 'Learner')
-        .setTenantId('') // Missing tenant ID
-        .setData({})
+      const valid = new DomainEventBuilder('UserOnboarded', 'learner-123', 'Learner')
+        .setTenantId('tenant-1')
+        .setData({ recorded: true })
         .build();
+      const invalidEvent = { ...valid, tenantId: '' }; // Missing tenant ID
 
       await expect(store.append(invalidEvent)).rejects.toThrow();
     });
@@ -177,7 +178,7 @@ describe('EventStore', () => {
     it('should support archival (no-op in memory)', async () => {
       const event = new DomainEventBuilder('UserOnboarded', 'learner-123', 'Learner')
         .setTenantId('tenant-1')
-        .setData({})
+        .setData({ recorded: true })
         .build();
 
       await store.append(event);
@@ -187,7 +188,7 @@ describe('EventStore', () => {
       // In-memory store is no-op, returns 0
       expect(archived).toBe(0);
       // Event still available
-      expect(await store.count()).toBe(1);
+      expect((await store.getAllEvents()).length).toBe(1);
     });
   });
 

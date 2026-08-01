@@ -72,7 +72,8 @@ describe('Priority 3 Validation: LAO Learning Engine Scenarios', () => {
       expect(state.masteryLevel).toBeGreaterThan(0);
       expect(['aware', 'developing']).toContain(state.masteryStage);
       expect(state.successRate).toBe(100);
-      expect(state.confidence).toBeGreaterThan(60);
+      // Confidence is a 0-1 probability, unlike successRate which is a percentage.
+      expect(state.confidence).toBeGreaterThan(0.6);
 
       // And: When completing more assessments
       for (let i = 2; i <= 4; i++) {

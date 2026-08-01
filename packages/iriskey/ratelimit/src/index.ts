@@ -31,54 +31,44 @@ export interface RateLimitResult {
 /**
  * In-memory rate limiter (for single instance)
  */
-class InMemoryRateLimiter {
+export class InMemoryRateLimiter {
   private store: Map<string, { count: number; resetTime: number }> = new Map();
+  private windowMs: number;
+  private maxRequests: number;
 
-  constructor(private windowMs: number) {}
+  constructor(config: RateLimitConfig) {
+    this.windowMs = config.windowMs;
+    this.maxRequests = config.maxRequests;
+  }
 
   check(key: string): RateLimitResult {
     const now = Date.now();
     const entry = this.store.get(key);
 
-    if (!entry) {
-      this.store.set(key, {
-        count: 1,
-        resetTime: now + this.windowMs,
-      });
-      return {
-        success: true,
-        limit: 1,
-        current: 1,
-        resetTime: now + this.windowMs,
-      };
-    }
-
-    if (now >= entry.resetTime) {
-      // Window expired, reset
-      this.store.set(key, {
-        count: 1,
-        resetTime: now + this.windowMs,
-      });
-      return {
-        success: true,
-        limit: 1,
-        current: 1,
-        resetTime: now + this.windowMs,
-      };
+    // No entry, or the window has expired: start a fresh window.
+    if (!entry || now >= entry.resetTime) {
+      const resetTime = now + this.windowMs;
+      this.store.set(key, { count: 1, resetTime });
+      return this.result(1, resetTime);
     }
 
     entry.count++;
+    return this.result(entry.count, entry.resetTime);
+  }
+
+  private result(current: number, resetTime: number): RateLimitResult {
+    const success = current <= this.maxRequests;
     return {
-      success: true,
-      limit: entry.count,
-      current: entry.count,
-      resetTime: entry.resetTime,
+      success,
+      limit: this.maxRequests,
+      current,
+      resetTime,
+      ...(success ? {} : { retryAfter: Math.ceil((resetTime - Date.now()) / 1000) }),
     };
   }
 
-  isLimited(key: string, maxRequests: number): boolean {
-    const result = this.check(key);
-    return result.current > maxRequests;
+  isLimited(key: string): boolean {
+    return !this.check(key).success;
   }
 
   reset(key?: string): void {
@@ -159,31 +149,29 @@ class RedisRateLimiter {
 export class RateLimiter {
   private inMemory: InMemoryRateLimiter;
   private redis?: RedisRateLimiter;
+  private config: RateLimitConfig;
 
-  constructor(windowMs: number, redisClient?: any) {
-    this.inMemory = new InMemoryRateLimiter(windowMs);
+  constructor(config: RateLimitConfig, redisClient?: any) {
+    this.config = config;
+    this.inMemory = new InMemoryRateLimiter(config);
     if (redisClient) {
       this.redis = new RedisRateLimiter(redisClient);
     }
   }
 
-  async check(key: string, windowMs: number): Promise<RateLimitResult> {
+  async check(key: string): Promise<RateLimitResult> {
     if (this.redis) {
-      return this.redis.check(key, windowMs);
+      const result = await this.redis.check(key, this.config.windowMs);
+      // The Redis limiter counts but does not judge, so apply the limit here.
+      const success = result.current <= this.config.maxRequests;
+      return { ...result, success, limit: this.config.maxRequests };
     }
-    // The in-memory limiter is constructed with its window, so it takes only a key.
+    // The in-memory limiter is constructed with its config, so it takes only a key.
     return this.inMemory.check(key);
   }
 
-  async isLimited(
-    key: string,
-    windowMs: number,
-    maxRequests: number
-  ): Promise<boolean> {
-    if (this.redis) {
-      return this.redis.isLimited(key, windowMs, maxRequests);
-    }
-    return this.inMemory.isLimited(key, maxRequests);
+  async isLimited(key: string): Promise<boolean> {
+    return !(await this.check(key)).success;
   }
 
   async reset(key?: string): Promise<void> {
@@ -245,7 +233,8 @@ export const RateLimitPresets = {
 export function getIpAddress(request: NextRequest): string {
   const forwarded = request.headers.get('x-forwarded-for');
   if (forwarded) {
-    return forwarded.split(',')[0].trim();
+    // split always yields at least one element for a non-empty string.
+    return forwarded.split(',')[0]!.trim();
   }
   return request.headers.get('x-real-ip') || 'unknown';
 }
@@ -262,11 +251,7 @@ export function createRateLimitMiddleware(
       config.keyGenerator || ((req: NextRequest) => getIpAddress(req));
 
     const key = keyGenerator(request);
-    const isLimited = await limiter.isLimited(
-      key,
-      config.windowMs,
-      config.maxRequests
-    );
+    const isLimited = await limiter.isLimited(key);
 
     return {
       limited: isLimited,
@@ -290,12 +275,9 @@ export class RateLimitStore {
   /**
    * Get or create a limiter
    */
-  getLimiter(name: string, windowMs: number): RateLimiter {
+  getLimiter(name: string, config: RateLimitConfig): RateLimiter {
     if (!this.limiters.has(name)) {
-      this.limiters.set(
-        name,
-        new RateLimiter(windowMs, this.redisClient)
-      );
+      this.limiters.set(name, new RateLimiter(config, this.redisClient));
     }
     return this.limiters.get(name)!;
   }
@@ -308,12 +290,9 @@ export class RateLimitStore {
     key: string,
     config: RateLimitConfig
   ): Promise<RateLimitResult & { limited: boolean }> {
-    const limiter = this.getLimiter(name, config.windowMs);
-    const result = await limiter.check(key, config.windowMs);
-    return {
-      ...result,
-      limited: result.current > config.maxRequests,
-    };
+    const limiter = this.getLimiter(name, config);
+    const result = await limiter.check(key);
+    return { ...result, limited: !result.success };
   }
 
   /**

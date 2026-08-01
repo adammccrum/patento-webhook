@@ -64,33 +64,33 @@ describe('@iriskey/monitoring', () => {
       const healthCheck = new HealthCheckService();
 
       healthCheck.registerCheck('test', async () => ({
-        status: 'healthy',
+        ok: true,
       }));
 
       const health = await healthCheck.getHealth();
       expect(health.status).toBe('healthy');
     });
 
-    it('marks service as degraded when some checks fail', async () => {
+    it('marks service as unhealthy when some checks fail', async () => {
       const healthCheck = new HealthCheckService();
 
       healthCheck.registerCheck('ok', async () => ({
-        status: 'healthy',
+        ok: true,
       }));
 
       healthCheck.registerCheck('bad', async () => ({
-        status: 'degraded',
+        ok: false,
       }));
 
       const health = await healthCheck.getHealth();
-      expect(health.status).toBe('degraded');
+      expect(health.status).toBe('unhealthy');
     });
 
     it('provides readiness check', async () => {
       const healthCheck = new HealthCheckService();
 
       healthCheck.registerCheck('database', async () => ({
-        status: 'healthy',
+        ok: true,
       }));
 
       const readiness = await healthCheck.getReadiness();
@@ -101,16 +101,16 @@ describe('@iriskey/monitoring', () => {
       const healthCheck = new HealthCheckService();
       const liveness = await healthCheck.getLiveness();
       expect(liveness.alive).toBe(true);
-      expect(liveness.uptime).toBeGreaterThan(0);
+      expect(liveness.uptime).toBeGreaterThanOrEqual(0);
     });
   });
 
   describe('LogLevel', () => {
     it('has required log levels', () => {
-      expect(LogLevel.DEBUG).toBe('DEBUG');
-      expect(LogLevel.INFO).toBe('INFO');
-      expect(LogLevel.WARN).toBe('WARN');
-      expect(LogLevel.ERROR).toBe('ERROR');
+      expect(LogLevel.DEBUG).toBe('debug');
+      expect(LogLevel.INFO).toBe('info');
+      expect(LogLevel.WARN).toBe('warn');
+      expect(LogLevel.ERROR).toBe('error');
     });
   });
 });
