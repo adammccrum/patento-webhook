@@ -6,6 +6,7 @@ import { NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
 
 const COURSE_1_DATA = {
+  slug: 'course-1',
   title: 'Building AI Assistants for Your Work',
   description:
     'Learn to build practical AI assistants that solve real problems in your daily work. Each mission teaches you to create a working tool you can use immediately.',
@@ -171,10 +172,18 @@ export const POST = withCapability('content.seed', async (_request: Request) => 
 
     // Check if Course 1 already exists
     const existingCourse = await prisma.course.findFirst({
-      where: { position: 1 },
+      where: { OR: [{ slug: COURSE_1_DATA.slug }, { position: 1 }] },
     });
 
     if (existingCourse) {
+      // A course seeded before slugs existed still needs one, or its links
+      // will not resolve.
+      if (existingCourse.slug !== COURSE_1_DATA.slug) {
+        await prisma.course.update({
+          where: { id: existingCourse.id },
+          data: { slug: COURSE_1_DATA.slug },
+        });
+      }
       return NextResponse.json(
         { message: 'Course 1 already exists', courseId: existingCourse.id },
         { status: 200 }
@@ -184,6 +193,7 @@ export const POST = withCapability('content.seed', async (_request: Request) => 
     // Create course with missions
     const course = await prisma.course.create({
       data: {
+        slug: COURSE_1_DATA.slug,
         title: COURSE_1_DATA.title,
         description: COURSE_1_DATA.description,
         position: COURSE_1_DATA.position,

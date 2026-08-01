@@ -207,6 +207,9 @@ model Settings {
   twoFactorEnabled Boolean  @default(false)
   emailNotifications Boolean @default(true)
   publicProfile    Boolean  @default(false)
+  // DEPRECATED — no dark theme exists and none is planned; LAO's identity is a
+  // clean, bright workspace. Retained for database compatibility only. Remove in
+  // a later cleanup, or revive only if beta demand justifies it.
   darkMode         Boolean  @default(false)
   metadata         Json     @default("{}")
   createdAt        DateTime @default(now())
@@ -488,6 +491,9 @@ model CoachConversation {
 // Learning Courses
 model Course {
   id            String   @id @default(cuid())
+  // Stable, human-readable address. Links point at this, never at the cuid,
+  // so /course/course-1 works on any environment including a fresh seed.
+  slug          String   @unique
   title         String   // "Building AI Assistants for Your Work"
   description   String
   position      Int      @default(1) // Course 1, 2, 3, etc.
@@ -500,6 +506,7 @@ model Course {
   updatedAt     DateTime @updatedAt
 
   @@index([status])
+  @@index([slug])
 }
 
 model Mission {

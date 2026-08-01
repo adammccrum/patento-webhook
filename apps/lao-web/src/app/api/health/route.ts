@@ -5,11 +5,14 @@
  */
 
 import { NextResponse } from 'next/server';
-import { getHealthCheckService } from '@iriskey/monitoring';
+import { getHealth } from '@/lib/health';
+
+// A probe that is prerendered can never report a problem.
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export const GET = async () => {
-  const healthCheckService = getHealthCheckService();
-  const health = await healthCheckService.getHealth();
+  const health = await getHealth().getHealth();
 
   const statusCode = health.status === 'healthy' ? 200 : 503;
   return NextResponse.json(health, { status: statusCode });

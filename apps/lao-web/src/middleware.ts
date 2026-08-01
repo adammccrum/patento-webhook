@@ -29,10 +29,22 @@ const protectedRoutes = [
 const publicRoutes = ['/auth/login', '/auth/register', '/auth/forgot-password'];
 const healthRoutes = ['/api/health', '/api/ready', '/api/alive'];
 
+const secure = withSecurityHeaders();
+
+/**
+ * Every response leaves through here, so headers are applied once, at the end,
+ * rather than remembered at each return. Previously `withSecurityHeaders` was
+ * imported and never called, and the app shipped with no CSP, HSTS or
+ * X-Frame-Options at all.
+ */
 export async function middleware(request: NextRequest) {
+  return secure(await route(request));
+}
+
+async function route(request: NextRequest): Promise<NextResponse> {
   const path = request.nextUrl.pathname;
 
-  // Skip security checks for health endpoints
+  // Probes must answer even when auth is unavailable.
   if (healthRoutes.some((route) => path.startsWith(route))) {
     return NextResponse.next();
   }

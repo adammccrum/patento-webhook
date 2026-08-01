@@ -7,6 +7,9 @@
 import { NextResponse } from 'next/server';
 import { getHealthCheckService } from '@iriskey/monitoring';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export const GET = async () => {
   const healthCheckService = getHealthCheckService();
   const liveness = await healthCheckService.getLiveness();

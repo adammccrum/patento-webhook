@@ -165,7 +165,7 @@ export default function SolutionsPage() {
                 <p className="text-sm text-slate-600 mb-6">
                   Solve a problem and the tool you build lands here.
                 </p>
-                <Link href="/course/1">
+                <Link href="/course/course-1">
                   <button className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition text-sm font-medium">
                     Solve a Problem
                   </button>

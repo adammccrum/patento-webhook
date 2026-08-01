@@ -8,11 +8,19 @@ export const dynamic = 'force-dynamic';
 export const GET = withCapability('course.read', async (request: Request, { params, principal }: any) => {
   try {
 
-    const courseId = params.id;
+    // Resolve by slug, cuid, or ordinal position. Links use the slug, but
+    // "/course/1" was shipped in earlier builds and must not dead-end.
+    const key = params.id as string;
+    const position = /^\d+$/.test(key) ? Number(key) : null;
 
-    // Get course with missions
-    const course = await prisma.course.findUnique({
-      where: { id: courseId },
+    const course = await prisma.course.findFirst({
+      where: {
+        OR: [
+          { slug: key },
+          { id: key },
+          ...(position !== null ? [{ position }] : []),
+        ],
+      },
       include: {
         missions: {
           orderBy: { position: 'asc' },
@@ -23,6 +31,9 @@ export const GET = withCapability('course.read', async (request: Request, { para
     if (!course) {
       return NextResponse.json({ error: 'Course not found' }, { status: 404 });
     }
+
+    // Everything below keys off the real id, whatever the caller used.
+    const courseId = course.id;
 
     // Get or create enrollment
     let enrollment = await prisma.courseEnrollment.findUnique({

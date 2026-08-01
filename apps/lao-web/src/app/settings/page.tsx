@@ -13,6 +13,9 @@ export default function SettingsPage() {
   const [formData, setFormData] = useState({
     twoFactorEnabled: false,
     emailNotifications: true,
+    // Deprecated. LAO's identity is a clean, bright workspace, so there is
+    // no dark theme and no toggle. Kept in state only so saving settings does
+    // not clear the stored column. See /brand/AUDIT.md A12.
     darkMode: false,
     emailOnLogin: false,
     emailOnSecurityAlert: true,
@@ -186,28 +189,6 @@ export default function SettingsPage() {
                     <p className="font-medium text-slate-900">Login Notifications</p>
                     <p className="text-sm text-slate-600">
                       Be notified when your account is accessed
-                    </p>
-                  </div>
-                </label>
-              </div>
-            </div>
-
-            <div className="border-t border-slate-200 pt-8">
-              <h3 className="text-lg font-semibold text-slate-900 mb-4">Appearance</h3>
-              <div className="space-y-4">
-                <label className="flex items-center p-4 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 transition">
-                  <input
-                    type="checkbox"
-                    checked={formData.darkMode}
-                    onChange={(e) =>
-                      setFormData({ ...formData, darkMode: e.target.checked })
-                    }
-                    className="w-4 h-4 rounded border-slate-300 text-blue-600"
-                  />
-                  <div className="ml-3">
-                    <p className="font-medium text-slate-900">Dark Mode</p>
-                    <p className="text-sm text-slate-600">
-                      Use dark theme (coming soon)
                     </p>
                   </div>
                 </label>

@@ -121,7 +121,7 @@ export default function TransformationsPage() {
           <p className="text-slate-600 mb-6 max-w-2xl mx-auto">
             See a problem you have? Solve it.
           </p>
-          <Link href="/course/1">
+          <Link href="/course/course-1">
             <button className="px-8 py-3 bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-600 transition">
               Build a Solution
             </button>

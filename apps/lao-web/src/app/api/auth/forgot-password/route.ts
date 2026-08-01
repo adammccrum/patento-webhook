@@ -13,6 +13,7 @@ import { getAuditService } from '@iriskey/audit';
 import { getRateLimitStore, RateLimitPresets } from '@iriskey/ratelimit';
 import { getLogger } from '@iriskey/monitoring';
 import { db } from '@/lib/db';
+import { sendPasswordReset } from '@/lib/email';
 
 const schema = z.object({
   email: z.string().email('Invalid email address'),
@@ -78,6 +79,18 @@ export const POST = withErrorHandler(async (request: NextRequest, ctx) => {
 
     const auditService = getAuditService();
     await auditService.logPasswordReset(user.id, ctx.productId);
+
+    // Deliver it. A failure here must not tell the caller whether the
+    // address exists, so it is logged and swallowed.
+    try {
+      await sendPasswordReset(email, resetToken);
+    } catch (error) {
+      logger.error(
+        'Password reset email failed to send',
+        error instanceof Error ? error : new Error(String(error)),
+        { userId: user.id, productId: ctx.productId }
+      );
+    }
 
     logger.info('Password reset requested', {
       context: {

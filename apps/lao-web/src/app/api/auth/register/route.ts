@@ -14,11 +14,13 @@ import { getAuditService } from '@iriskey/audit';
 import { getRateLimitStore, RateLimitPresets } from '@iriskey/ratelimit';
 import { getLogger } from '@iriskey/monitoring';
 import { db } from '@/lib/db';
+import { checkPassword, passwordField } from '@/lib/password';
+import { sendEmailVerification } from '@/lib/email';
 
 const registerSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
   email: z.string().email('Invalid email address'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
+  password: passwordField,
 });
 
 /**
@@ -62,6 +64,12 @@ export const POST = withErrorHandler(async (request: NextRequest, ctx) => {
 
   const { name, email, password } = validation.data;
 
+  // Re-check with the email in hand — a field-level rule cannot see it.
+  const passwordProblem = checkPassword(password, email);
+  if (passwordProblem) {
+    return validationError(passwordProblem);
+  }
+
   const existingUser = await db.user.findUnique({
     where: { email },
   });
@@ -102,6 +110,18 @@ export const POST = withErrorHandler(async (request: NextRequest, ctx) => {
       expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
     },
   });
+
+  // The account already exists at this point, so a mail failure must not
+  // fail the request — the learner can still sign in.
+  try {
+    await sendEmailVerification(email, verificationToken);
+  } catch (error) {
+    logger.error(
+        'Verification email failed to send',
+        error instanceof Error ? error : new Error(String(error)),
+        { userId: user.id, productId: ctx.productId }
+      );
+  }
 
   // Use audit service instead of manual logging
   const auditService = getAuditService();
