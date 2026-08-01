@@ -96,6 +96,10 @@ jobs:
           RC_ENVIRONMENT: github-actions/${{ runner.os }}
           RC_OPERATOR: ${{ github.actor }}
           RC_PORT: '3400'
+          # Record every step rather than stopping at the first failure, so a
+          # known outstanding gate does not leave the rest unproven. The job
+          # still fails — this changes how much we learn, never the verdict.
+          RC_REPORT_ALL: '1'
         run: npm run verify-release-candidate
 
       # Always — a failed run is evidence too, and the reason not to release.
