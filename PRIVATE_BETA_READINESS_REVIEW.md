@@ -2,7 +2,16 @@
 
 **Date:** 2026-08-01
 **Question:** Can we invite ten real learners?
-**Answer: Not yet.** Six blockers, one of which breaks the first thirty minutes outright. All are small. Estimated **4–6 working days** to green.
+**Answer: two blockers remain.** Four of the six are fixed and verified against a
+running build (see the change log at the end). What is left:
+
+- **B4 — privacy.** No data export, no account deletion, no policy pages. Legal blocker.
+- **B6 — provider verification.** The nine-check harness now exists and is proven
+  end to end against a local OpenAI-compatible server, but **no live vendor has
+  been called** because no API key is available in this environment. Run
+  `npm run verify-providers --workspace=@iriskey/llm` in staging with real keys.
+
+Estimated **2 working days** remaining.
 
 **Method:** everything below was executed, not inferred. A production build was run against PostgreSQL 16 with a seeded corpus of 54 users / 8,601 solutions / 2,157 versions / 10,215 runs / 1,802 messages, served by `next start`, and probed with real HTTP requests and a real session. Where something could not be verified, it says so and says why.
 
@@ -12,12 +21,12 @@
 
 | Area | State | Blockers |
 |---|---|---|
-| Product journey | ❌ **Broken at step one** | B1 |
-| Security | ⚠️ Strong core, three gaps | B2, B3 |
+| Product journey | ✅ First click fixed | ~~B1~~ |
+| Security | ✅ Headers + password policy fixed | ~~B2~~, ~~B3~~ |
 | Privacy | ❌ **Nothing in place** | B4 |
-| Reliability | ⚠️ Solid build, blind health checks | B5 |
+| Reliability | ✅ Health checks now fail correctly | ~~B5~~ |
 | Performance | ✅ Fine for ten learners | — |
-| AI providers | ⚠️ **Zero live validation** | B6 |
+| AI providers | ⚠️ Harness built, needs keys | B6 |
 | Observability | ❌ Cannot answer the eight questions | B7 |
 | Founder dashboard | ⚠️ Four of five views read zero | R6 |
 
@@ -25,7 +34,11 @@
 
 # BLOCKERS — must fix before the first invitation
 
-## B1. The first click is a dead end — **critical**
+## ~~B1. The first click is a dead end~~ — **FIXED**
+
+> **Resolved.** `Course.slug` added; links use `/course/course-1`; the API resolves by slug, cuid or position so old `/course/1` URLs still work. Migration backfills existing rows. Verified: both URLs return the real course with 5 missions.
+
+<details><summary>Original finding</summary>
 
 A new learner's dashboard says *"Build your first solution → Start"*. That button, and four others, link to **`/course/1`**.
 
@@ -42,7 +55,13 @@ A learner who signs up and clicks the primary call to action sees *Course not fo
 
 **Fix (½ day):** give Course a stable `slug` (`course-1`) or resolve by `position: 1`, and route `/course/[slug]`. Then walk the journey end to end.
 
-## B2. The app serves no security headers — **critical**
+</details>
+
+## ~~B2. The app serves no security headers~~ — **FIXED**
+
+> **Resolved.** Every response now leaves through `withSecurityHeaders`. Verified on the wire: CSP, HSTS, `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy`.
+
+<details><summary>Original finding</summary>
 
 `apps/lao-web/src/middleware.ts` imports `withSecurityHeaders` from `@iriskey/security` and **never calls it**. Every path returns a bare `NextResponse.next()`.
 
@@ -52,7 +71,14 @@ The app is clickjackable and has no CSP. The helper is written and tested; it is
 
 **Fix (½ day):** apply `withSecurityHeaders(...)` to every middleware return. Re-verify with `curl -D -`.
 
-## B3. Password reset is dead, and password policy is nominal — **critical**
+</details>
+
+## ~~B3. Password policy and email delivery~~ — **FIXED** (live send unverified)
+
+> **Resolved.** 12-character floor rejecting common passwords, repeats, sequences and the learner's own email; passphrases welcome. Provider-agnostic email transport (HTTP / SMTP / console) wired into registration and reset, with failures logged and swallowed so they cannot fail a signup or reveal whether an address exists.
+> **Still unverified: live delivery.** No credentials were available.
+
+<details><summary>Original finding</summary>
 
 **No email transport exists anywhere in the repository.** Registration and password-reset both mint a `VerificationToken` row and then only write a log line. Nothing is ever sent.
 
@@ -65,7 +91,9 @@ Separately, the password policy is `z.string().min(8)` and nothing else. **Verif
 
 **Fix (1 day):** wire one transactional email provider for reset only; add complexity/breach checks to the password schema. Or, for beta: disable self-service registration entirely, invite by magic link, and document it.
 
-## B4. No privacy story at all — **critical (legal)**
+</details>
+
+## B4. No privacy story at all — **critical (legal), OUTSTANDING**
 
 Verified absent:
 
@@ -86,7 +114,11 @@ The schema is well positioned — `onDelete: Cascade` from `User` is already ver
 
 **Fix (1½ days):** `GET /api/account/export` (JSON of solutions + versions + runs + conversations), `DELETE /api/account` with a typed confirmation, and three static pages. Say plainly that conversations are stored and for how long.
 
-## B5. Health checks are frozen JSON that can never fail — **critical**
+## ~~B5. Health checks are frozen JSON~~ — **FIXED**
+
+> **Resolved.** All three probes are `force-dynamic` and a real `SELECT 1` check is registered. Verified by stopping PostgreSQL mid-run: `/api/health` and `/api/ready` returned 503, `/api/alive` correctly stayed 200, and both recovered without a redeploy.
+
+<details><summary>Original finding</summary>
 
 `/api/health`, `/api/ready` and `/api/alive` are marked `○ (Static)` in the build output — **prerendered at build time**. No check is registered anywhere in the codebase (`registerCheck` appears zero times outside the monitoring package itself).
 
@@ -96,7 +128,9 @@ A load balancer would keep routing traffic to a completely broken instance.
 
 **Fix (½ day):** add `export const dynamic = 'force-dynamic'` to all three, register a real `SELECT 1` database check, and return 503 when it fails. Re-verify by stopping the database.
 
-## B6. No AI provider has ever been called — **critical for trust**
+</details>
+
+## B6. No AI provider has ever been called — **OUTSTANDING** (harness ready)
 
 No API key was available in this environment, so **not one live provider call has been made.** What is verified is adapter *logic* against a stubbed transport: request shaping, response parsing, error mapping, retry, fallback, cancellation, budget refusal.
 
@@ -236,12 +270,19 @@ The workspace uses only 4 responsive breakpoints. Message bubbles cap at `max-w-
 
 **Nothing below has been executed.** This is the gate.
 
-For each of Anthropic, OpenAI, Gemini, and one OpenAI-compatible endpoint (Ollama or OpenRouter):
+**The harness now exists**: `npm run verify-providers --workspace=@iriskey/llm`
+runs all nine checks against whatever is configured, prints a pass/fail table,
+and exits non-zero on failure so it can gate a release. It was proven end to end
+against a local OpenAI-compatible server — all nine executed and passed — and
+against an unreachable endpoint, where it correctly failed and skipped the rest.
+
+Run it in staging with real keys. For each of Anthropic, OpenAI, Gemini, and one
+OpenAI-compatible endpoint (Ollama or OpenRouter):
 
 | # | Check | Pass condition |
 |---|---|---|
 | 1 | Authentication | Real key returns 200; bad key maps to `INVALID_REQUEST`, never retried |
-| 2 | Streaming | Currently a **non-incremental fallback for all providers** — see R1 |
+| 2 | Streaming | Reports whether it is incremental. Currently a **non-incremental fallback for all providers** — the harness flags this explicitly (see R1) |
 | 3 | Structured JSON | `proposedContent` returns as data, not prose |
 | 4 | Diff generation | Proposal differs from current content and is applyable |
 | 5 | Cancellation | Aborting stops token consumption; `CANCELLED` charges nothing further |
@@ -267,23 +308,24 @@ Record which model served each check. Do not proceed to public beta until every 
 
 # The exact list before inviting learners
 
-**Day 1**
-1. B1 — fix `/course/1`; walk the journey end to end. *(½ d)*
-2. B2 — apply `withSecurityHeaders`; verify with `curl -D -`. *(½ d)*
+**Done** — verified against a running production build:
 
-**Day 2**
-3. B5 — make health checks dynamic and real; verify by stopping the database. *(½ d)*
-4. B3 — disable self-service registration for beta, invite by hand, **or** wire reset email. *(½ d)*
+| Blocker | Evidence |
+|---|---|
+| ~~B1~~ course dead end | `/api/courses/course-1` and `/api/courses/1` both return the real course with 5 missions |
+| ~~B2~~ security headers | CSP, HSTS, X-Frame-Options DENY, nosniff, Referrer-Policy present on the wire |
+| ~~B3~~ password policy | `password`, `short1234`, `aaaa…`, `abcdefghijkl`, and own-email all rejected; passphrase accepted |
+| ~~B3~~ email delivery | transport built and wired; **live send unverified — no credentials** |
+| ~~B5~~ health checks | 503 with PostgreSQL stopped, 200 on recovery, `/api/alive` correctly unaffected |
 
-**Day 3–4**
-5. B4 — export, delete, and three static pages. *(1½ d)*
-6. H6 — structured collaborator logging. *(½ d)*
+**Remaining:**
 
-**Day 5**
-7. B6 — run the nine-point matrix against every provider in staging. *(1 d)*
-
-**Day 6 (recommended)**
-8. H5 accessibility labels, H3 rate-limit keying, R6 dashboard cull, manual mobile pass. *(1 d)*
+| Order | Work | Effort |
+|---|---|---|
+| 1 | **B4** — export, deletion, three static pages | 1½ d |
+| 2 | **B6** — run `verify-providers` in staging against real keys | ½ d |
+| 3 | H6 — structured collaborator logging | ½ d |
+| 4 | H5 accessibility labels, H3 rate-limit keying, R6 dashboard cull, manual mobile pass | 1 d |
 
 Then invite.
 

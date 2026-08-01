@@ -54,6 +54,11 @@ export class ModelRouter {
     return this.models.length;
   }
 
+  /** The registered models, for verification and diagnostics. */
+  get registered(): readonly LanguageModel[] {
+    return this.models;
+  }
+
   /** Candidates that can serve these requirements, best first. */
   select(requirements: ModelRequirements = {}): LanguageModel[] {
     const capable = this.models.filter((m) => {

@@ -28,6 +28,13 @@ export { ModelRouter, type ModelRequirements, type RouteTrace, type RouterOption
 
 export { buildRouter, type BuildResult, type RegistryEnv } from './registry';
 
+export {
+  formatReport,
+  verifyProvider,
+  type CheckResult,
+  type VerificationReport,
+} from './verify';
+
 export { AnthropicAdapter, type AnthropicOptions } from './adapters/anthropic';
 export { GeminiAdapter, type GeminiOptions } from './adapters/gemini';
 export {
