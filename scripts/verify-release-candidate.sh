@@ -218,26 +218,45 @@ step "Complete learner journey, with no intervention"
 EMAIL="rc-$(date +%s)@example.com"
 PASSWORD='Rc-Verification-2026!x'
 
-# curl helper: prints the status, keeps the body in RESP.
+# Sets CODE and RESP in *this* shell. Deliberately not called through command
+# substitution: that runs in a subshell, so the response body never comes back
+# and every assertion about it silently passes on an empty string. It did, and
+# a genuinely empty body read as "the course has no missions".
+CODE=""
 RESP=""
+BODY_FILE="${WORKDIR}/resp"
+
 call() {
   local method="$1" path="$2" body="${3:-}"
-  local args=(-s -o "${WORKDIR}/resp" -w '%{http_code}' -b "$JAR" -c "$JAR" -X "$method" "${BASE}${path}")
+  local args=(-s -o "$BODY_FILE" -w '%{http_code}' -b "$JAR" -c "$JAR" -X "$method" "${BASE}${path}")
   [[ -n "$body" ]] && args+=(-H 'Content-Type: application/json' -d "$body")
-  local code
-  code="$(curl "${args[@]}")"
-  RESP="$(cat "${WORKDIR}/resp")"
-  echo "$code"
+  CODE="$(curl "${args[@]}")"
+  RESP="$(cat "$BODY_FILE")"
 }
 
+# expect <label> <status> <method> <path> [body]
 expect() {
-  local label="$1" want="$2" got="$3"
-  [[ "$got" == "$want" ]] || fail "${label} → HTTP ${got} (expected ${want}) :: $(echo "$RESP" | head -c 300)"
-  ok "${label} → ${got}"
+  local label="$1" want="$2"
+  shift 2
+  call "$@"
+  [[ "$CODE" == "$want" ]] \
+    || fail "${label} → HTTP ${CODE} (expected ${want}) :: $(head -c 300 "$BODY_FILE")"
+  ok "${label} → ${CODE}"
 }
 
-expect "register" 201 "$(call POST /api/auth/register \
-  "{\"name\":\"RC Verifier\",\"email\":\"${EMAIL}\",\"password\":\"${PASSWORD}\"}")"
+# Read a value out of the last response. Real JSON parsing, because a regex
+# over JSON is how "no missions" got reported for a response full of missions.
+json() {
+  node -e '
+    const d = JSON.parse(require("fs").readFileSync(process.argv[1], "utf8"));
+    const v = process.argv[2].split(".").reduce((o, k) => o?.[k], d);
+    if (v === undefined || v === null) process.exit(1);
+    process.stdout.write(String(v));
+  ' "$BODY_FILE" "$1"
+}
+
+expect "register" 201 POST /api/auth/register \
+  "{\"name\":\"RC Verifier\",\"email\":\"${EMAIL}\",\"password\":\"${PASSWORD}\"}"
 
 CSRF="$(curl -s -b "$JAR" -c "$JAR" "${BASE}/api/auth/csrf" | sed 's/.*"csrfToken":"\([^"]*\)".*/\1/')"
 [[ -n "$CSRF" ]] || fail "Could not obtain a CSRF token"
@@ -248,44 +267,45 @@ curl -s -o /dev/null -b "$JAR" -c "$JAR" \
 grep -q 'session-token' "$JAR" || fail "Sign in produced no session cookie"
 ok "sign in → session established"
 
-expect "dashboard" 200 "$(call GET /api/dashboard)"
+expect "dashboard" 200 GET /api/dashboard
 
-expect "open course 1" 200 "$(call GET /api/courses/course-1)"
-COURSE_ID="$(echo "$RESP" | sed 's/.*"course":{"id":"\([^"]*\)".*/\1/')"
-echo "$RESP" | grep -q '"missions"' || fail "Course returned no missions"
-MISSION_ID="$(echo "$RESP" | grep -o '"missions":\[{"id":"[^"]*"' | sed 's/.*"id":"//;s/"//')"
-[[ -n "$MISSION_ID" ]] || fail "Could not read a mission id from the course"
-ok "course resolved with missions, first mission ${MISSION_ID:0:8}…"
+expect "open course 1" 200 GET /api/courses/course-1
+COURSE_ID="$(json course.id)" || fail "Course response has no id"
+MISSION_COUNT="$(json course.missions.length)" || fail "Course returned no missions array"
+[[ "$MISSION_COUNT" == "5" ]] || fail "Course has ${MISSION_COUNT} missions, expected 5"
+MISSION_ID="$(json course.missions.0.id)" || fail "Could not read the first mission id"
+ok "course resolved with ${MISSION_COUNT} missions, first is ${MISSION_ID:0:8}…"
 
-expect "open mission" 200 "$(call GET "/api/missions/${MISSION_ID}")"
+expect "open mission" 200 GET "/api/missions/${MISSION_ID}"
 
-expect "complete mission" 200 "$(call POST /api/missions/complete \
-  "{\"missionId\":\"${MISSION_ID}\",\"courseId\":\"${COURSE_ID}\",\"reflection\":\"Verification run.\",\"problem\":\"Replying to the same email every week.\",\"content\":\"A short reusable reply.\"}")"
+expect "complete mission" 200 POST /api/missions/complete \
+  "{\"missionId\":\"${MISSION_ID}\",\"courseId\":\"${COURSE_ID}\",\"reflection\":\"Verification run.\",\"problem\":\"Replying to the same email every week.\",\"content\":\"A short reusable reply.\"}"
 
-expect "toolbox lists the solution" 200 "$(call GET /api/solutions)"
-SOLUTION_ID="$(echo "$RESP" | grep -o '"id":"[^"]*"' | head -1 | sed 's/"id":"//;s/"//')"
-[[ -n "$SOLUTION_ID" ]] || fail "Completing a mission produced no solution"
-ok "solution created: ${SOLUTION_ID:0:8}…"
+expect "toolbox lists the solution" 200 GET /api/solutions
+SOLUTION_ID="$(json solutions.0.id)" || fail "Completing a mission produced no solution"
+SOLUTION_NAME="$(json solutions.0.name)" || true
+ok "solution in the toolbox: ${SOLUTION_NAME:-untitled}"
 
-expect "open solution" 200 "$(call GET "/api/solutions/${SOLUTION_ID}")"
+expect "open solution" 200 GET "/api/solutions/${SOLUTION_ID}"
 
 # With no provider configured the collaborator must decline in plain language,
-# not fall over. 503 is the correct answer; 500 is a bug.
-COLLAB="$(call POST "/api/solutions/${SOLUTION_ID}/collaborate" \
-  '{"intent":"improve","message":"Make this shorter."}')"
-case "$COLLAB" in
+# not fall over. 503 is the correct answer; 500 is a defect.
+call POST "/api/solutions/${SOLUTION_ID}/collaborate" \
+  '{"intent":"improve","message":"Make this shorter."}'
+case "$CODE" in
   200) ok "collaborator → 200 (a provider is configured)" ;;
-  503) ok "collaborator → 503, degrades honestly with no provider configured" ;;
-  *)   fail "collaborator → HTTP ${COLLAB} :: $(echo "$RESP" | head -c 300)" ;;
+  503) ok "collaborator → 503, declines honestly with no provider configured" ;;
+  *)   fail "collaborator → HTTP ${CODE} :: $(head -c 300 "$BODY_FILE")" ;;
 esac
 
-expect "record a use" 200 "$(call POST "/api/solutions/${SOLUTION_ID}/run" '{}')"
+expect "record a use" 200 POST "/api/solutions/${SOLUTION_ID}/run" '{}'
 
-expect "export my data" 200 "$(call GET /api/account/export)"
-echo "$RESP" | grep -q "$EMAIL" || fail "Export does not contain the learner's own account"
+expect "export my data" 200 GET /api/account/export
+grep -q "$EMAIL" "$BODY_FILE" || fail "Export does not contain the learner's own account"
+grep -q "$SOLUTION_ID" "$BODY_FILE" || fail "Export does not contain the learner's solution"
 ok "export contains the account and its solutions"
 
-expect "delete my account" 200 "$(call DELETE /api/account "{\"confirmEmail\":\"${EMAIL}\"}")"
+expect "delete my account" 200 DELETE /api/account "{\"confirmEmail\":\"${EMAIL}\"}"
 
 LEFT=$(psql "$RC_DATABASE_URL" -tAc \
   "select count(*) from \"User\" where email='${EMAIL}'")
