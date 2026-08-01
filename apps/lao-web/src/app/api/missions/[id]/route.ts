@@ -17,11 +17,6 @@ export async function GET(
 
     const mission = await prisma.mission.findUnique({
       where: { id: missionId },
-      include: {
-        course: {
-          select: { id: true, title: true },
-        },
-      },
     });
 
     if (!mission) {
