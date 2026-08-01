@@ -45,6 +45,8 @@ DB_NAME="(not reached)"
 # The report must never claim something happened that did not. It said
 # "dropped and recreated" on a run that refused to start.
 DB_STATE="not touched"
+# Failures recorded in evidence mode. Any value here forces NOT RELEASABLE.
+SOFT_FAILURES=0
 
 STEP=0
 STEP_NAME=""
@@ -100,7 +102,15 @@ cleanup() {
       sleep 0.5
     done
   fi
-  write_report "$([[ $status -eq 0 ]] && echo 'RELEASABLE' || echo "NOT RELEASABLE — failed at step ${STEP}")"
+  local verdict
+  if [[ $status -eq 0 && $SOFT_FAILURES -eq 0 ]]; then
+    verdict='RELEASABLE'
+  elif [[ $SOFT_FAILURES -gt 0 ]]; then
+    verdict="NOT RELEASABLE — ${SOFT_FAILURES} gate(s) failed"
+  else
+    verdict="NOT RELEASABLE — failed at step ${STEP}"
+  fi
+  write_report "$verdict"
   printf '\nRelease report: %s\n' "$REPORT"
 
   if [[ $status -ne 0 ]]; then
@@ -244,7 +254,23 @@ else
   # prefixes every line with the package name, so match anywhere.
   FAILING="$(grep -hoE '● .*' "${WORKDIR}/test.log" | sed 's/^● //' | sort -u | head -3 | paste -sd'; ' - || true)"
   TOTALS="$(grep -hoE 'Tests: +[^|]*' "${WORKDIR}/test.log" | grep failed | tail -1 || true)"
-  fail "${TOTALS:-test suite failed}${FAILING:+ :: ${FAILING}}"
+  MESSAGE="${TOTALS:-test suite failed}${FAILING:+ :: ${FAILING}}"
+
+  if [[ -n "${RC_REPORT_ALL:-}" ]]; then
+    # Evidence mode. While a known gate is outstanding — today, the master
+    # logo — stopping here would leave the journey unproven on every commit.
+    # This runs the rest and reports it.
+    #
+    # It is not a bypass: the failure is recorded, the verdict stays NOT
+    # RELEASABLE, and the exit code stays non-zero. There is no combination
+    # of flags that turns a failing run green.
+    printf '    \033[31m✗ %s\033[0m\n' "$MESSAGE"
+    printf '      RC_REPORT_ALL set — continuing to gather evidence. This run cannot pass.\n'
+    ROWS+=("| ${STEP_NAME} | FAIL | ${MESSAGE} |")
+    SOFT_FAILURES=$((SOFT_FAILURES + 1))
+  else
+    fail "$MESSAGE"
+  fi
 fi
 
 # ---------------------------------------------------------------------------
@@ -421,6 +447,12 @@ step "Result"
 if grep -qiE '\berror\b|unhandled|ECONNREFUSED' "$SERVER_LOG"; then
   printf '    \033[33m!\033[0m Server log contains error lines — review %s\n' "$SERVER_LOG"
   grep -iE '\berror\b|unhandled|ECONNREFUSED' "$SERVER_LOG" | head -5
+fi
+
+if [[ $SOFT_FAILURES -gt 0 ]]; then
+  printf '\n\033[31m\033[1mNOT RELEASABLE\033[0m — every other step passed, but %d gate(s) failed.\n' "$SOFT_FAILURES"
+  printf 'See the release report. The journey below is evidence, not approval.\n\n'
+  exit 1
 fi
 
 printf '\n\033[32m\033[1mRELEASE CANDIDATE VERIFIED\033[0m\n'
