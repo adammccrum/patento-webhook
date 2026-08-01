@@ -12,7 +12,9 @@ import { buildRouter } from './registry';
 import { formatReport, verifyProvider } from './verify';
 
 async function main(): Promise<void> {
-  const { degraded, configured } = buildRouter();
+  // Once. Building it twice made two sets of clients and read the environment
+  // twice, so the thing verified was not quite the thing reported on.
+  const { degraded, configured, router } = buildRouter();
 
   if (degraded) {
     console.error(
@@ -26,20 +28,28 @@ async function main(): Promise<void> {
 
   console.log(`\nVerifying ${configured.length} provider(s). This makes real calls.\n`);
 
-  const { router } = buildRouter();
-  const models = router.registered;
-
   let allPassed = true;
+  const warnings: string[] = [];
 
-  for (const model of models) {
+  for (const model of router.registered) {
     const report = await verifyProvider(model);
     console.log(formatReport(report));
     if (!report.passed) allPassed = false;
+    for (const r of report.results.filter((c) => c.warning)) {
+      warnings.push(`${report.modelId} — ${r.name}: ${r.detail}`);
+    }
+  }
+
+  if (warnings.length) {
+    // A pass with a known degradation must not read as a clean pass in the
+    // evidence someone files.
+    console.log('\nPassed with warnings:');
+    for (const w of warnings) console.log(`  ! ${w}`);
   }
 
   console.log(
     allPassed
-      ? '\nAll configured providers passed.\n'
+      ? `\nAll configured providers passed${warnings.length ? ' — with the warnings above' : ''}.\n`
       : '\nOne or more providers failed. Do not invite learners until they pass.\n'
   );
 

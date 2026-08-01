@@ -21,13 +21,35 @@ export interface CheckResult {
   passed: boolean;
   detail: string;
   skipped?: boolean;
+  /** Passed, but with a degradation worth reading before releasing. */
+  warning?: boolean;
 }
+
+/**
+ * Thrown by a check that passed while finding something acceptable-but-worse.
+ * Distinct from returning a string with a warning in it, which is how "budget
+ * was ignored" once reported PASS.
+ */
+class Degraded extends Error {}
 
 export interface VerificationReport {
   modelId: string;
   vendor: string;
   results: CheckResult[];
   passed: boolean;
+}
+
+/**
+ * Does a learner-facing message name who served it?
+ *
+ * Exported so it can be tested against messages directly. Check 9 constructs
+ * its own dead provider, so this is the only part of that check a test can
+ * reach — and an untested leak detector is worth nothing.
+ */
+export function namesAProvider(message: string): boolean {
+  return /\b(anthropic|openai|claude|gpt|gemini|llama|qwen|deepseek|mistral|hermes|bedrock|vertex)\b/i.test(
+    message
+  );
 }
 
 const ctx = (signal?: AbortSignal) => ({
@@ -60,6 +82,9 @@ async function check(
   try {
     return { name, passed: true, detail: await fn() };
   } catch (error) {
+    if (error instanceof Degraded) {
+      return { name, passed: true, warning: true, detail: error.message };
+    }
     const detail =
       error instanceof LLMError
         ? `${error.code}: ${error.message}`
@@ -113,9 +138,12 @@ export async function verifyProvider(model: LanguageModel): Promise<Verification
         }
       }
       if (!text.trim()) throw new Error('Stream produced no text');
-      return chunks > 1
-        ? `incremental, ${chunks} chunks`
-        : `WORKS BUT NOT INCREMENTAL — 1 chunk (adapter falls back to generate())`;
+      if (chunks <= 1) {
+        // Acceptable — the adapter falls back to generate() and the learner
+        // still gets an answer — but it must not read as a clean pass.
+        throw new Degraded('works but NOT incremental — 1 chunk, adapter falls back to generate()');
+      }
+      return `incremental, ${chunks} chunks`;
     })
   );
 
@@ -239,9 +267,12 @@ export async function verifyProvider(model: LanguageModel): Promise<Verification
           { ...ctx(), budgetCredits: 0.0000001 }
         );
         // Free/self-hosted models legitimately cost zero, so nothing to refuse.
-        return model.capabilities.outputCostPerMTok === 0
-          ? 'no cost declared, so nothing to refuse — expected for self-hosted'
-          : 'NOT REFUSED — budget was ignored';
+        if (model.capabilities.outputCostPerMTok === 0) {
+          return 'no cost declared, so nothing to refuse — expected for self-hosted';
+        }
+        // A priced model that ignores the budget is uncontrolled spend. This
+        // used to return the string below and report PASS.
+        throw new Error('NOT REFUSED — budget was ignored on a priced model');
       } catch (error) {
         if (error instanceof LLMError && error.code === 'BUDGET_EXCEEDED') {
           return 'refused before spending';
@@ -273,7 +304,7 @@ export async function verifyProvider(model: LanguageModel): Promise<Verification
       } catch (error) {
         if (!(error instanceof LLMError)) throw error;
         // The message reaching a learner must not name infrastructure.
-        if (/anthropic|openai|gemini|claude|gpt/i.test(error.message)) {
+        if (namesAProvider(error.message)) {
           throw new Error(`vendor name leaked into the message: ${error.message}`);
         }
         return `failed cleanly as ${error.code}, no vendor named`;
@@ -297,9 +328,13 @@ export function formatReport(report: VerificationReport): string {
     `── ${report.modelId} ${'─'.repeat(Math.max(0, 56 - report.modelId.length))}`,
   ];
   for (const r of report.results) {
-    const mark = r.skipped ? '–' : r.passed ? '✓' : '✗';
+    const mark = r.skipped ? '–' : r.warning ? '!' : r.passed ? '✓' : '✗';
     lines.push(`  ${mark} ${r.name.padEnd(26)} ${r.detail}`);
   }
-  lines.push(`  ${report.passed ? 'PASS' : 'FAIL'} — ${report.modelId}`);
+  const warnings = report.results.filter((r) => r.warning).length;
+  lines.push(
+    `  ${report.passed ? 'PASS' : 'FAIL'} — ${report.modelId}` +
+      (warnings ? ` (${warnings} warning${warnings > 1 ? 's' : ''} — read them)` : '')
+  );
   return lines.join('\n');
 }
