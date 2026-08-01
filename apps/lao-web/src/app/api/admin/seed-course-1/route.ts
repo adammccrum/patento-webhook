@@ -5,16 +5,19 @@ import { NextResponse } from 'next/server';
 const COURSE_1_DATA = {
   title: 'Building AI Assistants for Your Work',
   description:
-    'Learn to build practical AI assistants that solve real problems in your daily work. Each lesson teaches you to create a working tool you can use immediately.',
+    'Learn to build practical AI assistants that solve real problems in your daily work. Each mission teaches you to create a working tool you can use immediately.',
   position: 1,
 
-  lessons: [
+  missions: [
     {
-      title: 'Your First AI Assistant',
-      description: 'Build an AI assistant to solve a real problem you face at work',
+      title: 'Win Back One Hour',
+      tagline: 'Automate a task that eats your time',
+      description:
+        'Pick a task you do regularly that takes up your time. Build an AI assistant to do it for you and reclaim that hour each week.',
       position: 1,
       problemArea: 'General',
-      overview: `You already know how to build AI assistants. In this lesson, you'll apply that skill to solve your first real problem.
+      toolkitName: 'Personal Assistant',
+      overview: `You already know how to build AI assistants. In this mission, you'll apply that skill to solve your first real problem.
 
 Pick something you do regularly that takes up your time. Something that would free up 30 minutes in your week if you could automate it.
 
@@ -24,6 +27,8 @@ Then build an AI assistant to do it for you.`,
       reflectionPrompt:
         'Did it work? What surprised you about building this? How will you use it this week?',
       buildTemplate: null,
+      achievement: 'You saved 1 hour per week',
+      timeSavedMinutes: 60,
       successCriteria: JSON.stringify([
         'Clearly defines what the AI should do',
         'Includes specific instructions for the AI',
@@ -32,12 +37,14 @@ Then build an AI assistant to do it for you.`,
       ]),
     },
     {
-      title: 'AI for Email Management',
+      title: 'Clear Your Inbox Faster',
+      tagline: 'Let AI handle your email triage',
       description:
-        'Build an AI assistant that processes your emails and extracts what matters',
+        'Build an AI assistant that reads your emails and extracts what matters. Summarizes action items, flags urgency, and categories messages.',
       position: 2,
       problemArea: 'Email',
-      overview: `Email is a constant source of interruption. In this lesson, you'll build an AI assistant that reads your emails and does the thinking for you.
+      toolkitName: 'Email Assistant',
+      overview: `Email is a constant source of interruption. In this mission, you'll build an AI assistant that reads your emails and does the thinking for you.
 
 You'll create a tool that:
 - Summarizes long emails into key action items
@@ -54,6 +61,8 @@ Instructions:
 2. Extract specific action items (who, what, when)
 3. Categorize: Decision Needed, Follow-up Required, FYI
 4. Keep summary to 2-3 sentences max`,
+      achievement: 'You reclaimed email time',
+      timeSavedMinutes: 45,
       successCriteria: JSON.stringify([
         'Handles multiple types of emails (sales, support, collaboration)',
         'Consistent formatting of action items',
@@ -62,13 +71,16 @@ Instructions:
       ]),
     },
     {
-      title: 'AI for Content Creation',
-      description: 'Build an AI assistant that helps you write faster and better',
+      title: 'Create Content That Sounds Like You',
+      tagline: 'Write faster. Sound better.',
+      description:
+        'Build an AI assistant that helps you write faster and better. Improves tone and clarity, expands brief ideas, adapts your voice.',
       position: 3,
       problemArea: 'Writing',
+      toolkitName: 'Content Assistant',
       overview: `Whether you write emails, reports, or social media, an AI assistant can help you write faster and more clearly.
 
-In this lesson, you'll build a writing assistant that:
+In this mission, you'll build a writing assistant that:
 - Improves tone and clarity
 - Expands brief ideas into full thoughts
 - Adapts your voice to different audiences
@@ -84,6 +96,8 @@ Instructions:
 3. Expand with specific examples
 4. Adapt formality level based on audience
 5. Keep original message intact`,
+      achievement: 'Your writing got better and faster',
+      timeSavedMinutes: 30,
       successCriteria: JSON.stringify([
         'Preserves original intent and tone',
         'Output is more professional and clear',
@@ -92,14 +106,16 @@ Instructions:
       ]),
     },
     {
-      title: 'AI for Data Analysis',
+      title: 'Find Insights In Minutes',
+      tagline: 'Turn raw data into action',
       description:
-        'Build an AI assistant that turns raw data into insights you can act on',
+        'Build an AI assistant that finds patterns you would miss. Analyzes data, highlights anomalies, calculates metrics, suggests what to do.',
       position: 4,
       problemArea: 'Analysis',
-      overview: `You collect data every day. Sales numbers, metrics, feedback, metrics. But extracting insights takes time.
+      toolkitName: 'Research Assistant',
+      overview: `You collect data every day. Sales numbers, metrics, feedback. But extracting insights takes time.
 
-In this lesson, you'll build an analysis assistant that:
+In this mission, you'll build an analysis assistant that:
 - Finds patterns you would miss
 - Highlights anomalies
 - Calculates key metrics
@@ -115,6 +131,8 @@ Instructions:
 3. Identify trends and anomalies
 4. Compare to expected patterns
 5. Suggest top 3 actions to take`,
+      achievement: 'You found insights in minutes, not hours',
+      timeSavedMinutes: 90,
       successCriteria: JSON.stringify([
         'Identifies real patterns in the data',
         'Insights are specific and actionable',
@@ -123,11 +141,14 @@ Instructions:
       ]),
     },
     {
-      title: 'Build Your Next AI Assistant',
-      description: 'Apply everything you\'ve learned to solve your next problem',
+      title: 'Build Your Own AI Assistant',
+      tagline: 'You know how. Now solve YOUR problem.',
+      description:
+        'Pick the next problem you want to solve. It could be work, personal, creative—anything. You know the process. You know it works.',
       position: 5,
       problemArea: 'Your Choice',
-      overview: `You\'ve built four AI assistants. You understand the process. You\'ve seen what\'s possible.
+      toolkitName: 'Custom Assistant',
+      overview: `You've built four AI assistants. You understand the process. You've seen what's possible.
 
 Now pick the next problem you want to solve. It could be something you thought of while building the first four. Or something completely new.
 
@@ -137,6 +158,8 @@ Whatever it is, you know how to build it.`,
       reflectionPrompt:
         'You\'ve now built five working AI assistants. How has that changed what you think is possible? What will you build next?',
       buildTemplate: null,
+      achievement: 'You solved your own problem',
+      timeSavedMinutes: 120,
       successCriteria: JSON.stringify([
         'Solves a real problem you face',
         'You actually use it',
@@ -166,27 +189,31 @@ export async function POST() {
       );
     }
 
-    // Create course with lessons
+    // Create course with missions
     const course = await prisma.course.create({
       data: {
         title: COURSE_1_DATA.title,
         description: COURSE_1_DATA.description,
         position: COURSE_1_DATA.position,
-        lessons: {
-          create: COURSE_1_DATA.lessons.map((lesson) => ({
-            title: lesson.title,
-            description: lesson.description,
-            position: lesson.position,
-            problemArea: lesson.problemArea,
-            overview: lesson.overview,
-            coachPrompt: lesson.coachPrompt,
-            reflectionPrompt: lesson.reflectionPrompt,
-            buildTemplate: lesson.buildTemplate,
-            successCriteria: lesson.successCriteria,
+        missions: {
+          create: COURSE_1_DATA.missions.map((mission) => ({
+            title: mission.title,
+            tagline: mission.tagline,
+            description: mission.description,
+            position: mission.position,
+            problemArea: mission.problemArea,
+            toolkitName: mission.toolkitName,
+            overview: mission.overview,
+            coachPrompt: mission.coachPrompt,
+            reflectionPrompt: mission.reflectionPrompt,
+            buildTemplate: mission.buildTemplate,
+            achievement: mission.achievement,
+            timeSavedMinutes: mission.timeSavedMinutes,
+            successCriteria: mission.successCriteria,
           })),
         },
       },
-      include: { lessons: true },
+      include: { missions: true },
     });
 
     return NextResponse.json(

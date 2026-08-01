@@ -483,7 +483,7 @@ model Course {
   position      Int      @default(1) // Course 1, 2, 3, etc.
   status        String   @default("active") // active, draft, archived
 
-  lessons       Lesson[]
+  missions      Mission[]
   enrollments   CourseEnrollment[]
 
   createdAt     DateTime @default(now())
@@ -492,17 +492,21 @@ model Course {
   @@index([status])
 }
 
-model Lesson {
+model Mission {
   id            String   @id @default(cuid())
   courseId      String
   course        Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
-  title         String   // "Your First AI Assistant"
-  description   String   // What learner will build
-  position      Int      // Lesson order within course
+  // Mission identity (not "Lesson 1" but "Win Back One Hour")
+  title         String   // "Win Back One Hour", "Clear Your Inbox Faster", etc.
+  tagline       String   // Short description: "Automate a task that eats your time"
+  description   String   // What learner will build and why it matters
 
-  // The problem this lesson solves
+  position      Int      // Order within course (1-5)
+
+  // The problem this mission solves
   problemArea   String   // Email, Writing, Analysis, etc.
+  toolkitName   String   // "Email Assistant", "Content Assistant", etc.
 
   // Learning content (markdown)
   overview      String   // Introduction and context
@@ -516,6 +520,10 @@ model Lesson {
 
   // Success criteria (what makes a good asset)
   successCriteria String? // JSON array of criteria
+
+  // Outcome/achievement
+  achievement   String   // "You saved 1 hour per week", "Your inbox now works for you", etc.
+  timeSavedMinutes Int?   // Estimated weekly time saved
 
   status        String   @default("active") // active, draft, archived
   createdAt     DateTime @default(now())
@@ -532,9 +540,16 @@ model CourseEnrollment {
   courseId      String
   course        Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
-  // Progress tracking
-  currentLessonPosition Int  @default(0)
-  lessonsCompleted  Int  @default(0)
+  // Progress tracking (as achievements, not percentages)
+  currentMissionPosition Int @default(0)
+  missionsCompleted  Int @default(0)
+
+  // Toolkit (the assistants they've built)
+  toolkitItems  Json     @default("[]") // Array of {missionId, title, toolkitName, completedAt}
+
+  // Confidence journey
+  confidenceStart Float? // Captured at enrollment
+  confidenceEnd   Float? // Captured at graduation
 
   // Engagement
   enrolledAt    DateTime @default(now())

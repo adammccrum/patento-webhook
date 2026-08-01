@@ -9,23 +9,27 @@ CREATE TABLE "Course" (
     "updatedAt" DATETIME NOT NULL
 );
 
--- CreateTable Lesson
-CREATE TABLE "Lesson" (
+-- CreateTable Mission
+CREATE TABLE "Mission" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "courseId" TEXT NOT NULL,
     "title" TEXT NOT NULL,
+    "tagline" TEXT NOT NULL,
     "description" TEXT NOT NULL,
     "position" INTEGER NOT NULL,
     "problemArea" TEXT NOT NULL,
+    "toolkitName" TEXT NOT NULL,
     "overview" TEXT NOT NULL,
     "coachPrompt" TEXT NOT NULL,
     "buildTemplate" TEXT,
     "reflectionPrompt" TEXT NOT NULL,
     "successCriteria" TEXT,
+    "achievement" TEXT NOT NULL,
+    "timeSavedMinutes" INTEGER,
     "status" TEXT NOT NULL DEFAULT 'active',
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" DATETIME NOT NULL,
-    CONSTRAINT "Lesson_courseId_fkey" FOREIGN KEY ("courseId") REFERENCES "Course" ("id") ON DELETE CASCADE
+    CONSTRAINT "Mission_courseId_fkey" FOREIGN KEY ("courseId") REFERENCES "Course" ("id") ON DELETE CASCADE
 );
 
 -- CreateTable CourseEnrollment
@@ -33,8 +37,11 @@ CREATE TABLE "CourseEnrollment" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "userId" TEXT NOT NULL,
     "courseId" TEXT NOT NULL,
-    "currentLessonPosition" INTEGER NOT NULL DEFAULT 0,
-    "lessonsCompleted" INTEGER NOT NULL DEFAULT 0,
+    "currentMissionPosition" INTEGER NOT NULL DEFAULT 0,
+    "missionsCompleted" INTEGER NOT NULL DEFAULT 0,
+    "toolkitItems" TEXT NOT NULL DEFAULT '[]',
+    "confidenceStart" REAL,
+    "confidenceEnd" REAL,
     "enrolledAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "lastAccessedAt" DATETIME,
     "completedAt" DATETIME,
@@ -45,9 +52,9 @@ CREATE TABLE "CourseEnrollment" (
 -- CreateIndex Course
 CREATE INDEX "Course_status_idx" ON "Course"("status");
 
--- CreateIndex Lesson
-CREATE INDEX "Lesson_courseId_idx" ON "Lesson"("courseId");
-CREATE INDEX "Lesson_position_idx" ON "Lesson"("position");
+-- CreateIndex Mission
+CREATE INDEX "Mission_courseId_idx" ON "Mission"("courseId");
+CREATE INDEX "Mission_position_idx" ON "Mission"("position");
 
 -- CreateIndex CourseEnrollment
 CREATE UNIQUE INDEX "CourseEnrollment_userId_courseId_key" ON "CourseEnrollment"("userId", "courseId");
