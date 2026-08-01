@@ -42,6 +42,7 @@ model User {
   settings      Settings?
   analyticsEvents AnalyticsEvent[]
   sessionMetrics SessionMetrics[]
+  courseEnrollments CourseEnrollment[]
 
   @@index([email])
   @@index([createdAt])
@@ -472,4 +473,76 @@ model CoachConversation {
   @@index([userId])
   @@index([missionId])
   @@index([expiresAt])
+}
+
+// Learning Courses
+model Course {
+  id            String   @id @default(cuid())
+  title         String   // "Building AI Assistants for Your Work"
+  description   String
+  position      Int      @default(1) // Course 1, 2, 3, etc.
+  status        String   @default("active") // active, draft, archived
+
+  lessons       Lesson[]
+  enrollments   CourseEnrollment[]
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([status])
+}
+
+model Lesson {
+  id            String   @id @default(cuid())
+  courseId      String
+  course        Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  title         String   // "Your First AI Assistant"
+  description   String   // What learner will build
+  position      Int      // Lesson order within course
+
+  // The problem this lesson solves
+  problemArea   String   // Email, Writing, Analysis, etc.
+
+  // Learning content (markdown)
+  overview      String   // Introduction and context
+  coachPrompt   String   // Initial coach message
+
+  // What learner builds (template/example)
+  buildTemplate String? // Starting point or example
+
+  // Reflection guidance
+  reflectionPrompt String // What to think about after building
+
+  // Success criteria (what makes a good asset)
+  successCriteria String? // JSON array of criteria
+
+  status        String   @default("active") // active, draft, archived
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([courseId])
+  @@index([position])
+}
+
+model CourseEnrollment {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courseId      String
+  course        Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  // Progress tracking
+  currentLessonPosition Int  @default(0)
+  lessonsCompleted  Int  @default(0)
+
+  // Engagement
+  enrolledAt    DateTime @default(now())
+  lastAccessedAt DateTime?
+  completedAt   DateTime?
+
+  @@unique([userId, courseId])
+  @@index([userId])
+  @@index([courseId])
+  @@index([completedAt])
 }
