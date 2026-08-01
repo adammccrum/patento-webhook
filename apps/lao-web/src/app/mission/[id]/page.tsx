@@ -154,8 +154,8 @@ export default function MissionPage() {
 
             <p className="text-lg text-slate-700 mb-8 leading-relaxed">{mission.overview}</p>
 
-            <div className="bg-blue-50 border-l-4 border-blue-500 p-6 mb-8 rounded-lg">
-              <p className="text-slate-700 font-medium mb-2">What you'll build:</p>
+            <div className="bg-green-50 border-l-4 border-green-500 p-6 mb-8 rounded-lg">
+              <p className="text-slate-700 font-medium mb-2">What you'll solve:</p>
               <p className="text-slate-700">{mission.description}</p>
               <p className="text-sm text-slate-600 mt-3 font-medium">{mission.achievement}</p>
             </div>
@@ -183,17 +183,17 @@ export default function MissionPage() {
         {/* Coach Step */}
         {step === 'coach' && (
           <div className="bg-white rounded-lg shadow p-8">
-            <h3 className="text-2xl font-bold text-slate-900 mb-6">Tell Your Story</h3>
+            <h3 className="text-2xl font-bold text-slate-900 mb-6">Describe Your Problem</h3>
 
             <div className="mb-8 p-6 bg-blue-50 border-l-4 border-blue-500 rounded-lg">
               <p className="text-slate-700 leading-relaxed text-lg">
-                🤖 <span className="font-medium">Your Coach:</span> {mission.coachPrompt}
+                <span className="font-medium">Let's understand:</span> {mission.coachPrompt}
               </p>
             </div>
 
             <div className="mb-8">
               <label className="block text-sm font-semibold text-slate-900 mb-3">
-                Your situation:
+                The problem I'm solving:
               </label>
               <textarea
                 value={problemInput}
@@ -234,10 +234,11 @@ export default function MissionPage() {
         {step === 'build' && (
           <div className="bg-white rounded-lg shadow p-8">
             <div className="mb-8">
-              <h3 className="text-2xl font-bold text-slate-900 mb-4">Building Your {mission.toolkitName}</h3>
+              <h3 className="text-2xl font-bold text-slate-900 mb-4">Solving Your Problem</h3>
               <p className="text-slate-700 mb-4">
-                You're building a solution for: <span className="font-semibold">"{problemInput}"</span>
+                Your problem: <span className="font-semibold">"{problemInput}"</span>
               </p>
+              <p className="text-slate-600 text-sm">You'll build a {mission.toolkitName.toLowerCase()} to solve it.</p>
             </div>
 
             {mission.buildTemplate && (
@@ -267,7 +268,7 @@ export default function MissionPage() {
                 onClick={() => setStep('reflection')}
                 className="flex-1 px-6 py-3 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 transition"
               >
-                I've Built It →
+                Problem Solved →
               </button>
             </div>
           </div>
@@ -277,7 +278,8 @@ export default function MissionPage() {
         {step === 'reflection' && (
           <div className="bg-white rounded-lg shadow p-8">
             <div className="mb-8">
-              <h3 className="text-2xl font-bold text-slate-900 mb-2">You've Done Something Real</h3>
+              <h3 className="text-2xl font-bold text-slate-900 mb-2">You've Solved Something Real</h3>
+              <p className="text-slate-600 mb-2">Now that {problemInput.toLowerCase()} no longer consumes your time:</p>
               <p className="text-slate-700 mb-6">{mission.reflectionPrompt}</p>
             </div>
 
@@ -311,7 +313,7 @@ export default function MissionPage() {
                 onClick={handleCompleteMission}
                 className="flex-1 px-6 py-3 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 transition"
               >
-                Complete Mission ✓
+                Add to My Solutions ✓
               </button>
             </div>
           </div>

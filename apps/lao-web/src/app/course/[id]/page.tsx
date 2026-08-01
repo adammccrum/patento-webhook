@@ -26,7 +26,7 @@ interface Course {
 interface Enrollment {
   currentMissionPosition: number;
   missionsCompleted: number;
-  toolkitItems: Array<{ missionId: string; title: string; toolkitName: string; completedAt: string }>;
+  toolkitItems: Array<{ missionId: string; title: string; toolkitName: string; impact?: string; completedAt: string }>;
 }
 
 export default function CoursePage() {
@@ -222,22 +222,69 @@ export default function CoursePage() {
           })}
         </div>
 
-        {/* Toolkit Display */}
+        {/* My Solutions Display */}
         {enrollment && enrollment.toolkitItems.length > 0 && (
-          <div className="mb-12 p-8 bg-gradient-to-r from-indigo-50 to-blue-50 border-2 border-blue-200 rounded-lg">
-            <h3 className="text-2xl font-bold text-slate-900 mb-6">Your AI Toolkit</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {enrollment.toolkitItems.map((item) => (
-                <div key={item.missionId} className="bg-white rounded-lg p-4 border border-blue-200">
-                  <div className="flex items-start gap-3">
-                    <span className="text-2xl">✓</span>
-                    <div>
-                      <p className="font-semibold text-slate-900">{item.toolkitName}</p>
-                      <p className="text-xs text-slate-600">Built {new Date(item.completedAt).toLocaleDateString()}</p>
+          <div className="mb-12 space-y-8">
+            {/* Time You've Won Back */}
+            <div className="p-8 bg-gradient-to-r from-purple-50 to-indigo-50 border-2 border-purple-200 rounded-lg">
+              <h3 className="text-2xl font-bold text-slate-900 mb-6">Time You've Won Back</h3>
+              <div className="space-y-2 mb-6">
+                {enrollment.toolkitItems.map((item) => {
+                  const match = item.impact?.match(/(\d+)\s*hour|(\d+)\s*minute/g);
+                  return (
+                    <div key={item.missionId} className="flex justify-between items-center py-2 border-b border-purple-100">
+                      <p className="font-medium text-slate-900">{item.toolkitName}</p>
+                      <p className="text-slate-600">
+                        {item.impact?.match(/(\d+\s*(?:hour|minute))/g)?.join(' ') || '—'}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="flex justify-between items-center pt-4 border-t-2 border-purple-300">
+                <p className="text-lg font-bold text-slate-900">Total Every Week</p>
+                <p className="text-lg font-bold text-purple-600">
+                  {enrollment.toolkitItems.reduce((totalMinutes, item) => {
+                    const minuteMatch = item.impact?.match(/(\d+)\s*minute/);
+                    const hourMatch = item.impact?.match(/(\d+)\s*hour/);
+                    const mins = minuteMatch ? parseInt(minuteMatch[1]) : 0;
+                    const hours = hourMatch ? parseInt(hourMatch[1]) : 0;
+                    return totalMinutes + (hours * 60) + mins;
+                  }, 0) > 0
+                    ? (() => {
+                        const totalMinutes = enrollment.toolkitItems.reduce((acc, item) => {
+                          const minuteMatch = item.impact?.match(/(\d+)\s*minute/);
+                          const hourMatch = item.impact?.match(/(\d+)\s*hour/);
+                          const mins = minuteMatch ? parseInt(minuteMatch[1]) : 0;
+                          const hours = hourMatch ? parseInt(hourMatch[1]) : 0;
+                          return acc + (hours * 60) + mins;
+                        }, 0);
+                        const h = Math.floor(totalMinutes / 60);
+                        const m = totalMinutes % 60;
+                        return `${h > 0 ? `${h}h ` : ''}${m > 0 ? `${m}m` : ''}`.trim();
+                      })()
+                    : '0'}
+                </p>
+              </div>
+            </div>
+
+            {/* My Solutions */}
+            <div className="p-8 bg-gradient-to-r from-indigo-50 to-blue-50 border-2 border-blue-200 rounded-lg">
+              <h3 className="text-2xl font-bold text-slate-900 mb-2">My Solutions</h3>
+              <p className="text-slate-600 mb-6">Problems that no longer slow me down:</p>
+              <div className="space-y-3">
+                {enrollment.toolkitItems.map((item) => (
+                  <div key={item.missionId} className="bg-white rounded-lg p-4 border border-blue-200">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <p className="font-semibold text-slate-900">{item.toolkitName}</p>
+                        <p className="text-sm text-slate-600 mt-1">{item.impact || 'Built ' + new Date(item.completedAt).toLocaleDateString()}</p>
+                      </div>
+                      <span className="text-2xl">✓</span>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
         )}
@@ -246,16 +293,16 @@ export default function CoursePage() {
         {enrollment && enrollment.missionsCompleted === course.missions.length && (
           <div className="mt-12 p-8 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-lg text-center">
             <div className="text-5xl mb-4">🎉</div>
-            <h3 className="text-3xl font-bold text-green-900 mb-4">Look What You've Built</h3>
+            <h3 className="text-3xl font-bold text-green-900 mb-4">You've Won Back Time</h3>
             <p className="text-lg text-green-800 mb-6">
-              Five working AI assistants. Real solutions to real problems. And the knowledge to build more.
+              Five real problems solved. Countless hours reclaimed. And the knowledge that you can solve what's next.
             </p>
 
             {/* The Success Question */}
             <div className="bg-white rounded-lg p-8 mb-6 max-w-2xl mx-auto">
               <p className="text-slate-600 mb-4">One final question:</p>
               <p className="text-2xl font-bold text-slate-900 mb-6">
-                Which assistant are you going to use tomorrow?
+                Which problem disappears from your life tomorrow?
               </p>
               <textarea
                 value={successAnswer}

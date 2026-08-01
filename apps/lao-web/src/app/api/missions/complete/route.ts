@@ -52,11 +52,21 @@ export async function POST(request: Request) {
         ? JSON.parse(enrollment.toolkitItems)
         : [];
 
-    // Add new toolkit item
+    // Add new toolkit item with impact statement
+    const minutes = mission.timeSavedMinutes || 0;
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+
+    let impact = mission.achievement || 'Built successfully';
+    if (minutes > 0) {
+      impact = `Saves approximately ${hours > 0 ? `${hours} hour${hours !== 1 ? 's' : ''}` : ''} ${mins > 0 ? `${mins} minute${mins !== 1 ? 's' : ''}` : ''}`.trim() + ' every week.';
+    }
+
     const newToolkitItem = {
       missionId,
       title: mission.title,
       toolkitName: mission.toolkitName,
+      impact,
       completedAt: new Date().toISOString(),
     };
 
