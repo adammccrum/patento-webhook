@@ -278,7 +278,8 @@ export default function CoursePage() {
 
             {/* My Journey Timeline */}
             <div className="p-8 bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-200 rounded-lg">
-              <h3 className="text-2xl font-bold text-slate-900 mb-6">My Journey</h3>
+              <h3 className="text-2xl font-bold text-slate-900 mb-2">My Journey</h3>
+              <p className="text-slate-600 mb-6">From "I didn't think I could do this" to "I became someone who solves problems with AI"</p>
               <div className="space-y-4">
                 {enrollment.missionsCompleted >= 1 && (
                   <div className="flex items-start gap-4">
@@ -346,43 +347,44 @@ export default function CoursePage() {
               </div>
             </div>
 
-            {/* My Transformations */}
+            {/* My Creations */}
             <div className="space-y-6">
               <div>
-                <h3 className="text-2xl font-bold text-slate-900 mb-2">My Solutions</h3>
-                <p className="text-slate-600">The transformations I've created.</p>
+                <h3 className="text-2xl font-bold text-slate-900 mb-2">What I've Created</h3>
+                <p className="text-slate-600">Solutions I built. Problems I solved. The story of how I changed.</p>
               </div>
               {enrollment.toolkitItems.map((item, idx) => (
                 <div key={item.missionId} className="bg-white rounded-lg p-6 border-2 border-blue-200">
                   <div className="flex gap-4">
                     <div className="flex-shrink-0">
                       <div className="flex items-center justify-center h-10 w-10 rounded-full bg-blue-100">
-                        <span className="text-blue-600 font-bold">{idx + 1}</span>
+                        <span className="text-blue-600 font-bold">✓</span>
                       </div>
                     </div>
                     <div className="flex-1">
-                      <h4 className="text-lg font-bold text-slate-900 mb-2">{item.title}</h4>
+                      <h4 className="text-lg font-bold text-slate-900 mb-1">{item.title}</h4>
+                      <p className="text-sm text-blue-600 font-medium mb-3">I created this solution</p>
 
                       <div className="grid grid-cols-2 gap-4 mb-4">
                         <div>
-                          <p className="text-xs font-semibold text-slate-600 uppercase mb-1">Problem Solved</p>
-                          <p className="text-slate-700">{item.problemArea || 'General'}</p>
+                          <p className="text-xs font-semibold text-slate-600 uppercase mb-1">The Problem</p>
+                          <p className="text-slate-700">{item.problemArea || 'A real challenge'}</p>
                         </div>
                         <div>
-                          <p className="text-xs font-semibold text-slate-600 uppercase mb-1">Time Won Back</p>
-                          <p className="text-slate-700">{item.impact?.match(/(\d+ (?:hour|minute))/)?.[1] || '—'}</p>
+                          <p className="text-xs font-semibold text-slate-600 uppercase mb-1">Time I Won Back</p>
+                          <p className="text-slate-700 font-semibold">{item.impact?.match(/(\d+ (?:hour|minute))/)?.[1] || '—'}/week</p>
                         </div>
                       </div>
 
                       {item.reflection && (
-                        <div className="bg-slate-50 rounded p-3 mb-3">
-                          <p className="text-xs font-semibold text-slate-600 mb-1">What Changed</p>
-                          <p className="text-slate-700 italic">"{item.reflection}"</p>
+                        <div className="bg-slate-50 rounded p-3 mb-3 border-l-4 border-blue-300">
+                          <p className="text-xs font-semibold text-slate-600 mb-1">My Reflection</p>
+                          <p className="text-slate-700">"{item.reflection}"</p>
                         </div>
                       )}
 
                       <p className="text-sm text-slate-600">
-                        Solved on {new Date(item.completedAt).toLocaleDateString()}
+                        I solved this on {new Date(item.completedAt).toLocaleDateString()}
                       </p>
                     </div>
                   </div>
@@ -396,16 +398,16 @@ export default function CoursePage() {
         {enrollment && enrollment.missionsCompleted === course.missions.length && (
           <div className="mt-12 p-8 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-lg text-center">
             <div className="text-5xl mb-4">🎉</div>
-            <h3 className="text-3xl font-bold text-green-900 mb-4">You've Won Back Time</h3>
+            <h3 className="text-3xl font-bold text-green-900 mb-4">You've Become Someone New</h3>
             <p className="text-lg text-green-800 mb-6">
-              Five real problems solved. Countless hours reclaimed. And the knowledge that you can solve what's next.
+              Five problems solved by you. Hours won back every week. Most importantly: you proved to yourself that you can solve problems with AI.
             </p>
 
             {/* The Success Question */}
             <div className="bg-white rounded-lg p-8 mb-6 max-w-2xl mx-auto">
-              <p className="text-slate-600 mb-4">One final question:</p>
+              <p className="text-slate-600 mb-4">One final reflection:</p>
               <p className="text-2xl font-bold text-slate-900 mb-6">
-                Which problem disappears from your life tomorrow?
+                How has this changed who you are?
               </p>
               <textarea
                 value={successAnswer}

@@ -67,6 +67,9 @@ export default function DashboardPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
           <h1 className="text-2xl font-bold text-slate-900">LAO</h1>
           <div className="flex items-center gap-4">
+            <Link href="/transformations" className="text-slate-600 hover:text-slate-900 font-medium text-sm">
+              See Transformations
+            </Link>
             <span className="text-slate-600">{user.email}</span>
             <button
               onClick={handleSignOut}
@@ -83,14 +86,16 @@ export default function DashboardPage() {
         <div className="mb-8">
           <div>
             <h2 className="text-3xl font-bold text-slate-900 mb-2">
-              Welcome back
+              {learnerState.problemsSolved === 0
+                ? "Welcome"
+                : "Welcome back"}
             </h2>
             <p className="text-lg text-slate-600">
               {learnerState.problemsSolved === 0
-                ? "Ready to solve your first problem?"
+                ? "You're about to become someone who solves problems with AI."
                 : learnerState.problemsSolved === 1
-                ? "You're building momentum. Let's keep going."
-                : `You've solved ${learnerState.problemsSolved} problems. What's next?`}
+                ? "You've proven you can do this. Let's build your confidence."
+                : `You've now solved ${learnerState.problemsSolved} problems. You're becoming an expert.`}
             </p>
           </div>
         </div>
@@ -130,8 +135,8 @@ export default function DashboardPage() {
           <div className="lg:col-span-2">
             <div className="bg-white rounded-lg shadow p-6">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold text-slate-900">My Solutions</h3>
-                <span className="text-sm text-slate-500">{portfolio?.length || 0} transformation{portfolio?.length !== 1 ? 's' : ''}</span>
+                <h3 className="text-lg font-semibold text-slate-900">What I've Created</h3>
+                <span className="text-sm text-slate-500">{portfolio?.length || 0} solution{portfolio?.length !== 1 ? 's' : ''} I built</span>
               </div>
               <div className="space-y-4">
                 {portfolio && portfolio.length > 0 ? (

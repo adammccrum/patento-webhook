@@ -344,13 +344,16 @@ export default function MissionPage() {
 
               <div className="bg-white rounded-lg p-8 mb-8 shadow-lg">
                 <p className="text-lg text-slate-700 mb-3">
-                  <span className="font-semibold">{mission.toolkitName}</span> is now part of your life.
+                  <span className="font-semibold">You created</span> a solution that works.
                 </p>
                 <p className="text-slate-600 mb-6">
-                  Every week, you get back {mission.achievement.toLowerCase()}.
+                  Every week, {mission.achievement.toLowerCase()}.
                 </p>
-                <p className="text-slate-600">
-                  Tomorrow your work will be easier because of what you built today.
+                <p className="text-lg font-semibold text-green-900 mb-2">
+                  You are now someone who solves problems with AI.
+                </p>
+                <p className="text-slate-600 text-sm">
+                  That's not a small thing. That changes what's possible for you.
                 </p>
               </div>
 
