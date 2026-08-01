@@ -123,9 +123,18 @@ export const POST = withErrorHandler(async (request: NextRequest, ctx) => {
       );
   }
 
-  // Use audit service instead of manual logging
-  const auditService = getAuditService();
-  await auditService.logUserRegistered(user.id, email, ctx.productId, ctx.ipAddress);
+  // The account exists by this point. Failing the request now is worse than
+  // failing to log: the learner sees an error, tries again, and is told the
+  // email is already registered. Same reasoning as the verification email above.
+  try {
+    await getAuditService().logUserRegistered(user.id, email, ctx.productId, ctx.ipAddress);
+  } catch (error) {
+    logger.error(
+      'Audit log failed for registration',
+      error instanceof Error ? error : new Error(String(error)),
+      { userId: user.id, productId: ctx.productId }
+    );
+  }
 
   logger.info('User registered successfully', {
     context: {

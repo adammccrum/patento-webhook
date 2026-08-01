@@ -4,6 +4,7 @@
  */
 
 import { PrismaClient, Prisma } from '@prisma/client';
+import { getPrisma } from '@iriskey/database';
 import { emitEvent, createEvent, EVENTS } from '@iriskey/events';
 import type { AuditLogEntry, AuditAction } from '@iriskey/contracts';
 
@@ -39,11 +40,19 @@ class AuditService {
   }
 
   /**
-   * Get singleton instance
+   * Get singleton instance.
+   *
+   * Falls back to the shared database client when nobody has called
+   * `initialize`. It used to throw, which made every audited route depend on
+   * some *other* module having been imported first: `initializeAudit(db)` runs
+   * as a side effect of loading the app's auth module, and `/api/auth/register`
+   * does not import it. On a cold server the first registration returned
+   * HTTP 500 — after creating the account, so the learner could not retry
+   * either. Which module loaded first is not something a request may depend on.
    */
   static getInstance(): AuditService {
     if (!AuditService.instance) {
-      throw new Error('AuditService not initialized. Call AuditService.initialize(prisma) first.');
+      AuditService.instance = new AuditService(getPrisma());
     }
     return AuditService.instance;
   }

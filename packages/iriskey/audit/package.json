@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@iriskey/contracts": "*",
+    "@iriskey/database": "*",
     "@iriskey/events": "*",
     "@prisma/client": "^5.7.1"
   },
