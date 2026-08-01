@@ -38,6 +38,8 @@ export default function CoursePage() {
   const [enrollment, setEnrollment] = useState<Enrollment | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [successAnswer, setSuccessAnswer] = useState('');
+  const [submittingSuccess, setSubmittingSuccess] = useState(false);
 
   useEffect(() => {
     async function fetchCourse() {
@@ -65,6 +67,36 @@ export default function CoursePage() {
       fetchCourse();
     }
   }, [courseId, router]);
+
+  const handleSubmitSuccess = async () => {
+    if (!successAnswer.trim()) {
+      setError('Please share which assistant you'll use');
+      return;
+    }
+
+    setSubmittingSuccess(true);
+    try {
+      const response = await fetch('/api/course/completion', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          courseId,
+          successAnswer,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to submit answer');
+      }
+
+      // Redirect to dashboard or show success state
+      router.push('/dashboard');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setSubmittingSuccess(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -226,12 +258,26 @@ export default function CoursePage() {
                 Which assistant are you going to use tomorrow?
               </p>
               <textarea
+                value={successAnswer}
+                onChange={(e) => {
+                  setSuccessAnswer(e.target.value);
+                  setError(null);
+                }}
                 placeholder="Your answer..."
                 className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-slate-900"
                 rows={3}
               />
-              <button className="mt-4 w-full px-6 py-3 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 transition">
-                Submit & Celebrate
+              {error && (
+                <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="text-sm text-red-700">{error}</p>
+                </div>
+              )}
+              <button
+                onClick={handleSubmitSuccess}
+                disabled={submittingSuccess}
+                className="mt-4 w-full px-6 py-3 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {submittingSuccess ? 'Submitting...' : 'Submit & Celebrate'}
               </button>
             </div>
           </div>
