@@ -528,3 +528,109 @@ describeIfDb('Collaborator persistence', () => {
     expect(after?.lastOpenedAt).not.toBeNull();
   });
 });
+
+describeIfDb('Account data rights', () => {
+  it('EXPORT: returns every solution, version, run and message', async () => {
+    const user = await prisma.user.create({
+      data: { email: `export-${Date.now()}@test.local`, name: 'Export Test' },
+    });
+
+    const solution = await prisma.solution.create({
+      data: {
+        userId: user.id,
+        name: 'Email Assistant',
+        problem: 'inbox triage',
+        content: 'v2 content',
+        currentVersion: 2,
+        notes: 'private note',
+        versions: {
+          create: [
+            { version: 1, content: 'v1 content', changeNote: 'Created' },
+            { version: 2, content: 'v2 content', changeNote: 'Shorter' },
+          ],
+        },
+        runs: { create: [{ version: 1, timeSavedMinutes: 30 }] },
+      },
+    });
+    const conv = await prisma.solutionConversation.create({ data: { solutionId: solution.id } });
+    await prisma.solutionMessage.create({
+      data: { conversationId: conv.id, role: 'learner', content: 'Make this simpler' },
+    });
+
+    // Mirrors the export route's query.
+    const exported = await prisma.solution.findMany({
+      where: { userId: user.id },
+      include: {
+        versions: { orderBy: { version: 'asc' } },
+        runs: true,
+        conversation: { include: { messages: true } },
+      },
+    });
+
+    expect(exported).toHaveLength(1);
+    // Full content of every version — not just the current one.
+    expect(exported[0]?.versions.map((v) => v.content)).toEqual(['v1 content', 'v2 content']);
+    expect(exported[0]?.notes).toBe('private note');
+    expect(exported[0]?.runs).toHaveLength(1);
+    expect(exported[0]?.conversation?.messages[0]?.content).toBe('Make this simpler');
+
+    await prisma.user.delete({ where: { id: user.id } });
+  });
+
+  it('DELETE: removes the account and everything attached to it', async () => {
+    const user = await prisma.user.create({
+      data: { email: `erase-${Date.now()}@test.local` },
+    });
+    const solution = await prisma.solution.create({
+      data: {
+        userId: user.id,
+        name: 'Doomed',
+        problem: 'p',
+        content: 'c',
+        versions: { create: { version: 1, content: 'c' } },
+        runs: { create: { version: 1 } },
+      },
+    });
+    const conv = await prisma.solutionConversation.create({ data: { solutionId: solution.id } });
+    await prisma.solutionMessage.create({
+      data: { conversationId: conv.id, role: 'learner', content: 'hello' },
+    });
+    await prisma.settings.create({ data: { userId: user.id } });
+    await prisma.credits.create({ data: { userId: user.id } });
+
+    // One statement; cascades do the rest.
+    await prisma.user.delete({ where: { id: user.id } });
+
+    expect(await prisma.user.findUnique({ where: { id: user.id } })).toBeNull();
+    expect(await prisma.solution.count({ where: { userId: user.id } })).toBe(0);
+    expect(await prisma.solutionVersion.count({ where: { solutionId: solution.id } })).toBe(0);
+    expect(await prisma.solutionRun.count({ where: { solutionId: solution.id } })).toBe(0);
+    expect(await prisma.solutionConversation.count({ where: { solutionId: solution.id } })).toBe(0);
+    expect(await prisma.solutionMessage.count({ where: { conversationId: conv.id } })).toBe(0);
+    expect(await prisma.settings.count({ where: { userId: user.id } })).toBe(0);
+    expect(await prisma.credits.count({ where: { userId: user.id } })).toBe(0);
+  });
+
+  it('DELETE: keeps the audit record, without the identifier', async () => {
+    const user = await prisma.user.create({
+      data: { email: `audit-${Date.now()}@test.local` },
+    });
+    const log = await prisma.auditLog.create({
+      data: {
+        userId: user.id,
+        action: 'account_deleted',
+        resource: 'account',
+        details: {},
+      },
+    });
+
+    await prisma.user.delete({ where: { id: user.id } });
+
+    // AuditLog.userId is SetNull: the fact survives, the person does not.
+    const after = await prisma.auditLog.findUnique({ where: { id: log.id } });
+    expect(after).not.toBeNull();
+    expect(after?.userId).toBeNull();
+
+    await prisma.auditLog.delete({ where: { id: log.id } });
+  });
+});

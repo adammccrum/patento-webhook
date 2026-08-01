@@ -9,7 +9,9 @@ import { withSecurityHeaders } from '@iriskey/security';
 // Every signed-in surface. These must match real route paths — earlier entries
 // read '/courses' and '/missions', which no page ever served, so those pages
 // were never actually protected here.
-// Deliberately public: '/', '/auth/*', '/s/[shareId]' (shared solutions).
+// Deliberately public: '/', '/auth/*', '/s/[shareId]' (shared solutions),
+// and '/privacy', '/terms', '/cookies' — a learner must be able to read what
+// happens to their data before signing up, and after signing out.
 const protectedRoutes = [
   '/dashboard',
   '/settings',

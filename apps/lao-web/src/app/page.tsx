@@ -125,7 +125,12 @@ export default async function HomePage() {
       {/* Footer */}
       <footer className="bg-white border-t mt-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center text-slate-600 text-sm">
-          <p>© 2026 LAO Academy</p>
+          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
+            <p>© 2026 LAO Academy</p>
+            <Link href="/privacy" className="hover:text-ink">Privacy</Link>
+            <Link href="/terms" className="hover:text-ink">Terms</Link>
+            <Link href="/cookies" className="hover:text-ink">Cookies</Link>
+          </div>
         </div>
       </footer>
     </div>

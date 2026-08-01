@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { Download } from 'lucide-react';
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -10,6 +11,9 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [confirmEmail, setConfirmEmail] = useState('');
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     twoFactorEnabled: false,
     emailNotifications: true,
@@ -90,6 +94,25 @@ export default function SettingsPage() {
         <div className="text-red-600">{error || 'Failed to load settings'}</div>
       </div>
     );
+  }
+
+  async function handleDeleteAccount() {
+    setDeleteError(null);
+    try {
+      const response = await fetch('/api/account', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ confirmEmail }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Could not delete the account');
+
+      // The session belongs to an account that no longer exists.
+      await fetch('/api/auth/signout', { method: 'POST' }).catch(() => {});
+      router.push('/');
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : 'An error occurred');
+    }
   }
 
   return (
@@ -205,10 +228,71 @@ export default function SettingsPage() {
           </form>
 
           <div className="mt-8 pt-8 border-t border-slate-200">
-            <h3 className="text-lg font-semibold text-slate-900 mb-4">Danger Zone</h3>
-            <button className="px-4 py-2 border border-red-300 text-red-600 rounded-lg font-medium hover:bg-red-50 transition">
-              Delete Account
-            </button>
+            <h3 className="text-lg font-semibold text-ink mb-2">Your data</h3>
+            <p className="text-sm text-ink-muted mb-4">
+              Your solutions are yours. Take them with you at any time, or remove
+              everything permanently.
+            </p>
+
+            <a
+              href="/api/account/export"
+              className="inline-flex items-center gap-2 px-4 py-2 border border-hairline-strong rounded-control text-ink text-sm font-medium hover:bg-surface-sunken transition"
+            >
+              <Download size={18} strokeWidth={1.5} aria-hidden />
+              Download my data
+            </a>
+
+            <div className="mt-8 pt-6 border-t border-hairline">
+              <h4 className="font-medium text-ink mb-2">Delete my account</h4>
+              <p className="text-sm text-ink-muted mb-4">
+                This removes your account, every solution, every version you saved,
+                and every conversation. It cannot be undone.
+              </p>
+
+              {!deleting ? (
+                <button
+                  type="button"
+                  onClick={() => setDeleting(true)}
+                  className="px-4 py-2 border border-red-300 text-danger rounded-control text-sm font-medium hover:bg-red-50 transition"
+                >
+                  Delete my account
+                </button>
+              ) : (
+                <div className="space-y-3 max-w-md">
+                  <label htmlFor="confirm-email" className="block text-sm text-ink">
+                    Type your email address to confirm
+                  </label>
+                  <input
+                    id="confirm-email"
+                    value={confirmEmail}
+                    onChange={(e) => setConfirmEmail(e.target.value)}
+                    placeholder="your email address"
+                    className="w-full px-3 py-2 border border-hairline-strong rounded-control text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
+                  />
+                  {deleteError && <p className="text-sm text-danger">{deleteError}</p>}
+                  <div className="flex gap-3">
+                    <button
+                      type="button"
+                      onClick={handleDeleteAccount}
+                      className="px-4 py-2 bg-danger text-white rounded-control text-sm font-medium hover:opacity-90 transition"
+                    >
+                      Delete permanently
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setDeleting(false);
+                        setConfirmEmail('');
+                        setDeleteError(null);
+                      }}
+                      className="px-4 py-2 border border-hairline-strong text-ink rounded-control text-sm hover:bg-surface-sunken transition"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </main>

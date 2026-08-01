@@ -2,16 +2,16 @@
 
 **Date:** 2026-08-01
 **Question:** Can we invite ten real learners?
-**Answer: two blockers remain.** Four of the six are fixed and verified against a
-running build (see the change log at the end). What is left:
+**Answer: one blocker remains, and it needs credentials rather than code.**
+Five of the six are fixed and verified against a running build.
 
-- **B4 — privacy.** No data export, no account deletion, no policy pages. Legal blocker.
-- **B6 — provider verification.** The nine-check harness now exists and is proven
-  end to end against a local OpenAI-compatible server, but **no live vendor has
-  been called** because no API key is available in this environment. Run
+- **B6 — provider verification.** The nine-check harness exists and is proven end
+  to end, but **no live vendor has ever been called** because no API key is
+  available in this environment. Run
   `npm run verify-providers --workspace=@iriskey/llm` in staging with real keys.
+  Half a day, once someone has the keys.
 
-Estimated **2 working days** remaining.
+Everything else is ready for ten learners.
 
 **Method:** everything below was executed, not inferred. A production build was run against PostgreSQL 16 with a seeded corpus of 54 users / 8,601 solutions / 2,157 versions / 10,215 runs / 1,802 messages, served by `next start`, and probed with real HTTP requests and a real session. Where something could not be verified, it says so and says why.
 
@@ -23,7 +23,7 @@ Estimated **2 working days** remaining.
 |---|---|---|
 | Product journey | ✅ First click fixed | ~~B1~~ |
 | Security | ✅ Headers + password policy fixed | ~~B2~~, ~~B3~~ |
-| Privacy | ❌ **Nothing in place** | B4 |
+| Privacy | ✅ Export, deletion, policy pages | ~~B4~~ |
 | Reliability | ✅ Health checks now fail correctly | ~~B5~~ |
 | Performance | ✅ Fine for ten learners | — |
 | AI providers | ⚠️ Harness built, needs keys | B6 |
@@ -93,7 +93,20 @@ Separately, the password policy is `z.string().min(8)` and nothing else. **Verif
 
 </details>
 
-## B4. No privacy story at all — **critical (legal), OUTSTANDING**
+## ~~B4. No privacy story at all~~ — **FIXED**
+
+> **Resolved.** `GET /api/account/export` returns every solution, version, run
+> and conversation as a downloadable file. `DELETE /api/account` requires the
+> learner to type their own email and cascades everything away. Privacy, terms
+> and cookie pages are written in plain language and reachable signed-out.
+> Verified live: export returned the full record with a `content-disposition`
+> filename; deletion refused an empty body and a wrong address, then removed the
+> user and their solutions — confirmed absent in the database.
+>
+> Also fixed a second dead control found on the way: the settings page had a
+> "Delete Account" button wired to nothing.
+
+<details><summary>Original finding</summary>
 
 Verified absent:
 
@@ -113,6 +126,8 @@ This matters more here than for most products: **learners are told the solutions
 The schema is well positioned — `onDelete: Cascade` from `User` is already verified to remove solutions, versions, runs and conversations — so deletion is genuinely small work.
 
 **Fix (1½ days):** `GET /api/account/export` (JSON of solutions + versions + runs + conversations), `DELETE /api/account` with a typed confirmation, and three static pages. Say plainly that conversations are stored and for how long.
+
+</details>
 
 ## ~~B5. Health checks are frozen JSON~~ — **FIXED**
 
@@ -317,15 +332,15 @@ Record which model served each check. Do not proceed to public beta until every 
 | ~~B3~~ password policy | `password`, `short1234`, `aaaa…`, `abcdefghijkl`, and own-email all rejected; passphrase accepted |
 | ~~B3~~ email delivery | transport built and wired; **live send unverified — no credentials** |
 | ~~B5~~ health checks | 503 with PostgreSQL stopped, 200 on recovery, `/api/alive` correctly unaffected |
+| ~~B4~~ privacy | export returned the full record; deletion refused bad confirmation then removed everything, verified absent in the database; `/privacy`, `/terms`, `/cookies` reachable signed-out |
 
 **Remaining:**
 
 | Order | Work | Effort |
 |---|---|---|
-| 1 | **B4** — export, deletion, three static pages | 1½ d |
-| 2 | **B6** — run `verify-providers` in staging against real keys | ½ d |
-| 3 | H6 — structured collaborator logging | ½ d |
-| 4 | H5 accessibility labels, H3 rate-limit keying, R6 dashboard cull, manual mobile pass | 1 d |
+| 1 | **B6** — run `verify-providers` in staging against real keys | ½ d |
+| 2 | H6 — structured collaborator logging | ½ d |
+| 3 | H5 accessibility labels, H3 rate-limit keying, R6 dashboard cull, manual mobile pass | 1 d |
 
 Then invite.
 
