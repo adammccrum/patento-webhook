@@ -8,9 +8,12 @@
  */
 
 import { PrismaClient } from '@prisma/client';
+import { requireDatabaseUrl } from './env';
 import { COURSE_1 } from './seed-data';
 
-const prisma = new PrismaClient();
+// tsx loads no .env of its own. Without this the script fails on a clean
+// checkout with a Prisma error that reads like a schema fault.
+const prisma = new PrismaClient({ datasources: { db: { url: requireDatabaseUrl() } } });
 
 async function seedCourse1(): Promise<string> {
   const existing = await prisma.course.findFirst({

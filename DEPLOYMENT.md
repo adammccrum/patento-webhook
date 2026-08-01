@@ -21,54 +21,51 @@
 
 ## Quick Start
 
+> **Note on the rest of this document.** The sequence immediately below is the
+> one that is verified from a clean checkout on every release candidate — see
+> [RELEASE_CANDIDATE.md](./RELEASE_CANDIDATE.md). Later sections were written
+> earlier, describe `pnpm` and `db:push`, and are **not** verified. This
+> repository uses npm workspaces and versioned migrations. Where the two
+> disagree, this section is correct.
+
 ### Prerequisites
-- Node.js 20+ (or Docker)
-- PostgreSQL 16+ (or Docker Compose)
-- Redis 7+ (or Docker Compose)
-- pnpm 8+
+- Node.js 20+
+- PostgreSQL 16+
 
-### Using Docker Compose (Recommended)
+Redis is optional. Without it, rate limiting and caching run in process memory,
+which is correct for a single instance and must be revisited before running
+more than one.
 
-```bash
-# Clone the repository
-git clone https://github.com/yourdomain/patento-webhook.git
-cd patento-webhook
+### Deploying
 
-# Copy environment template
-cp .env.example .env.local
-
-# Edit .env.local with your configuration
-nano .env.local
-
-# Start services
-docker-compose up -d
-
-# Run database migrations
-docker exec iriskey-lao-web pnpm db:push
-
-# Application is ready at http://localhost:3000
-```
-
-### Manual Setup (Without Docker)
+Five commands, from the repository root. **No existing data is required.**
 
 ```bash
-# Install dependencies
-pnpm install
-
-# Setup environment
-cp .env.example .env.local
-nano .env.local
-
-# Start PostgreSQL and Redis (via brew, apt-get, etc.)
-# PostgreSQL: brew services start postgresql@16
-# Redis: brew services start redis
-
-# Run database migrations
-pnpm db:push
-
-# Start development server
-pnpm dev
+npm install                    # also generates the Prisma client
+npm run db:deploy              # apply migrations
+npm run seed                   # create Course 1 if it is not already there
+npm run build
+npm start --workspace=lao-web
 ```
+
+`db:deploy` and `seed` are both safe to run on every deploy. Migrations already
+applied are skipped; the seeder reports `already present` and changes nothing.
+
+**Do not skip `seed`.** Course 1 is the first thing a learner is invited to
+open. Without it, a brand-new deployment serves a 404 at the first click.
+
+### Configuration
+
+`DATABASE_URL` and `NEXTAUTH_SECRET` are required; everything else has a
+working default. See `.env.example`.
+
+Set them in the process environment. The database scripts also read a `.env`
+at the repository root as a convenience for running commands by hand, but an
+environment variable always wins over the file.
+
+With **no language model provider configured** the app still runs. The
+collaborator states plainly that it cannot suggest improvements, and solutions
+remain fully editable by hand. It does not fail, and it never names a provider.
 
 ---
 

@@ -14,6 +14,7 @@
  */
 
 import { PrismaClient } from '@prisma/client';
+import { requireDatabaseUrl } from './env';
 
 // Kept in step with @iriskey/authz. The database package cannot import authz
 // (authz depends on the generated client), so this list is duplicated here and
@@ -21,7 +22,8 @@ import { PrismaClient } from '@prisma/client';
 const ROLES = ['learner', 'coach', 'support', 'enterprise', 'admin', 'founder'] as const;
 type RoleName = (typeof ROLES)[number];
 
-const prisma = new PrismaClient();
+// Same reason as seed.ts: tsx loads no .env.
+const prisma = new PrismaClient({ datasources: { db: { url: requireDatabaseUrl() } } });
 
 function arg(name: string): string | undefined {
   const i = process.argv.indexOf(`--${name}`);
