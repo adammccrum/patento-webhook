@@ -8,8 +8,19 @@
  * configured provider fails, so it can gate a release.
  */
 
+import { execFileSync } from 'child_process';
 import { buildRouter } from './registry';
 import { formatReport, verifyProvider } from './verify';
+
+/** The commit under test. Unknown is an honest answer; a guess is not. */
+function commit(): string {
+  if (process.env.GITHUB_SHA) return process.env.GITHUB_SHA;
+  try {
+    return execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
+  } catch {
+    return 'unknown';
+  }
+}
 
 async function main(): Promise<void> {
   // Once. Building it twice made two sets of clients and read the environment
@@ -26,6 +37,15 @@ async function main(): Promise<void> {
     return;
   }
 
+  // A release decision must be reproducible from the archived output alone,
+  // so the output carries who ran it, where, against what commit.
+  console.log('LAO provider verification');
+  console.log(`  timestamp    ${new Date().toISOString()}`);
+  console.log(`  commit       ${commit()}`);
+  console.log(`  environment  ${process.env.LLM_ENVIRONMENT ?? 'local'}`);
+  console.log(`  operator     ${process.env.LLM_OPERATOR ?? process.env.USER ?? 'unknown'}`);
+  console.log(`  providers    ${configured.join(', ')}`);
+  console.log(`  models       ${router.registered.map((m) => m.id).join(', ')}`);
   console.log(`\nVerifying ${configured.length} provider(s). This makes real calls.\n`);
 
   let allPassed = true;

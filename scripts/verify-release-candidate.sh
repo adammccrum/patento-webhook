@@ -35,10 +35,58 @@ JAR="${WORKDIR}/cookies.txt"
 SERVER_LOG="${WORKDIR}/server.log"
 SERVER_PID=""
 
+# Release evidence. Written whether the run passes or fails — a failed run is
+# evidence too, and the reason we are not releasing.
+REPORT="${RC_REPORT:-${REPO_ROOT}/release-report.md}"
+ROWS=()
+# Set before the guard runs, so the report can be written even when the script
+# refuses to start at all.
+DB_NAME="(not reached)"
+# The report must never claim something happened that did not. It said
+# "dropped and recreated" on a run that refused to start.
+DB_STATE="not touched"
+
 STEP=0
-step()  { STEP=$((STEP + 1)); printf '\n\033[1m[%d] %s\033[0m\n' "$STEP" "$1"; }
-ok()    { printf '    \033[32m✓\033[0m %s\n' "$1"; }
-fail()  { printf '    \033[31m✗ %s\033[0m\n' "$1"; exit 1; }
+STEP_NAME=""
+step() {
+  STEP=$((STEP + 1))
+  STEP_NAME="$1"
+  printf '\n\033[1m[%d] %s\033[0m\n' "$STEP" "$1"
+}
+ok() {
+  printf '    \033[32m✓\033[0m %s\n' "$1"
+  ROWS+=("| ${STEP_NAME} | PASS | $1 |")
+}
+warn() {
+  printf '    \033[33m!\033[0m %s\n' "$1"
+  ROWS+=("| ${STEP_NAME} | WARN | $1 |")
+}
+fail() {
+  printf '    \033[31m✗ %s\033[0m\n' "$1"
+  ROWS+=("| ${STEP_NAME:-Setup} | FAIL | $1 |")
+  exit 1
+}
+
+write_report() {
+  local verdict="$1"
+  {
+    printf '# Release candidate report\n\n'
+    printf '| | |\n|---|---|\n'
+    printf '| Verdict | **%s** |\n' "$verdict"
+    printf '| Timestamp | %s |\n' "$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+    printf '| Commit | `%s` |\n' "$(git -C "$REPO_ROOT" rev-parse HEAD 2>/dev/null || echo unknown)"
+    printf '| Branch | %s |\n' "$(git -C "$REPO_ROOT" rev-parse --abbrev-ref HEAD 2>/dev/null || echo unknown)"
+    printf '| Environment | %s |\n' "${RC_ENVIRONMENT:-local}"
+    printf '| Operator | %s |\n' "${RC_OPERATOR:-${GITHUB_ACTOR:-$(whoami 2>/dev/null || echo unknown)}}"
+    printf '| Node | %s |\n' "$(node --version 2>/dev/null || echo unknown)"
+    printf '| Database | %s |\n' "${DB_NAME} (${DB_STATE})"
+    printf '| Provider | %s |\n' "${RC_PROVIDER_NOTE:-none configured — collaborator verified on the degraded path}"
+    printf '\n## Steps\n\n| Step | Result | Evidence |\n|---|---|---|\n'
+    # `${ROWS[@]}` on an empty array is an unbound variable under `set -u`.
+    [[ ${#ROWS[@]} -gt 0 ]] && printf '%s\n' "${ROWS[@]}"
+    printf '\nProduced by `scripts/verify-release-candidate.sh`.\n'
+  } > "$REPORT"
+}
 
 cleanup() {
   local status=$?
@@ -52,6 +100,9 @@ cleanup() {
       sleep 0.5
     done
   fi
+  write_report "$([[ $status -eq 0 ]] && echo 'RELEASABLE' || echo "NOT RELEASABLE — failed at step ${STEP}")"
+  printf '\nRelease report: %s\n' "$REPORT"
+
   if [[ $status -ne 0 ]]; then
     printf '\n\033[31mRelease candidate verification FAILED at step %d.\033[0m\n' "$STEP"
     if [[ -s "$SERVER_LOG" ]]; then
@@ -130,6 +181,7 @@ psql "$ADMIN_URL" -v ON_ERROR_STOP=1 -q \
 TABLES=$(psql "$RC_DATABASE_URL" -tAc \
   "select count(*) from information_schema.tables where table_schema='public'")
 [[ "$TABLES" == "0" ]] || fail "Database is not empty — found ${TABLES} tables"
+DB_STATE="dropped and recreated empty"
 ok "${DB_NAME} recreated, 0 tables"
 
 # ---------------------------------------------------------------------------
@@ -169,11 +221,35 @@ ok "course-1 present with 5 missions"
 
 # ---------------------------------------------------------------------------
 
-step "Build"
+step "Type check"
 
 ( cd "$CHECKOUT" && npx turbo run type-check >"${WORKDIR}/typecheck.log" 2>&1 ) \
   || { tail -30 "${WORKDIR}/typecheck.log"; fail "type-check failed"; }
-ok "type-check clean"
+ok "clean across all packages"
+
+# ---------------------------------------------------------------------------
+
+step "Tests"
+
+# Run against the clean checkout, not the working tree — the same code that is
+# about to be built and served.
+# Every grep here ends in `|| true`. Without it, a grep that matches nothing
+# fails the assignment, and under `set -e` the script dies before `fail` can
+# record why — which is how the first failing run produced a report with no
+# failure row in it.
+if ( cd "$CHECKOUT" && npx turbo run test >"${WORKDIR}/test.log" 2>&1 ); then
+  ok "$(grep -hoE 'Tests: +[0-9]+ passed[^,]*' "${WORKDIR}/test.log" | tail -1 || true)"
+else
+  # jest marks a failing test with ✕ in its list and ● in its detail; turbo
+  # prefixes every line with the package name, so match anywhere.
+  FAILING="$(grep -hoE '● .*' "${WORKDIR}/test.log" | sed 's/^● //' | sort -u | head -3 | paste -sd'; ' - || true)"
+  TOTALS="$(grep -hoE 'Tests: +[^|]*' "${WORKDIR}/test.log" | grep failed | tail -1 || true)"
+  fail "${TOTALS:-test suite failed}${FAILING:+ :: ${FAILING}}"
+fi
+
+# ---------------------------------------------------------------------------
+
+step "Build"
 
 ( cd "$CHECKOUT" && npx turbo run build >"${WORKDIR}/build.log" 2>&1 ) \
   || { tail -30 "${WORKDIR}/build.log"; fail "production build failed"; }
