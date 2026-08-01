@@ -171,7 +171,8 @@ export class RateLimiter {
     if (this.redis) {
       return this.redis.check(key, windowMs);
     }
-    return this.inMemory.check(key, windowMs);
+    // The in-memory limiter is constructed with its window, so it takes only a key.
+    return this.inMemory.check(key);
   }
 
   async isLimited(

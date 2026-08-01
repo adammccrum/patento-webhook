@@ -47,6 +47,7 @@ export default function ReflectionPage() {
   }, [goalId, router]);
 
   async function handleSubmit() {
+    if (!goalId) return;
     if (!reflection.trim()) {
       setError('Please share your reflection');
       return;

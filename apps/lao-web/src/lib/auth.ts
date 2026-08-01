@@ -19,7 +19,6 @@ const authConfig = createAuthConfig({
   pages: {
     signIn: '/auth/login',
     error: '/auth/error',
-    callbackUrl: '/dashboard',
   },
 });
 

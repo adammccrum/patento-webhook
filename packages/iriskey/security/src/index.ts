@@ -11,7 +11,8 @@ import DOMPurify from 'isomorphic-dompurify';
  */
 export interface SecurityHeadersConfig {
   cspDirectives?: Record<string, string | string[]>;
-  hstsMaxAge?: number;
+  /** Max-age in seconds, or false to omit the HSTS header entirely. */
+  hstsMaxAge?: number | false;
   noSniff?: boolean;
   xssProtection?: boolean;
   referrerPolicy?: string;

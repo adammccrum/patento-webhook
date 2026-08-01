@@ -3,7 +3,7 @@
  * Centralized, immutable audit logging for all operations
  */
 
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client';
 import { emitEvent, createEvent, EVENTS } from '@iriskey/events';
 import type { AuditLogEntry, AuditAction } from '@iriskey/contracts';
 
@@ -61,7 +61,9 @@ class AuditService {
         productId,
         action,
         resource,
-        details: details || {},
+        // Callers pass plain objects; Prisma's Json input type is structurally
+        // narrower than Record<string, unknown> but accepts the same values.
+        details: (details || {}) as Prisma.InputJsonValue,
         ipAddress,
         userAgent,
       },

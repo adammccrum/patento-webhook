@@ -24,11 +24,15 @@ export const POST = withErrorHandler(async (request: NextRequest, ctx) => {
   const logger = getLogger();
   const rateLimitStore = getRateLimitStore();
 
-  // Apply rate limiting
-  const limiter = rateLimitStore.getLimiter('passwordReset', RateLimitPresets.passwordReset);
-  const rateLimitResult = await limiter.check(ctx.ipAddress);
+  // Apply rate limiting. checkLimit compares against the preset's maxRequests;
+  // the raw limiter's `success` is always true and would never block.
+  const rateLimitResult = await rateLimitStore.checkLimit(
+    'passwordReset',
+    ctx.ipAddress ?? 'unknown',
+    RateLimitPresets.passwordReset
+  );
 
-  if (!rateLimitResult.success) {
+  if (rateLimitResult.limited) {
     logger.warn('Password reset rate limit exceeded', {
       context: {
         ipAddress: ctx.ipAddress,

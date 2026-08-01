@@ -138,7 +138,7 @@ Instructions:
       title: 'Solve Your Own Problem',
       tagline: 'Pick any problem. You know how now.',
       description:
-        'You've solved four real problems. Now solve the one that actually matters to you. Work. Personal. Creative. Anything.',
+        "You've solved four real problems. Now solve the one that actually matters to you. Work. Personal. Creative. Anything.",
       position: 5,
       problemArea: 'Your Choice',
       toolkitName: 'Custom Solution',
@@ -150,7 +150,7 @@ Solve it. You know how.`,
       coachPrompt:
         'What problem keeps coming back to you? The one that\'s really slowing you down? Work, personal, creative—whatever it is.',
       reflectionPrompt:
-        'You've now solved five real problems. What could change in your life if you kept using these solutions? What\'s next?',
+        "You've now solved five real problems. What could change in your life if you kept using these solutions? What's next?",
       buildTemplate: null,
       achievement: 'You solved your own problem',
       timeSavedMinutes: 120,

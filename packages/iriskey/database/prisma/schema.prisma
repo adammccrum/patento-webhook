@@ -455,7 +455,10 @@ model LearnerState {
 // AI Coach conversation state
 model CoachConversation {
   id            String   @id @default(cuid())
-  missionId     String
+  // A conversation starts from a goal; the mission is only created once the
+  // coach has something to recommend, so missionId is set later.
+  goalId        String?
+  missionId     String?
   userId        String
 
   // Conversation flow
@@ -477,6 +480,7 @@ model CoachConversation {
   expiresAt     DateTime // Conversation expires after 24 hours
 
   @@index([userId])
+  @@index([goalId])
   @@index([missionId])
   @@index([expiresAt])
 }

@@ -176,7 +176,8 @@ class EventEmitter {
     if (!this.handlers.has(eventType)) {
       this.handlers.set(eventType, new Set());
     }
-    this.handlers.get(eventType)!.add(handler);
+    // Handlers are stored erased to PlatformEvent; callers narrow by event type.
+    this.handlers.get(eventType)!.add(handler as EventHandler);
   }
 
   /**

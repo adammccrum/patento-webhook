@@ -76,6 +76,7 @@ export default function BuildPage() {
     }
 
     async function loadGoal() {
+      if (!goalId) return;
       try {
         // Get user
         const userResponse = await fetch('/api/profile');
@@ -100,6 +101,7 @@ export default function BuildPage() {
   }, [goalId, router, analytics]);
 
   async function handleStepComplete() {
+    if (!goalId) return;
     if (currentStep === 4) {
       // Complete the mission
       try {
@@ -322,7 +324,7 @@ export default function BuildPage() {
                 )}
                 <button
                   onClick={handleStepComplete}
-                  disabled={loading || (step?.inputLabel && !inputs[currentStep])}
+                  disabled={loading || Boolean(step?.inputLabel && !inputs[currentStep])}
                   className="flex-1 px-6 py-3 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 disabled:bg-slate-300 disabled:cursor-not-allowed transition"
                 >
                   {loading ? 'Processing...' : currentStep === 4 ? 'Complete & Celebrate →' : 'Next Step →'}

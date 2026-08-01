@@ -250,7 +250,10 @@ export class HealthCheckService {
    * Get health status
    */
   async getHealth(): Promise<HealthCheckResponse> {
-    const checkResults: Record<string, { status: string; message?: string }> = {};
+    const checkResults: Record<
+      string,
+      { status: 'ok' | 'warning' | 'error'; message?: string }
+    > = {};
 
     for (const [name, check] of this.checks) {
       try {

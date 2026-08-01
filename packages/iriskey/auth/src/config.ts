@@ -12,13 +12,29 @@ import GitHub from 'next-auth/providers/github';
 import Google from 'next-auth/providers/google';
 import { verifyPassword } from './crypto';
 
+/**
+ * This config writes `id` and `provider` onto the session user. NextAuth's
+ * stock Session type doesn't declare them, so we augment it here. (The JWT
+ * type already permits arbitrary keys, so it needs no augmentation.)
+ */
+declare module 'next-auth' {
+  interface Session {
+    user: {
+      id: string;
+      provider?: string;
+      email?: string | null;
+      name?: string | null;
+      image?: string | null;
+    };
+  }
+}
+
 export interface AuthConfigOptions {
   prisma: PrismaClient;
   productId: string;
   pages?: {
     signIn?: string;
     error?: string;
-    callbackUrl?: string;
   };
 }
 
@@ -84,7 +100,6 @@ export function createAuthConfig(options: AuthConfigOptions): NextAuthConfig {
     pages: {
       signIn: pages.signIn || '/auth/login',
       error: pages.error || '/auth/error',
-      callbackUrl: pages.callbackUrl || '/dashboard',
     },
     callbacks: {
       async jwt({ token, user, account }) {
@@ -129,7 +144,10 @@ export function createAuthConfig(options: AuthConfigOptions): NextAuthConfig {
           });
         }
       },
-      async signOut({ token }) {
+      // The payload differs by session strategy: JWT sessions carry `token`,
+      // database sessions carry `session`. We use JWT, so narrow to that.
+      async signOut(message) {
+        const token = 'token' in message ? message.token : null;
         if (token?.sub) {
           await prisma.auditLog.create({
             data: {

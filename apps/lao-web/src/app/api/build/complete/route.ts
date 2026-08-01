@@ -27,7 +27,7 @@ export async function POST(request: Request) {
     }
 
     // Get the mission
-    const mission = await prisma.mission.findFirst({
+    const mission = await prisma.personalMission.findFirst({
       where: { goalId, userId: session.user.id },
       orderBy: { createdAt: 'desc' },
     });
@@ -57,7 +57,7 @@ export async function POST(request: Request) {
 
     // Update mission status
     const timeSpentMinutes = buildDurationMillis ? Math.round(buildDurationMillis / 60000) : 25;
-    await prisma.mission.update({
+    await prisma.personalMission.update({
       where: { id: mission.id },
       data: {
         status: 'completed',

@@ -39,7 +39,6 @@ export async function GET(request: Request) {
     if (!conversation) {
       conversation = await prisma.coachConversation.create({
         data: {
-          missionId: '', // Will be set later when mission is created
           userId: session.user.id,
           goalId,
           step: 0,

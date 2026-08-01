@@ -42,7 +42,7 @@ export async function POST(request: Request) {
     // Create a mission for this goal if recommendation exists
     let mission = null;
     if (recommendation) {
-      mission = await prisma.mission.create({
+      mission = await prisma.personalMission.create({
         data: {
           goalId,
           userId: session.user.id,

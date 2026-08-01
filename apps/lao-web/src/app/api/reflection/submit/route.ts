@@ -37,7 +37,7 @@ export async function POST(request: Request) {
     }
 
     // Get the mission
-    const mission = await prisma.mission.findFirst({
+    const mission = await prisma.personalMission.findFirst({
       where: { goalId, userId: session.user.id, status: 'completed' },
       orderBy: { createdAt: 'desc' },
     });
