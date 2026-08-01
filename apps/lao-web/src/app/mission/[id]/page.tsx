@@ -267,9 +267,8 @@ export default function MissionPage() {
         {step === 'reflection' && (
           <div className="bg-white rounded-lg shadow p-8">
             <div className="mb-8">
-              <h3 className="text-2xl font-bold text-slate-900 mb-2">You've Solved Something Real</h3>
-              <p className="text-slate-600 mb-2">Now that {problemInput.toLowerCase()} no longer consumes your time:</p>
-              <p className="text-slate-700 mb-6">{mission.reflectionPrompt}</p>
+              <h3 className="text-xl font-semibold text-slate-900 mb-3">One quick note</h3>
+              <p className="text-slate-700">{mission.reflectionPrompt}</p>
             </div>
 
             <div className="mb-8">
@@ -303,7 +302,7 @@ export default function MissionPage() {
                 disabled={submitting}
                 className="flex-1 px-6 py-3 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 transition disabled:opacity-50"
               >
-                {submitting ? 'Adding to Solutions...' : 'Add to My Solutions ✓'}
+                {submitting ? 'Saving...' : 'Save Solution'}
               </button>
             </div>
           </div>

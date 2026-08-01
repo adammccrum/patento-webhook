@@ -78,7 +78,7 @@ export default function CoursePage() {
 
   const handleSubmitSuccess = async () => {
     if (!successAnswer.trim()) {
-      setError('Please share which assistant you'll use');
+      setError('Please describe the problem');
       return;
     }
 
@@ -132,7 +132,9 @@ export default function CoursePage() {
               LAO
             </h1>
           </Link>
-          <div className="text-sm text-slate-600">Your transformation journey</div>
+          <Link href="/dashboard" className="text-sm text-slate-600 hover:text-slate-900">
+            Back to Dashboard
+          </Link>
         </div>
       </nav>
 
@@ -142,25 +144,11 @@ export default function CoursePage() {
           <h2 className="text-4xl font-bold text-slate-900 mb-4">{course.title}</h2>
           <p className="text-lg text-slate-700 mb-6">{course.description}</p>
 
-          {/* Achievements, not progress */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-            {enrollment && enrollment.missionsCompleted === 0 && (
-              <p className="text-lg font-semibold text-slate-900">
-                {course.missions.length} wins waiting for you
-              </p>
-            )}
-            {enrollment && enrollment.missionsCompleted > 0 && enrollment.missionsCompleted < course.missions.length && (
-              <p className="text-lg font-semibold text-slate-900">
-                ✓ You've solved {enrollment.missionsCompleted} real problem{enrollment.missionsCompleted !== 1 ? 's' : ''}.<br />
-                {course.missions.length - enrollment.missionsCompleted} more wins until you complete your AI toolkit.
-              </p>
-            )}
-            {enrollment && enrollment.missionsCompleted === course.missions.length && (
-              <p className="text-lg font-semibold text-green-900">
-                ✓ All {course.missions.length} missions complete!
-              </p>
-            )}
-          </div>
+          {enrollment && enrollment.missionsCompleted > 0 && (
+            <p className="text-sm text-slate-600">
+              {enrollment.missionsCompleted} of {course.missions.length} solved
+            </p>
+          )}
         </div>
 
         {/* Missions Grid */}
@@ -230,163 +218,30 @@ export default function CoursePage() {
           })}
         </div>
 
-        {/* My Solutions Display */}
+        {/* Your Toolbox */}
         {enrollment && enrollment.toolkitItems.length > 0 && (
-          <div className="mb-12 space-y-8">
-            {/* Time You've Won Back */}
-            <div className="p-8 bg-gradient-to-r from-purple-50 to-indigo-50 border-2 border-purple-200 rounded-lg">
-              <h3 className="text-2xl font-bold text-slate-900 mb-6">Time You've Won Back</h3>
-              <div className="space-y-2 mb-6">
-                {enrollment.toolkitItems.map((item) => {
-                  const match = item.impact?.match(/(\d+)\s*hour|(\d+)\s*minute/g);
-                  return (
-                    <div key={item.missionId} className="flex justify-between items-center py-2 border-b border-purple-100">
+          <div className="mb-12">
+            <h3 className="text-xl font-semibold text-slate-900 mb-6">Your Toolbox</h3>
+            <div className="space-y-3">
+              {enrollment.toolkitItems.map((item) => (
+                <div key={item.missionId} className="bg-white rounded-lg p-5 border border-slate-200">
+                  <div className="flex items-start justify-between gap-4 mb-3">
+                    <div className="flex-1 min-w-0">
                       <p className="font-medium text-slate-900">{item.toolkitName}</p>
-                      <p className="text-slate-600">
-                        {item.impact?.match(/(\d+\s*(?:hour|minute))/g)?.join(' ') || '—'}
-                      </p>
+                      <p className="text-sm text-slate-600 mt-1">{item.problemArea || 'Solution'}</p>
                     </div>
-                  );
-                })}
-              </div>
-              <div className="flex justify-between items-center pt-4 border-t-2 border-purple-300">
-                <p className="text-lg font-bold text-slate-900">Total Every Week</p>
-                <p className="text-lg font-bold text-purple-600">
-                  {enrollment.toolkitItems.reduce((totalMinutes, item) => {
-                    const minuteMatch = item.impact?.match(/(\d+)\s*minute/);
-                    const hourMatch = item.impact?.match(/(\d+)\s*hour/);
-                    const mins = minuteMatch ? parseInt(minuteMatch[1]) : 0;
-                    const hours = hourMatch ? parseInt(hourMatch[1]) : 0;
-                    return totalMinutes + (hours * 60) + mins;
-                  }, 0) > 0
-                    ? (() => {
-                        const totalMinutes = enrollment.toolkitItems.reduce((acc, item) => {
-                          const minuteMatch = item.impact?.match(/(\d+)\s*minute/);
-                          const hourMatch = item.impact?.match(/(\d+)\s*hour/);
-                          const mins = minuteMatch ? parseInt(minuteMatch[1]) : 0;
-                          const hours = hourMatch ? parseInt(hourMatch[1]) : 0;
-                          return acc + (hours * 60) + mins;
-                        }, 0);
-                        const h = Math.floor(totalMinutes / 60);
-                        const m = totalMinutes % 60;
-                        return `${h > 0 ? `${h}h ` : ''}${m > 0 ? `${m}m` : ''}`.trim();
-                      })()
-                    : '0'}
-                </p>
-              </div>
-            </div>
-
-            {/* My Journey Timeline */}
-            <div className="p-8 bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-200 rounded-lg">
-              <h3 className="text-2xl font-bold text-slate-900 mb-2">My Journey</h3>
-              <p className="text-slate-600 mb-6">From "I didn't think I could do this" to "I became someone who solves problems with AI"</p>
-              <div className="space-y-4">
-                {enrollment.missionsCompleted >= 1 && (
-                  <div className="flex items-start gap-4">
-                    <div className="flex-shrink-0">
-                      <div className="flex items-center justify-center h-8 w-8 rounded-full bg-purple-200">
-                        <span className="text-purple-700 font-bold">✓</span>
-                      </div>
-                    </div>
-                    <div>
-                      <p className="font-semibold text-slate-900">Solved my first problem</p>
-                      <p className="text-sm text-slate-600">
-                        {new Date(enrollment.toolkitItems[0]?.completedAt).toLocaleDateString()}
-                      </p>
-                    </div>
+                    <button className="px-3 py-1 text-sm font-medium text-blue-600 hover:bg-blue-50 rounded whitespace-nowrap">
+                      Open
+                    </button>
                   </div>
-                )}
-
-                {enrollment.missionsCompleted >= 2 && (
-                  <div className="flex items-start gap-4">
-                    <div className="flex-shrink-0">
-                      <div className="flex items-center justify-center h-8 w-8 rounded-full bg-purple-200">
-                        <span className="text-purple-700 font-bold">✓</span>
-                      </div>
-                    </div>
-                    <div>
-                      <p className="font-semibold text-slate-900">Built solutions for multiple areas</p>
-                      <p className="text-sm text-slate-600">
-                        Expanding beyond one problem
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                {enrollment.missionsCompleted >= 3 && (
-                  <div className="flex items-start gap-4">
-                    <div className="flex-shrink-0">
-                      <div className="flex items-center justify-center h-8 w-8 rounded-full bg-purple-200">
-                        <span className="text-purple-700 font-bold">✓</span>
-                      </div>
-                    </div>
-                    <div>
-                      <p className="font-semibold text-slate-900">Won back hours every week</p>
-                      <p className="text-sm text-slate-600">
-                        Starting to see real impact on daily work
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                {enrollment.missionsCompleted === course.missions.length && (
-                  <div className="flex items-start gap-4">
-                    <div className="flex-shrink-0">
-                      <div className="flex items-center justify-center h-8 w-8 rounded-full bg-green-500">
-                        <span className="text-white font-bold">✓</span>
-                      </div>
-                    </div>
-                    <div>
-                      <p className="font-semibold text-slate-900">Became my own AI expert</p>
-                      <p className="text-sm text-slate-600">
-                        I can now solve any problem I face
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* My Creations */}
-            <div className="space-y-6">
-              <div>
-                <h3 className="text-2xl font-bold text-slate-900 mb-2">What I've Created</h3>
-                <p className="text-slate-600">Solutions I built. Problems I solved. The story of how I changed.</p>
-              </div>
-              {enrollment.toolkitItems.map((item, idx) => (
-                <div key={item.missionId} className="bg-white rounded-lg p-6 border-2 border-blue-200">
-                  <div className="flex gap-4">
-                    <div className="flex-shrink-0">
-                      <div className="flex items-center justify-center h-10 w-10 rounded-full bg-blue-100">
-                        <span className="text-blue-600 font-bold">✓</span>
-                      </div>
-                    </div>
-                    <div className="flex-1">
-                      <h4 className="text-lg font-bold text-slate-900 mb-1">{item.title}</h4>
-                      <p className="text-sm text-blue-600 font-medium mb-3">I created this solution</p>
-
-                      <div className="grid grid-cols-2 gap-4 mb-4">
-                        <div>
-                          <p className="text-xs font-semibold text-slate-600 uppercase mb-1">The Problem</p>
-                          <p className="text-slate-700">{item.problemArea || 'A real challenge'}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs font-semibold text-slate-600 uppercase mb-1">Time I Won Back</p>
-                          <p className="text-slate-700 font-semibold">{item.impact?.match(/(\d+ (?:hour|minute))/)?.[1] || '—'}/week</p>
-                        </div>
-                      </div>
-
-                      {item.reflection && (
-                        <div className="bg-slate-50 rounded p-3 mb-3 border-l-4 border-blue-300">
-                          <p className="text-xs font-semibold text-slate-600 mb-1">My Reflection</p>
-                          <p className="text-slate-700">"{item.reflection}"</p>
-                        </div>
-                      )}
-
-                      <p className="text-sm text-slate-600">
-                        I solved this on {new Date(item.completedAt).toLocaleDateString()}
-                      </p>
-                    </div>
+                  <div className="flex items-center justify-between pt-3 border-t border-slate-100">
+                    <p className="text-xs text-slate-600">
+                      Last used {new Date(item.completedAt).toLocaleDateString()}
+                      {item.impact?.match(/(\d+\s*(?:hour|minute))/g)?.[0] && ` · saves ${item.impact.match(/(\d+\s*(?:hour|minute))/g)?.join(' ')}/week`}
+                    </p>
+                    <button className="px-2 py-1 text-xs text-slate-600 hover:bg-slate-100 rounded">
+                      Improve
+                    </button>
                   </div>
                 </div>
               ))}
@@ -394,44 +249,34 @@ export default function CoursePage() {
           </div>
         )}
 
-        {/* Journey Complete - The Success Moment */}
+        {/* Course Complete */}
         {enrollment && enrollment.missionsCompleted === course.missions.length && (
-          <div className="mt-12 p-8 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-lg text-center">
-            <div className="text-5xl mb-4">🎉</div>
-            <h3 className="text-3xl font-bold text-green-900 mb-4">You've Become Someone New</h3>
-            <p className="text-lg text-green-800 mb-6">
-              Five problems solved by you. Hours won back every week. Most importantly: you proved to yourself that you can solve problems with AI.
+          <div className="mt-12 p-6 bg-white border border-slate-200 rounded-lg">
+            <p className="text-slate-900 font-medium mb-4">
+              All {course.missions.length} solved. What problem should we tackle next?
             </p>
-
-            {/* The Success Question */}
-            <div className="bg-white rounded-lg p-8 mb-6 max-w-2xl mx-auto">
-              <p className="text-slate-600 mb-4">One final reflection:</p>
-              <p className="text-2xl font-bold text-slate-900 mb-6">
-                How has this changed who you are?
-              </p>
-              <textarea
-                value={successAnswer}
-                onChange={(e) => {
-                  setSuccessAnswer(e.target.value);
-                  setError(null);
-                }}
-                placeholder="Your answer..."
-                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-slate-900"
-                rows={3}
-              />
-              {error && (
-                <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-                  <p className="text-sm text-red-700">{error}</p>
-                </div>
-              )}
-              <button
-                onClick={handleSubmitSuccess}
-                disabled={submittingSuccess}
-                className="mt-4 w-full px-6 py-3 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {submittingSuccess ? 'Submitting...' : 'Submit & Celebrate'}
-              </button>
-            </div>
+            <textarea
+              value={successAnswer}
+              onChange={(e) => {
+                setSuccessAnswer(e.target.value);
+                setError(null);
+              }}
+              placeholder="What's still costing you time?"
+              className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900"
+              rows={2}
+            />
+            {error && (
+              <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-sm text-red-700">{error}</p>
+              </div>
+            )}
+            <button
+              onClick={handleSubmitSuccess}
+              disabled={submittingSuccess}
+              className="mt-4 px-6 py-2 bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-600 transition disabled:opacity-50"
+            >
+              {submittingSuccess ? 'Saving...' : 'Continue'}
+            </button>
           </div>
         )}
       </main>
