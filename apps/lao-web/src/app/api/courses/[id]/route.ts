@@ -15,11 +15,11 @@ export async function GET(
 
     const courseId = params.id;
 
-    // Get course with lessons
+    // Get course with missions
     const course = await prisma.course.findUnique({
       where: { id: courseId },
       include: {
-        lessons: {
+        missions: {
           orderBy: { position: 'asc' },
         },
       },
@@ -57,8 +57,9 @@ export async function GET(
     return NextResponse.json({
       course,
       enrollment: {
-        currentLessonPosition: enrollment.currentLessonPosition,
-        lessonsCompleted: enrollment.lessonsCompleted,
+        currentMissionPosition: enrollment.currentMissionPosition,
+        missionsCompleted: enrollment.missionsCompleted,
+        toolkitItems: enrollment.toolkitItems,
       },
     });
   } catch (error) {

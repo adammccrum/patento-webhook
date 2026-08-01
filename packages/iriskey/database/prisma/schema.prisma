@@ -314,7 +314,7 @@ model LearnerGoal {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  missions      Mission[]
+  missions      PersonalMission[]
   portfolio     Portfolio[]
   analyticsEvents AnalyticsEvent[]
   sessionMetrics SessionMetrics[]
@@ -324,7 +324,7 @@ model LearnerGoal {
   @@index([createdAt])
 }
 
-model Mission {
+model PersonalMission {
   id            String   @id @default(cuid())
   goalId        String
   goal          LearnerGoal @relation(fields: [goalId], references: [id], onDelete: Cascade)
@@ -365,7 +365,7 @@ model Mission {
 model Asset {
   id            String   @id @default(cuid())
   missionId     String
-  mission       Mission  @relation(fields: [missionId], references: [id], onDelete: Cascade)
+  mission       PersonalMission  @relation(fields: [missionId], references: [id], onDelete: Cascade)
   userId        String
   user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -394,7 +394,7 @@ model Asset {
 model Portfolio {
   id            String   @id @default(cuid())
   missionId     String   @unique
-  mission       Mission  @relation(fields: [missionId], references: [id], onDelete: Cascade)
+  mission       PersonalMission  @relation(fields: [missionId], references: [id], onDelete: Cascade)
   goalId        String
   goal          LearnerGoal @relation(fields: [goalId], references: [id], onDelete: Cascade)
   userId        String
