@@ -4,16 +4,17 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { getAnalytics } from '@/lib/analytics';
+import { PenLine, Mail, ClipboardList, Code2, BarChart3, Search } from 'lucide-react';
 
 // Page: "Let's Solve Something" (renamed from Discover)
 
 const PROBLEM_CATEGORIES = [
-  { id: 'writing', label: 'Writing', icon: '✍️' },
-  { id: 'email', label: 'Email', icon: '📧' },
-  { id: 'admin', label: 'Admin', icon: '📋' },
-  { id: 'code', label: 'Code', icon: '💻' },
-  { id: 'analysis', label: 'Analysis', icon: '📊' },
-  { id: 'research', label: 'Research', icon: '🔍' },
+  { id: 'writing', label: 'Writing', icon: PenLine },
+  { id: 'email', label: 'Email', icon: Mail },
+  { id: 'admin', label: 'Admin', icon: ClipboardList },
+  { id: 'code', label: 'Code', icon: Code2 },
+  { id: 'analysis', label: 'Analysis', icon: BarChart3 },
+  { id: 'research', label: 'Research', icon: Search },
 ];
 
 export default function DiscoverPage() {
@@ -88,7 +89,7 @@ export default function DiscoverPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    <div className="min-h-screen bg-surface">
       {/* Navigation */}
       <nav className="border-b bg-white sticky top-0 z-50">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
@@ -145,7 +146,12 @@ export default function DiscoverPage() {
                       : 'border-slate-200 bg-slate-50 hover:border-slate-300'
                   }`}
                 >
-                  <div className="text-2xl mb-1">{cat.icon}</div>
+                  <cat.icon
+                    size={24}
+                    strokeWidth={1.5}
+                    className="mb-1.5 text-brand-blue"
+                    aria-hidden
+                  />
                   <div className="text-sm font-medium text-slate-900">{cat.label}</div>
                 </button>
               ))}

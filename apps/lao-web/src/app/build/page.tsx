@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { getAnalytics } from '@/lib/analytics';
+import { Check } from 'lucide-react';
 
 interface BuildStep {
   id: number;
@@ -173,14 +174,14 @@ export default function BuildPage() {
 
   if (!goalData) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
+      <div className="min-h-screen bg-surface flex items-center justify-center">
         <div className="text-slate-600">Loading...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    <div className="min-h-screen bg-surface">
       {/* Navigation */}
       <nav className="border-b bg-white sticky top-0 z-50">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
@@ -252,7 +253,7 @@ export default function BuildPage() {
             <div className="bg-white rounded-lg shadow p-8">
               {/* Coach prompt */}
               <div className="mb-8 p-4 bg-blue-50 border-l-4 border-blue-500 rounded">
-                <p className="text-slate-700 leading-relaxed">🤖 <span className="font-medium">Your Coach:</span> {step?.prompt}</p>
+                <p className="text-slate-700 leading-relaxed"><span className="font-medium">Your Coach:</span> {step?.prompt}</p>
               </div>
 
               {/* Input area */}
@@ -301,8 +302,8 @@ export default function BuildPage() {
               {/* Completion message */}
               {currentStep === 4 && (
                 <div className="mb-8 p-6 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg text-center">
-                  <div className="text-4xl mb-4">🎉</div>
-                  <h3 className="text-2xl font-bold text-green-900 mb-2">You've built your AI assistant!</h3>
+                  <Check size={32} strokeWidth={1.5} className="text-success mb-4 mx-auto" aria-hidden />
+                  <h3 className="text-2xl font-bold text-green-900 mb-2">You've built your assistant</h3>
                   <p className="text-green-800 mb-4">
                     You now have a working tool that will save you time on "{goalData?.problem}"
                   </p>

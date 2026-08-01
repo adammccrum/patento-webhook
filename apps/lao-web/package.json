@@ -27,7 +27,8 @@
     "axios": "^1.6.2",
     "zod": "^3.22.4",
     "@iriskey/authz": "*",
-    "@iriskey/llm": "*"
+    "@iriskey/llm": "*",
+    "lucide-react": "^0.344.0"
   },
   "devDependencies": {
     "typescript": "^5.3.3",

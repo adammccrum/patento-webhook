@@ -6,6 +6,7 @@ import { getSession } from '@/lib/auth';
 import { Button } from '@lao/ui';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import { Wrench, Target, TrendingUp, Rocket, ShieldCheck, Globe } from 'lucide-react';
 
 export default async function HomePage() {
   const session = await getSession();
@@ -15,7 +16,7 @@ export default async function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    <div className="min-h-screen bg-surface">
       {/* Navigation */}
       <nav className="border-b bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
@@ -56,7 +57,7 @@ export default async function HomePage() {
         {/* Features */}
         <div id="features" className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-20">
           <div className="bg-white rounded-lg shadow-lg p-8">
-            <div className="text-3xl mb-4">🤖</div>
+            <Wrench size={28} strokeWidth={1.5} className="text-brand-blue mb-4" aria-hidden />
             <h3 className="text-xl font-semibold text-slate-900 mb-4">Invisible AI</h3>
             <p className="text-slate-600">
               The AI works behind the scenes. You never need to choose between providers—we
@@ -65,7 +66,7 @@ export default async function HomePage() {
           </div>
 
           <div className="bg-white rounded-lg shadow-lg p-8">
-            <div className="text-3xl mb-4">🎯</div>
+            <Target size={28} strokeWidth={1.5} className="text-brand-blue mb-4" aria-hidden />
             <h3 className="text-xl font-semibold text-slate-900 mb-4">Personalized</h3>
             <p className="text-slate-600">
               No two dashboards are the same. Every learning path is uniquely tailored to your
@@ -74,7 +75,7 @@ export default async function HomePage() {
           </div>
 
           <div className="bg-white rounded-lg shadow-lg p-8">
-            <div className="text-3xl mb-4">📈</div>
+            <TrendingUp size={28} strokeWidth={1.5} className="text-brand-blue mb-4" aria-hidden />
             <h3 className="text-xl font-semibold text-slate-900 mb-4">Measurable Progress</h3>
             <p className="text-slate-600">
               Track every interaction. Your progress is always visible, and insights drive
@@ -83,7 +84,7 @@ export default async function HomePage() {
           </div>
 
           <div className="bg-white rounded-lg shadow-lg p-8">
-            <div className="text-3xl mb-4">🚀</div>
+            <Rocket size={28} strokeWidth={1.5} className="text-brand-blue mb-4" aria-hidden />
             <h3 className="text-xl font-semibold text-slate-900 mb-4">Learning by Doing</h3>
             <p className="text-slate-600">
               Build real projects before diving into theory. Learn through hands-on missions
@@ -92,7 +93,7 @@ export default async function HomePage() {
           </div>
 
           <div className="bg-white rounded-lg shadow-lg p-8">
-            <div className="text-3xl mb-4">🔐</div>
+            <ShieldCheck size={28} strokeWidth={1.5} className="text-brand-blue mb-4" aria-hidden />
             <h3 className="text-xl font-semibold text-slate-900 mb-4">Secure & Private</h3>
             <p className="text-slate-600">
               Your data is encrypted, audited, and completely under your control. GDPR and
@@ -101,7 +102,7 @@ export default async function HomePage() {
           </div>
 
           <div className="bg-white rounded-lg shadow-lg p-8">
-            <div className="text-3xl mb-4">🌍</div>
+            <Globe size={28} strokeWidth={1.5} className="text-brand-blue mb-4" aria-hidden />
             <h3 className="text-xl font-semibold text-slate-900 mb-4">Scalable</h3>
             <p className="text-slate-600">
               Built for millions of users from day one. Consistent performance as you grow.
@@ -124,7 +125,7 @@ export default async function HomePage() {
       {/* Footer */}
       <footer className="bg-white border-t mt-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center text-slate-600 text-sm">
-          <p>© 2024 LAO - AI Learning Operating System. All rights reserved.</p>
+          <p>© 2026 LAO Academy</p>
         </div>
       </footer>
     </div>

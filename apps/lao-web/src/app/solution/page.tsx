@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { getAnalytics } from '@/lib/analytics';
+import { Wrench, Lightbulb } from 'lucide-react';
 
 export default function SolutionPage() {
   const router = useRouter();
@@ -58,7 +59,7 @@ export default function SolutionPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
+      <div className="min-h-screen bg-surface flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
           <p className="text-slate-600">Preparing your solution...</p>
@@ -69,7 +70,7 @@ export default function SolutionPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
+      <div className="min-h-screen bg-surface flex items-center justify-center">
         <div className="bg-white rounded-lg shadow-lg p-8 text-center max-w-md">
           <p className="text-red-600 mb-4">{error}</p>
           <Link href="/discover">
@@ -83,7 +84,7 @@ export default function SolutionPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    <div className="min-h-screen bg-surface">
       {/* Navigation */}
       <nav className="border-b bg-white sticky top-0 z-50">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
@@ -100,7 +101,7 @@ export default function SolutionPage() {
           {/* Header */}
           <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-8 text-white">
             <div className="flex items-center justify-center w-12 h-12 rounded-full bg-white bg-opacity-20 mb-4">
-              <span className="text-2xl">🛠️</span>
+              <Wrench size={24} strokeWidth={1.5} aria-hidden />
             </div>
             <h2 className="text-3xl font-bold mb-2">Here's What We'll Build</h2>
             <p className="text-blue-100">
@@ -120,7 +121,7 @@ export default function SolutionPage() {
             {mission && (
               <div className="mb-8 p-6 bg-blue-50 rounded-lg border-2 border-blue-200">
                 <div className="flex items-start gap-4">
-                  <div className="text-4xl">🤖</div>
+                  <Lightbulb size={32} strokeWidth={1.5} className="text-brand-blue shrink-0" aria-hidden />
                   <div className="flex-1">
                     <h3 className="text-2xl font-bold text-slate-900 mb-2">
                       {mission.solutionDescription}
@@ -180,7 +181,7 @@ export default function SolutionPage() {
                     4
                   </div>
                   <div>
-                    <p className="font-semibold text-slate-900">You're done!</p>
+                    <p className="font-semibold text-slate-900">You're done</p>
                     <p className="text-sm text-slate-600">You'll have a tool you can use immediately</p>
                   </div>
                 </div>

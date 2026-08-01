@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { getAnalytics } from '@/lib/analytics';
+import { Check } from 'lucide-react';
 
 export default function ReflectionPage() {
   const router = useRouter();
@@ -95,14 +96,14 @@ export default function ReflectionPage() {
 
   if (!goalData) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
+      <div className="min-h-screen bg-surface flex items-center justify-center">
         <div className="text-slate-600">Loading...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50">
+    <div className="min-h-screen bg-surface">
       {/* Navigation */}
       <nav className="border-b bg-white sticky top-0 z-50">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
@@ -119,7 +120,7 @@ export default function ReflectionPage() {
           // Celebration screen
           <div className="text-center">
             <div className="mb-8">
-              <div className="text-8xl mb-4 animate-bounce">🎉</div>
+              <Check size={48} strokeWidth={1.5} className="text-success mb-4 mx-auto" aria-hidden />
               <h2 className="text-4xl font-bold text-slate-900 mb-4">
                 You did it!
               </h2>
@@ -165,7 +166,7 @@ export default function ReflectionPage() {
 
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 text-left">
                 <p className="text-sm text-slate-700">
-                  <span className="font-semibold">Next step:</span> Your reflection has been saved. You can now see this achievement in your portfolio on your dashboard. Use your new tool in the coming days, and come back to tell us how it's working!
+                  <span className="font-semibold">Next step:</span> Your reflection has been saved. You can now see this achievement in your portfolio on your dashboard. Use your new tool in the coming days, and come back to tell us how it's working.
                 </p>
               </div>
             </div>
@@ -241,7 +242,7 @@ export default function ReflectionPage() {
             {/* Info box */}
             <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg mb-8">
               <p className="text-sm text-slate-700">
-                <span className="font-semibold">💡 Your reflection helps:</span> It helps us understand what works and what doesn't, so we can make the experience better for everyone.
+                <span className="font-semibold">Your reflection helps:</span> It helps us understand what works and what doesn't, so we can make the experience better for everyone.
               </p>
             </div>
 
@@ -252,7 +253,7 @@ export default function ReflectionPage() {
                 disabled={loading || !reflection.trim()}
                 className="flex-1 px-6 py-3 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 disabled:bg-slate-300 disabled:cursor-not-allowed transition"
               >
-                {loading ? 'Saving...' : 'Complete & Celebrate 🎉'}
+                {loading ? 'Saving...' : 'Complete'}
               </button>
               <button
                 onClick={() => setReflection('')}
