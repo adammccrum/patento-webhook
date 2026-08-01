@@ -43,6 +43,12 @@ model User {
   analyticsEvents AnalyticsEvent[]
   sessionMetrics SessionMetrics[]
   courseEnrollments CourseEnrollment[]
+  solutions     Solution[]
+  learnerGoals  LearnerGoal[]
+  personalMissions PersonalMission[]
+  assets        Asset[]
+  portfolio     Portfolio[]
+  learnerState  LearnerState?
 
   @@index([email])
   @@index([createdAt])
@@ -560,4 +566,85 @@ model CourseEnrollment {
   @@index([userId])
   @@index([courseId])
   @@index([completedAt])
+}
+
+// A Solution is a living tool the learner owns and keeps using.
+// The course creates the first one; the toolbox is where it stays alive.
+model Solution {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Identity — the learner names this, and renames it as it evolves
+  name          String   // "My Email Assistant", "Proposal Writer"
+  problem       String   // The problem it solves, in the learner's words
+  problemArea   String   @default("General")
+
+  // The working content of the current version (prompt, instructions, template)
+  content       String
+
+  // The learner's own notes — how to use it, what to watch for
+  notes         String?
+
+  currentVersion Int     @default(1)
+
+  // Usage — this is what tells us it's genuinely relied on
+  useCount      Int      @default(0)
+  lastUsedAt    DateTime?
+
+  // Time saved per use, and the accumulated total across all runs
+  timeSavedMinutes      Int @default(0)
+  totalTimeSavedMinutes Int @default(0)
+
+  // Where it came from (null when created directly in the toolbox)
+  originMissionId String?
+  originCourseId  String?
+
+  // Sharing — null means private. Set to a random token to publish read-only.
+  shareId       String?  @unique
+
+  status        String   @default("active") // active, archived
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  versions      SolutionVersion[]
+  runs          SolutionRun[]
+
+  @@index([userId])
+  @@index([userId, status])
+  @@index([lastUsedAt])
+  @@index([originMissionId])
+}
+
+// Every solution remembers its own story. Nothing is ever finished.
+model SolutionVersion {
+  id            String   @id @default(cuid())
+  solutionId    String
+  solution      Solution @relation(fields: [solutionId], references: [id], onDelete: Cascade)
+
+  version       Int
+  content       String
+  changeNote    String?  // "Made it shorter", "Added tone guidance"
+
+  createdAt     DateTime @default(now())
+
+  @@unique([solutionId, version])
+  @@index([solutionId])
+}
+
+// One record per time the learner actually used the solution.
+model SolutionRun {
+  id            String   @id @default(cuid())
+  solutionId    String
+  solution      Solution @relation(fields: [solutionId], references: [id], onDelete: Cascade)
+
+  version       Int      // Which version was used
+  timeSavedMinutes Int?  // Learner's own estimate for this run
+  note          String?  // Optional: what they used it for
+
+  ranAt         DateTime @default(now())
+
+  @@index([solutionId])
+  @@index([ranAt])
 }

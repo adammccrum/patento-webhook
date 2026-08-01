@@ -10,7 +10,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { missionId, courseId, reflection } = await request.json();
+    const { missionId, courseId, reflection, problem, content } = await request.json();
 
     if (!missionId || !courseId || !reflection) {
       return NextResponse.json(
@@ -74,6 +74,35 @@ export async function POST(request: Request) {
 
     toolkitItems.push(newToolkitItem);
 
+    // The mission produced a real tool. Give it a home in the toolbox so the
+    // learner can keep using and improving it long after the course ends.
+    const solutionContent =
+      (typeof content === 'string' && content.trim()) ||
+      mission.buildTemplate ||
+      `A solution for: ${mission.title}`;
+
+    const solution = await prisma.solution.create({
+      data: {
+        userId: session.user.id,
+        name: mission.toolkitName,
+        problem:
+          typeof problem === 'string' && problem.trim() ? problem.trim() : mission.description,
+        problemArea: mission.problemArea,
+        content: solutionContent,
+        notes: reflection,
+        timeSavedMinutes: mission.timeSavedMinutes || 0,
+        originMissionId: missionId,
+        originCourseId: courseId,
+        versions: {
+          create: {
+            version: 1,
+            content: solutionContent,
+            changeNote: `Built during "${mission.title}"`,
+          },
+        },
+      },
+    });
+
     // Update enrollment
     const updatedEnrollment = await prisma.courseEnrollment.update({
       where: {
@@ -101,6 +130,7 @@ export async function POST(request: Request) {
       {
         message: 'Mission completed successfully',
         enrollment: updatedEnrollment,
+        solution: { id: solution.id, name: solution.name },
       },
       { status: 200 }
     );

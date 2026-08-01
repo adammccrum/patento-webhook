@@ -22,7 +22,7 @@ export const GET = withErrorHandler(async (request: NextRequest, ctx) => {
   }
 
   // Fetch user data in parallel
-  const [user, profile, credits, settings, recentActivity, portfolio, learnerState] = await Promise.all([
+  const [user, profile, credits, settings, recentActivity, portfolio, learnerState, solutions] = await Promise.all([
     db.user.findUnique({
       where: { id: userId },
       select: {
@@ -93,6 +93,22 @@ export const GET = withErrorHandler(async (request: NextRequest, ctx) => {
         predictedReturnDate: true,
       },
     }),
+    // The toolbox — what the learner actually opens LAO to use.
+    db.solution.findMany({
+      where: { userId, status: 'active' },
+      select: {
+        id: true,
+        name: true,
+        problem: true,
+        problemArea: true,
+        currentVersion: true,
+        useCount: true,
+        lastUsedAt: true,
+        timeSavedMinutes: true,
+        totalTimeSavedMinutes: true,
+      },
+      orderBy: [{ lastUsedAt: { sort: 'desc', nulls: 'last' } }, { createdAt: 'desc' }],
+    }),
   ]);
 
   if (!user) {
@@ -117,6 +133,15 @@ export const GET = withErrorHandler(async (request: NextRequest, ctx) => {
       overallConfidence: 0.5,
       problemsSolved: 0,
       predictedReturnDate: null,
+    },
+    solutions: solutions || [],
+    toolbox: {
+      total: solutions.length,
+      inUse: solutions.filter((s) => s.useCount > 0).length,
+      weeklyTimeSaved: solutions.reduce(
+        (total, s) => total + (s.useCount > 0 ? s.timeSavedMinutes : 0),
+        0
+      ),
     },
     stats: {
       accountAge: Math.floor(

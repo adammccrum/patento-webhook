@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
+import { formatLastUsed } from '@/lib/solutions';
 
 interface Mission {
   id: string;
@@ -21,6 +22,17 @@ interface Course {
   title: string;
   description: string;
   missions: Mission[];
+}
+
+interface CourseSolution {
+  id: string;
+  name: string;
+  problem: string;
+  problemArea: string;
+  currentVersion: number;
+  useCount: number;
+  lastUsedAt: string | null;
+  originMissionId: string | null;
 }
 
 interface Enrollment {
@@ -44,6 +56,7 @@ export default function CoursePage() {
 
   const [course, setCourse] = useState<Course | null>(null);
   const [enrollment, setEnrollment] = useState<Enrollment | null>(null);
+  const [solutions, setSolutions] = useState<CourseSolution[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [successAnswer, setSuccessAnswer] = useState('');
@@ -64,6 +77,7 @@ export default function CoursePage() {
         const data = await response.json();
         setCourse(data.course);
         setEnrollment(data.enrollment);
+        setSolutions(data.solutions ?? []);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
       } finally {
@@ -218,32 +232,39 @@ export default function CoursePage() {
           })}
         </div>
 
-        {/* Your Toolbox */}
-        {enrollment && enrollment.toolkitItems.length > 0 && (
+        {/* What this course built — living tools, not completed assignments */}
+        {solutions.length > 0 && (
           <div className="mb-12">
-            <h3 className="text-xl font-semibold text-slate-900 mb-6">Your Toolbox</h3>
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-semibold text-slate-900">What You Built</h3>
+              <Link href="/solutions" className="text-sm text-slate-600 hover:text-slate-900">
+                Your toolbox
+              </Link>
+            </div>
             <div className="space-y-3">
-              {enrollment.toolkitItems.map((item) => (
-                <div key={item.missionId} className="bg-white rounded-lg p-5 border border-slate-200">
-                  <div className="flex items-start justify-between gap-4 mb-3">
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-slate-900">{item.toolkitName}</p>
-                      <p className="text-sm text-slate-600 mt-1">{item.problemArea || 'Solution'}</p>
+              {solutions.map((item) => (
+                <Link key={item.id} href={`/solutions/${item.id}`}>
+                  <div className="bg-white rounded-lg p-5 border border-slate-200 hover:border-slate-400 transition cursor-pointer">
+                    <div className="flex items-start justify-between gap-4 mb-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium text-slate-900">{item.name}</p>
+                          <span className="text-xs text-slate-500">v{item.currentVersion}</span>
+                        </div>
+                        <p className="text-sm text-slate-600 mt-1 truncate">{item.problem}</p>
+                      </div>
+                      <span className="text-sm font-medium text-blue-600 whitespace-nowrap">Open</span>
                     </div>
-                    <button className="px-3 py-1 text-sm font-medium text-blue-600 hover:bg-blue-50 rounded whitespace-nowrap">
-                      Open
-                    </button>
+                    <div className="flex items-center gap-3 pt-3 border-t border-slate-100 text-xs text-slate-600">
+                      <span>
+                        {item.useCount === 0
+                          ? 'Not used yet'
+                          : `Used ${item.useCount} time${item.useCount === 1 ? '' : 's'}`}
+                      </span>
+                      <span>Last used {formatLastUsed(item.lastUsedAt)}</span>
+                    </div>
                   </div>
-                  <div className="flex items-center justify-between pt-3 border-t border-slate-100">
-                    <p className="text-xs text-slate-600">
-                      Last used {new Date(item.completedAt).toLocaleDateString()}
-                      {item.impact?.match(/(\d+\s*(?:hour|minute))/g)?.[0] && ` · saves ${item.impact.match(/(\d+\s*(?:hour|minute))/g)?.join(' ')}/week`}
-                    </p>
-                    <button className="px-2 py-1 text-xs text-slate-600 hover:bg-slate-100 rounded">
-                      Improve
-                    </button>
-                  </div>
-                </div>
+                </Link>
               ))}
             </div>
           </div>

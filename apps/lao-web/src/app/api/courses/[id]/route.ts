@@ -54,6 +54,23 @@ export async function GET(
       data: { lastAccessedAt: new Date() },
     });
 
+    // The living tools this course produced, so the learner can open them
+    // straight from here rather than hunting through the toolbox.
+    const solutions = await prisma.solution.findMany({
+      where: { userId: session.user.id, originCourseId: courseId, status: 'active' },
+      select: {
+        id: true,
+        name: true,
+        problem: true,
+        problemArea: true,
+        currentVersion: true,
+        useCount: true,
+        lastUsedAt: true,
+        originMissionId: true,
+      },
+      orderBy: { createdAt: 'asc' },
+    });
+
     return NextResponse.json({
       course,
       enrollment: {
@@ -61,6 +78,7 @@ export async function GET(
         missionsCompleted: enrollment.missionsCompleted,
         toolkitItems: enrollment.toolkitItems,
       },
+      solutions,
     });
   } catch (error) {
     console.error('Error fetching course:', error);

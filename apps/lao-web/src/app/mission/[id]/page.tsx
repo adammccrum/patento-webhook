@@ -29,8 +29,10 @@ export default function MissionPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [problemInput, setProblemInput] = useState('');
+  const [solutionContent, setSolutionContent] = useState('');
   const [reflection, setReflection] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [solutionId, setSolutionId] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchMission() {
@@ -60,10 +62,23 @@ export default function MissionPage() {
 
   const handleStartBuild = () => {
     if (problemInput.trim()) {
+      // Give them the template as a starting point rather than a blank page.
+      if (!solutionContent && mission?.buildTemplate) {
+        setSolutionContent(mission.buildTemplate);
+      }
       setStep('build');
     } else {
       setError('Please describe your problem first');
     }
+  };
+
+  const handleFinishBuild = () => {
+    if (!solutionContent.trim()) {
+      setError('Write your solution before moving on — this is what you keep');
+      return;
+    }
+    setError(null);
+    setStep('reflection');
   };
 
   const handleCompleteMission = async () => {
@@ -81,6 +96,8 @@ export default function MissionPage() {
           missionId,
           courseId: mission?.courseId,
           reflection,
+          problem: problemInput,
+          content: solutionContent,
         }),
       });
 
@@ -88,13 +105,9 @@ export default function MissionPage() {
         throw new Error('Failed to complete mission');
       }
 
-      // Show celebration moment
+      const data = await response.json();
+      setSolutionId(data.solution?.id ?? null);
       setStep('celebration');
-
-      // Redirect after celebration moment
-      setTimeout(() => {
-        router.push(`/course/${mission?.courseId}`);
-      }, 3000);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
       setSubmitting(false);
@@ -230,18 +243,36 @@ export default function MissionPage() {
               <p className="text-slate-600 text-sm">You'll build a {mission.toolkitName.toLowerCase()} to solve it.</p>
             </div>
 
-            {mission.buildTemplate && (
-              <div className="mb-8 p-4 bg-slate-50 border border-slate-200 rounded-lg">
-                <p className="text-sm font-semibold text-slate-900 mb-3">Starting template (customize it):</p>
-                <pre className="text-xs text-slate-700 overflow-x-auto whitespace-pre-wrap">{mission.buildTemplate}</pre>
-              </div>
-            )}
+            <div className="mb-8">
+              <label className="block text-sm font-semibold text-slate-900 mb-3">
+                Your {mission.toolkitName.toLowerCase()}:
+              </label>
+              <textarea
+                value={solutionContent}
+                onChange={(e) => {
+                  setSolutionContent(e.target.value);
+                  setError(null);
+                }}
+                placeholder="Write the instructions you'll give the AI. Be specific about the task, the format you want back, and anything it should avoid."
+                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
+                rows={14}
+              />
+              <p className="text-xs text-slate-600 mt-2">
+                This is yours to keep. You&apos;ll be able to run it, improve it and version it from your toolbox.
+              </p>
+            </div>
 
             <div className="mb-8 p-6 bg-green-50 border-l-4 border-green-500 rounded-lg">
               <p className="text-slate-700 leading-relaxed">
                 <span className="font-semibold">Remember:</span> Define the task, write clear instructions, test with real examples.
               </p>
             </div>
+
+            {error && (
+              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-sm text-red-700">{error}</p>
+              </div>
+            )}
 
             <div className="flex gap-4">
               <button
@@ -254,7 +285,7 @@ export default function MissionPage() {
                 ← Back
               </button>
               <button
-                onClick={() => setStep('reflection')}
+                onClick={handleFinishBuild}
                 className="flex-1 px-6 py-3 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 transition"
               >
                 Problem Solved →
@@ -316,16 +347,30 @@ export default function MissionPage() {
             </div>
 
             <div className="mb-8 p-6 bg-slate-50 rounded-lg border border-slate-200">
-              <p className="text-slate-700 mb-2">{mission.achievement.toLowerCase().charAt(0).toUpperCase() + mission.achievement.toLowerCase().slice(1)}.</p>
-              <p className="text-sm text-slate-600">Ready for the next problem?</p>
+              <p className="text-slate-700 mb-2">
+                {mission.achievement.toLowerCase().charAt(0).toUpperCase() + mission.achievement.toLowerCase().slice(1)}.
+              </p>
+              <p className="text-sm text-slate-600">
+                {mission.toolkitName} is in your toolbox now. Use it, and improve it as you go.
+              </p>
             </div>
 
-            <button
-              onClick={() => router.push(`/course/${mission?.courseId}`)}
-              className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition text-sm font-medium"
-            >
-              See What's Next
-            </button>
+            <div className="flex gap-3 justify-center">
+              {solutionId && (
+                <button
+                  onClick={() => router.push(`/solutions/${solutionId}`)}
+                  className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition text-sm font-medium"
+                >
+                  Open {mission.toolkitName}
+                </button>
+              )}
+              <button
+                onClick={() => router.push(`/course/${mission?.courseId}`)}
+                className="px-6 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition text-sm font-medium"
+              >
+                Next Problem
+              </button>
+            </div>
           </div>
         )}
       </main>
