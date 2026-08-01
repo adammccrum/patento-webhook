@@ -25,11 +25,12 @@ export default function MissionPage() {
   const missionId = params.id as string;
 
   const [mission, setMission] = useState<Mission | null>(null);
-  const [step, setStep] = useState<'overview' | 'coach' | 'build' | 'reflection'>('overview');
+  const [step, setStep] = useState<'overview' | 'coach' | 'build' | 'reflection' | 'celebration'>('overview');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [problemInput, setProblemInput] = useState('');
   const [reflection, setReflection] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     async function fetchMission() {
@@ -71,6 +72,7 @@ export default function MissionPage() {
       return;
     }
 
+    setSubmitting(true);
     try {
       const response = await fetch('/api/missions/complete', {
         method: 'POST',
@@ -86,10 +88,16 @@ export default function MissionPage() {
         throw new Error('Failed to complete mission');
       }
 
-      // Redirect to course
-      router.push(`/course/${mission?.courseId}`);
+      // Show celebration moment
+      setStep('celebration');
+
+      // Redirect after celebration moment
+      setTimeout(() => {
+        router.push(`/course/${mission?.courseId}`);
+      }, 3000);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
+      setSubmitting(false);
     }
   };
 
@@ -311,10 +319,44 @@ export default function MissionPage() {
               </button>
               <button
                 onClick={handleCompleteMission}
-                className="flex-1 px-6 py-3 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 transition"
+                disabled={submitting}
+                className="flex-1 px-6 py-3 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 transition disabled:opacity-50"
               >
-                Add to My Solutions ✓
+                {submitting ? 'Adding to Solutions...' : 'Add to My Solutions ✓'}
               </button>
+            </div>
+          </div>
+        )}
+
+        {/* Celebration Moment */}
+        {step === 'celebration' && mission && (
+          <div className="fixed inset-0 bg-gradient-to-br from-green-50 to-emerald-50 flex items-center justify-center z-50">
+            <div className="max-w-2xl w-full mx-4 text-center">
+              <div className="text-6xl mb-6 animate-bounce">✓</div>
+
+              <h2 className="text-4xl font-bold text-green-900 mb-4">
+                You've Solved It
+              </h2>
+
+              <p className="text-xl text-green-800 mb-8">
+                {problemInput} is no longer a problem.
+              </p>
+
+              <div className="bg-white rounded-lg p-8 mb-8 shadow-lg">
+                <p className="text-lg text-slate-700 mb-3">
+                  <span className="font-semibold">{mission.toolkitName}</span> is now part of your life.
+                </p>
+                <p className="text-slate-600 mb-6">
+                  Every week, you get back {mission.achievement.toLowerCase()}.
+                </p>
+                <p className="text-slate-600">
+                  Tomorrow your work will be easier because of what you built today.
+                </p>
+              </div>
+
+              <p className="text-sm text-slate-600">
+                Taking you back to your journey...
+              </p>
             </div>
           </div>
         )}

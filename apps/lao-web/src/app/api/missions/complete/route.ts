@@ -67,6 +67,8 @@ export async function POST(request: Request) {
       title: mission.title,
       toolkitName: mission.toolkitName,
       impact,
+      problemArea: mission.problemArea,
+      reflection,
       completedAt: new Date().toISOString(),
     };
 

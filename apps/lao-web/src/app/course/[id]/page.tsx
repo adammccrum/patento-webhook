@@ -26,7 +26,15 @@ interface Course {
 interface Enrollment {
   currentMissionPosition: number;
   missionsCompleted: number;
-  toolkitItems: Array<{ missionId: string; title: string; toolkitName: string; impact?: string; completedAt: string }>;
+  toolkitItems: Array<{
+    missionId: string;
+    title: string;
+    toolkitName: string;
+    impact?: string;
+    problemArea?: string;
+    reflection?: string;
+    completedAt: string
+  }>;
 }
 
 export default function CoursePage() {
@@ -268,23 +276,118 @@ export default function CoursePage() {
               </div>
             </div>
 
-            {/* My Solutions */}
-            <div className="p-8 bg-gradient-to-r from-indigo-50 to-blue-50 border-2 border-blue-200 rounded-lg">
-              <h3 className="text-2xl font-bold text-slate-900 mb-2">My Solutions</h3>
-              <p className="text-slate-600 mb-6">Problems that no longer slow me down:</p>
-              <div className="space-y-3">
-                {enrollment.toolkitItems.map((item) => (
-                  <div key={item.missionId} className="bg-white rounded-lg p-4 border border-blue-200">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <p className="font-semibold text-slate-900">{item.toolkitName}</p>
-                        <p className="text-sm text-slate-600 mt-1">{item.impact || 'Built ' + new Date(item.completedAt).toLocaleDateString()}</p>
+            {/* My Journey Timeline */}
+            <div className="p-8 bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-200 rounded-lg">
+              <h3 className="text-2xl font-bold text-slate-900 mb-6">My Journey</h3>
+              <div className="space-y-4">
+                {enrollment.missionsCompleted >= 1 && (
+                  <div className="flex items-start gap-4">
+                    <div className="flex-shrink-0">
+                      <div className="flex items-center justify-center h-8 w-8 rounded-full bg-purple-200">
+                        <span className="text-purple-700 font-bold">✓</span>
                       </div>
-                      <span className="text-2xl">✓</span>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-slate-900">Solved my first problem</p>
+                      <p className="text-sm text-slate-600">
+                        {new Date(enrollment.toolkitItems[0]?.completedAt).toLocaleDateString()}
+                      </p>
                     </div>
                   </div>
-                ))}
+                )}
+
+                {enrollment.missionsCompleted >= 2 && (
+                  <div className="flex items-start gap-4">
+                    <div className="flex-shrink-0">
+                      <div className="flex items-center justify-center h-8 w-8 rounded-full bg-purple-200">
+                        <span className="text-purple-700 font-bold">✓</span>
+                      </div>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-slate-900">Built solutions for multiple areas</p>
+                      <p className="text-sm text-slate-600">
+                        Expanding beyond one problem
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {enrollment.missionsCompleted >= 3 && (
+                  <div className="flex items-start gap-4">
+                    <div className="flex-shrink-0">
+                      <div className="flex items-center justify-center h-8 w-8 rounded-full bg-purple-200">
+                        <span className="text-purple-700 font-bold">✓</span>
+                      </div>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-slate-900">Won back hours every week</p>
+                      <p className="text-sm text-slate-600">
+                        Starting to see real impact on daily work
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {enrollment.missionsCompleted === course.missions.length && (
+                  <div className="flex items-start gap-4">
+                    <div className="flex-shrink-0">
+                      <div className="flex items-center justify-center h-8 w-8 rounded-full bg-green-500">
+                        <span className="text-white font-bold">✓</span>
+                      </div>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-slate-900">Became my own AI expert</p>
+                      <p className="text-sm text-slate-600">
+                        I can now solve any problem I face
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
+            </div>
+
+            {/* My Transformations */}
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-2xl font-bold text-slate-900 mb-2">My Solutions</h3>
+                <p className="text-slate-600">The transformations I've created.</p>
+              </div>
+              {enrollment.toolkitItems.map((item, idx) => (
+                <div key={item.missionId} className="bg-white rounded-lg p-6 border-2 border-blue-200">
+                  <div className="flex gap-4">
+                    <div className="flex-shrink-0">
+                      <div className="flex items-center justify-center h-10 w-10 rounded-full bg-blue-100">
+                        <span className="text-blue-600 font-bold">{idx + 1}</span>
+                      </div>
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="text-lg font-bold text-slate-900 mb-2">{item.title}</h4>
+
+                      <div className="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                          <p className="text-xs font-semibold text-slate-600 uppercase mb-1">Problem Solved</p>
+                          <p className="text-slate-700">{item.problemArea || 'General'}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs font-semibold text-slate-600 uppercase mb-1">Time Won Back</p>
+                          <p className="text-slate-700">{item.impact?.match(/(\d+ (?:hour|minute))/)?.[1] || '—'}</p>
+                        </div>
+                      </div>
+
+                      {item.reflection && (
+                        <div className="bg-slate-50 rounded p-3 mb-3">
+                          <p className="text-xs font-semibold text-slate-600 mb-1">What Changed</p>
+                          <p className="text-slate-700 italic">"{item.reflection}"</p>
+                        </div>
+                      )}
+
+                      <p className="text-sm text-slate-600">
+                        Solved on {new Date(item.completedAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         )}
