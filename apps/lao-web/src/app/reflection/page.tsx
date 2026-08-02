@@ -31,7 +31,8 @@ export default function ReflectionPage() {
         // Get user
         const userResponse = await fetch('/api/profile');
         if (userResponse.ok) {
-          const userData = await userResponse.json();
+          const userBody = await userResponse.json();
+          const userData = userBody?.data ?? userBody;
           setUserId(userData.user?.id);
         }
 

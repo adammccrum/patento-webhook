@@ -5,14 +5,13 @@
 One line of evidence per criterion. Where the evidence is a command, the
 command is here so anyone can re-run it.
 
-**Status: not yet. 4 criteria of 31 lack evidence.** Two are operational and
-may not be simulated; two are unverified quality requirements.
+**Status: not yet. 2 criteria of 32 lack evidence.** Both are operational and
+may not be simulated. No engineering work is outstanding.
 
 | | |
 |---|---|
 | Last full clean-room run | commit `285e154`, 2026-08-02, verdict **NOT RELEASABLE — 1 gate failed**, 29 steps passed |
 | Blocking (operational) | official master logo; live provider credentials |
-| Blocking (unverified) | mobile layout; form accessibility |
 | Everything else | evidenced below |
 
 ---
@@ -68,29 +67,38 @@ may not be simulated; two are unverified quality requirements.
 | 5.3 | Remembers the solution | `buildContextBrief()` in `src/lib/collaborator.ts`; covered by `collaborator.test.ts`. |
 | 5.4 | Provider verification harness is trustworthy | `verify-harness.test.ts`, 27 tests: every check driven with a model that breaks what it exists to catch. Found that a priced provider ignoring the budget reported **PASS**. |
 
-### 6. Reliability and performance
+### 6. Rendering, mobile and accessibility
 
 | # | Criterion | Evidence |
 |---|---|---|
-| 6.1 | Health checks are real | `src/lib/health.ts` runs `SELECT 1`. Clean-room step 9 requires `/api/health` to report the database reachable before the journey starts. |
-| 6.2 | Performance measured on a realistic corpus | 54 users / 8,601 solutions / 2,157 versions / 10,215 runs. Dashboard 2.7ms, toolbox 1.7ms, collaborator context 1.6ms p50. `PRIVATE_BETA_READINESS_REVIEW.md`. |
-| 6.3 | Known ceilings are named, not hidden | Search degrades 1.7ms → 105ms between 12 and 2,000 solutions (ILIKE filters all heap rows after the userId index); toolbox payload is unbounded at 623 KB. Both recorded; neither reachable at beta scale. |
+| 6.1 | Every page renders with its data | `npm run verify-pages` — 9 pages loaded in Chromium with a real session, hard-loaded as a refresh would. Fails on an uncaught exception, the Next.js error screen, a stuck spinner, an API envelope in the DOM, or a page that renders without the data the API returned. **9/9 pass.** |
+| 6.2 | No client-side exceptions | Same run. Proved to catch regressions: reinstating the dashboard defect failed the check by name before the fix was restored. |
+| 6.3 | Works on mobile | `npm run verify-mobile` — the journey at 375px, 320px and 768px, checking horizontal overflow, off-screen controls, tap-target size, text size and the viewport meta. **30/30 page-viewport combinations pass, 0 defects.** |
+| 6.4 | Tap targets meet WCAG 2.2 AA | Same run: no control below 24×24px. 12 nav and footer links were 20px; `py-1` takes them to 28px. |
+| 6.5 | Renders at device width | `<meta name="viewport" content="width=device-width, initial-scale=1">` from a `viewport` export in the root layout, which previously declared none. `maximumScale` deliberately unset so text can still be enlarged. |
+| 6.6 | Forms are accessible | `form-accessibility.test.ts` — no orphaned `<label>`, and no `htmlFor` pointing at an id that does not exist. 12 labels associated. Proved to fail first with a canary page. |
 
-### 7. Not yet evidenced
+### 7. Reliability and performance
+
+| # | Criterion | Evidence |
+|---|---|---|
+| 7.1 | Health checks are real | `src/lib/health.ts` runs `SELECT 1`. Clean-room step 9 requires `/api/health` to report the database reachable before the journey starts. |
+| 7.2 | Performance measured on a realistic corpus | 54 users / 8,601 solutions / 2,157 versions / 10,215 runs. Dashboard 2.7ms, toolbox 1.7ms, collaborator context 1.6ms p50. `PRIVATE_BETA_READINESS_REVIEW.md`. |
+| 7.3 | Known ceilings are named, not hidden | Search degrades 1.7ms → 105ms between 12 and 2,000 solutions (ILIKE filters all heap rows after the userId index); toolbox payload is unbounded at 623 KB. Both recorded; neither reachable at beta scale. |
+
+### 8. Not yet evidenced
 
 | # | Criterion | What is missing |
 |---|---|---|
-| **7.1** | **Brand conformance with official assets** | The master logo has not been supplied. `brand-conformance.test.ts` fails deliberately: *"The master logo is missing from /brand/logo/."* This is the 1 failing test in every run. It must not be satisfied by recreating, redrawing, vectorising or colour-matching the logo. |
-| **7.2** | **Provider verification in staging with live credentials** | No credentials. `npm run verify-providers` refuses and exits 1 rather than pretending. Runbook: `STAGING_VERIFICATION.md`. |
-| **7.3** | **Works on mobile** | **Nothing verifies this.** The clean room tests HTTP status codes and payloads; it never renders a page. No viewport testing exists anywhere in the pipeline. Learners in a closed beta will open LAO on a phone. |
-| **7.4** | **Forms are accessible** | 21 `<label>` elements, 2 with `htmlFor`. Screen readers cannot associate the remaining 19 with their inputs. Recorded as H5 in `PRIVATE_BETA_READINESS_REVIEW.md` and never closed. |
+| **8.1** | **Brand conformance with official assets** | The master logo has not been supplied. `brand-conformance.test.ts` fails deliberately: *"The master logo is missing from /brand/logo/."* This is the 1 failing test in every run. It must not be satisfied by recreating, redrawing, vectorising or colour-matching the logo. |
+| **8.2** | **Provider verification in staging with live credentials** | No credentials. `npm run verify-providers` refuses and exits 1 rather than pretending. Runbook: `STAGING_VERIFICATION.md`. |
 
 ---
 
 ## Why the current run says NOT RELEASABLE
 
 The clean room stops nothing else: every other step passes. The single failure
-is 7.1 above.
+is 8.1 above.
 
 ```
 | Verdict | NOT RELEASABLE — 1 gate(s) failed |
@@ -110,12 +118,7 @@ than a green one with an asterisk.
    operator — the header now prints all six. Then re-run the clean room so the
    collaborator is exercised against a real provider rather than the degraded
    path.
-3. **Verify mobile** on real viewport sizes, and **associate the 19 orphaned
-   labels**. Neither is a feature; both are quality defects against a standing
-   requirement. Awaiting a decision on whether they are closed during the
-   freeze or logged for V1.1.
-
-When all four rows have evidence, every criterion here does, and we release.
+When both rows have evidence, every criterion here does, and we release.
 
 ## Reproducing all of it
 
@@ -125,6 +128,10 @@ npx turbo run type-check
 npx turbo run test
 RC_DATABASE_URL='postgresql://…/lao_release_candidate' npm run verify-release-candidate
 npm run verify-providers --workspace=@iriskey/llm    # needs credentials
+
+# Against a running, seeded server:
+PAGES_BASE_URL=http://localhost:3000 npm run verify-pages
+MOBILE_BASE_URL=http://localhost:3000 npm run verify-mobile
 ```
 
 Or push, and read the release report artifact.

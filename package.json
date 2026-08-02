@@ -21,7 +21,9 @@
     "db:generate": "npm run db:generate --workspace=@iriskey/database",
     "db:deploy": "prisma migrate deploy --schema=packages/iriskey/database/prisma/schema.prisma",
     "seed": "npm run seed --workspace=@iriskey/database",
-    "verify-release-candidate": "bash scripts/verify-release-candidate.sh"
+    "verify-release-candidate": "bash scripts/verify-release-candidate.sh",
+    "verify-mobile": "node scripts/verify-mobile.mjs",
+    "verify-pages": "node scripts/verify-pages.mjs"
   },
   "devDependencies": {
     "@types/jest": "^29.5.11",

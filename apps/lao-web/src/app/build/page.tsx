@@ -82,7 +82,8 @@ export default function BuildPage() {
         // Get user
         const userResponse = await fetch('/api/profile');
         if (userResponse.ok) {
-          const userData = await userResponse.json();
+          const userBody = await userResponse.json();
+          const userData = userBody?.data ?? userBody;
           setUserId(userData.user?.id);
           if (userData.user?.id) {
             analytics.logBuildSessionStarted(userData.user.id, goalId);

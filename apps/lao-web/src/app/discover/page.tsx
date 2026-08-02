@@ -32,7 +32,8 @@ export default function DiscoverPage() {
       try {
         const response = await fetch('/api/profile');
         if (response.ok) {
-          const data = await response.json();
+          const body = await response.json();
+          const data = body?.data ?? body;
           setUserId(data.user?.id);
           // Log session start with baseline confidence
           if (data.user?.id) {

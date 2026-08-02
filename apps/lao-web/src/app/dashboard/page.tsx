@@ -23,7 +23,9 @@ export default function DashboardPage() {
           }
           throw new Error('Failed to fetch dashboard');
         }
-        const data = await response.json();
+        // /api/dashboard returns { success, data }. Read the payload, not the envelope.
+        const body = await response.json();
+        const data = body?.data ?? body;
         setDashboardData(data);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
@@ -76,10 +78,12 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-surface">
       <nav className="border-b bg-white sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center gap-3">
           <h1 className="text-2xl font-bold text-slate-900">LAO</h1>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-slate-600">{user.email}</span>
+          {/* min-w-0 lets the email shrink; without it a long address pushed
+              Sign Out off-screen at 320px. */}
+          <div className="flex items-center gap-4 min-w-0">
+            <span className="text-sm text-slate-600 truncate">{user.email}</span>
             <button
               onClick={handleSignOut}
               className="px-4 py-2 border border-slate-200 rounded-lg hover:bg-slate-50 text-slate-700 text-sm transition"

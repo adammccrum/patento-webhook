@@ -29,7 +29,9 @@ export default function ProfilePage() {
           }
           throw new Error('Failed to fetch profile');
         }
-        const data = await response.json();
+        // /api/profile returns { success, data }. Read the payload, not the envelope.
+        const body = await response.json();
+        const data = body?.data ?? body;
         setProfile(data);
         setFormData({
           name: data.user.name || '',
@@ -63,7 +65,8 @@ export default function ProfilePage() {
         throw new Error('Failed to update profile');
       }
 
-      const data = await response.json();
+      const body = await response.json();
+      const data = body?.data ?? body;
       setProfile(data);
       setError(null);
     } catch (err) {
