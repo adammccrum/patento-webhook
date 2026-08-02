@@ -146,7 +146,11 @@ jobs:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/lao_rendering
       NEXTAUTH_SECRET: rendering-verification-secret-not-for-production
       NEXTAUTH_URL: http://localhost:3500
+      # @iriskey/config requires all five of PRODUCT_ID, PRODUCT_NAME,
+      # DATABASE_URL, NEXTAUTH_SECRET and NEXTAUTH_URL. Omitting PRODUCT_NAME
+      # failed the build at "Collecting page data", not at startup.
       PRODUCT_ID: lao
+      PRODUCT_NAME: LAO Academy
 
     steps:
       - uses: actions/checkout@v4
