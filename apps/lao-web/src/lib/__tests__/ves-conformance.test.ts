@@ -171,6 +171,33 @@ describe('The standard tells the truth about the pipeline', () => {
     expect(offenders).toEqual([]);
   });
 
+  it('no gate is suppressed by an earlier gate failing', () => {
+    // "Invoked by the workflow" is not the same as "runs". A job with `needs`
+    // and no `if` is skipped whenever its dependency fails — so the first run
+    // of the rendering job never executed at all: `checks` failed on the known
+    // logo gate and took every downstream job with it.
+    //
+    // A blocked gate must not hide whether everything else works. The run
+    // still fails; only the amount of evidence changes.
+    const jobs = [...workflow.matchAll(/^ {2}([a-z-]+):$/gm)];
+    const offenders: string[] = [];
+
+    for (const [i, match] of jobs.entries()) {
+      const start = match.index!;
+      const end = jobs[i + 1]?.index ?? workflow.length;
+      const block = workflow.slice(start, end);
+      const name = match[1]!;
+
+      if (!/^\s{4}needs:/m.test(block)) continue; // no dependency, always runs
+      const condition = block.match(/^\s{4}if:\s*(.+)$/m)?.[1] ?? '';
+      if (!/always\(\)|!\s*cancelled\(\)/.test(condition)) {
+        offenders.push(`${name} is skipped when its dependency fails`);
+      }
+    }
+
+    expect(offenders).toEqual([]);
+  });
+
   it('no verification step is continue-on-error', () => {
     // One exception is allowed and stated in the standard: the artefact
     // download in the reporting job, which must tolerate a missing artefact.

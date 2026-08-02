@@ -23,7 +23,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: rc-${{ github.ref }}
+  group: rc-${{ github.head_ref || github.ref_name }}
   cancel-in-progress: true
 
 env:
@@ -62,6 +62,10 @@ jobs:
     name: Clean room release candidate
     runs-on: ubuntu-latest
     needs: checks
+    # Run even when `checks` failed. A known outstanding gate — today the
+    # master logo — must not hide whether everything else works. Same reason
+    # the script itself takes RC_REPORT_ALL. The run still fails.
+    if: ${{ !cancelled() }}
     services:
       postgres:
         image: postgres:16-alpine
@@ -121,6 +125,8 @@ jobs:
     name: Page render and mobile
     runs-on: ubuntu-latest
     needs: checks
+    # As above: evidence is gathered even when an earlier gate is red.
+    if: ${{ !cancelled() }}
     services:
       postgres:
         image: postgres:16-alpine
@@ -199,8 +205,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: clean-room
     # Secrets are not available to forked pull requests, and an empty key
-    # would verify nothing.
-    if: github.event_name != 'pull_request'
+    # would verify nothing. `!cancelled()` so a red gate upstream does not
+    # suppress this one.
+    if: ${{ !cancelled() && github.event_name != 'pull_request' }}
     steps:
       - uses: actions/checkout@v4
 
