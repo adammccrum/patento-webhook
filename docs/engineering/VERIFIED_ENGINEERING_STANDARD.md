@@ -1,6 +1,6 @@
-# IrisKey Verified Engineering Standard (VES) v1.0
+# IrisKey Verified Engineering Standard (VES) v1.1
 
-**Status:** Company Engineering Standard
+**Status:** Company Engineering Standard · self-governing
 **Authority:** Founder
 **Applies to:** LAO · IrisKey.ai · internal tools · AI agents · future software
 products
@@ -24,6 +24,27 @@ VES is the governing engineering standard for all IrisKey software projects.
 Enforced by `ves-conformance.test.ts`, which fails the build if another
 engineering document claims normative authority or omits its derivation from
 VES.
+
+## VES is self-governing
+
+The standard must always satisfy the principles it defines. It is production
+software, and is subject to verification, regression protection, review,
+evidence and version control like any other.
+
+- No statement within VES may rely on assumption. Every normative statement
+  must itself be supported by objective evidence.
+- Every guard it references must exist.
+- Every artefact it cites must exist.
+- Every command it documents must execute successfully.
+- Every example must remain valid.
+- Every version-history entry must reference an observable change.
+
+**A VES self-violation takes precedence over any project-level work and must be
+corrected before further engineering continues.**
+
+The objective is that confidence in VES increases over time rather than
+resting on historical trust. Future engineering should not merely comply with
+VES; it should continuously verify VES itself.
 
 ---
 
@@ -344,8 +365,14 @@ Corollaries:
 ## Reference implementation — LAO
 
 LAO is the first product held to this standard, and its guards are a worked
-example of what compliance looks like. All run on every push; nothing in the
-pipeline is `continue-on-error`. Red means not releasable.
+example of what compliance looks like.
+
+Every guard below is invoked by `.github/workflows/release-candidate.yml` on
+every push — asserted by `ves-conformance.test.ts`, which reads the workflow
+and fails if a guard named here is not actually run. No verification step is
+`continue-on-error`; the single exception is the artefact download in the
+reporting job, which must tolerate a missing artefact from a job that failed
+before producing one. Red means not releasable.
 
 | Guard | Principle | Prevents |
 |---|---|---|
@@ -434,6 +461,45 @@ to.
 Each principle is recorded with the evidence that produced it, so a future
 project can understand *why* it exists rather than merely complying with it.
 Commit references are to the LAO repository.
+
+### v1.1 — 2026-08-02 · Founder — VES becomes self-governing
+
+**Motivating defect.** The first audit of VES against its own principles found
+two false normative statements in the document that forbids unsupported
+normative statements:
+
+1. *"All run on every push"*, of a table listing twelve guards.
+   `verify-pages.mjs` and `verify-mobile.mjs` were not in the CI workflow at
+   all. The two guards covering the defect class that produced Principle 2 —
+   a page returning 200 and failing to render — ran only when someone
+   remembered to run them by hand.
+2. *"Nothing in the pipeline is `continue-on-error`"*, while
+   `release-candidate.yml` carried one at line 183, and its own header comment
+   repeated the same false claim.
+
+**Why existing principles were insufficient.** Principles 1, 5 and 6 all
+applied — a claim never verified, a guard that could not fail, documentation
+that did not reproduce reality — but every one of them was written to be
+applied *by* the standard *to* the product. Nothing turned them back on the
+standard. Compliance was assumed because the document was the thing defining
+compliance.
+
+**Improvement introduced.** VES is declared self-governing. `ves-conformance.test.ts`
+grows from 11 checks to 15, adding: every cited document exists; every npm
+script named exists; every guard claimed to run on every push is actually
+invoked by the workflow; and no verification step is `continue-on-error`
+except the artefact download that must tolerate a missing artefact. A
+`rendering` job was added to CI so that the first claim became true rather
+than being softened.
+
+**Expected effect.** A false claim about the pipeline now fails the build. The
+two rendering guards run on every push, closing the gap that let the dashboard
+crash reach a state we had called verified. Future principles cannot cite a
+guard, document, command or workflow step that does not exist.
+
+**Approved by.** Founder, 2026-08-02.
+
+---
 
 ### v1.0 — 2026-08-02 · Founder
 

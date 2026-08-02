@@ -8,7 +8,10 @@
 # looked like a gate and was incapable of failing for the right reason, or of
 # passing at all.
 #
-# Nothing here is `continue-on-error`. A red pipeline means not releasable.
+# No verification step here is `continue-on-error`. The single exception is
+# the artefact download in the reporting job, which must tolerate a missing
+# artefact from a job that failed before producing one. A red pipeline means
+# not releasable.
 
 name: Release candidate
 
@@ -111,6 +114,84 @@ jobs:
           path: release-report.md
           retention-days: 90
 
+  # Renders the product. Everything above this point is HTTP-level: the clean
+  # room asserts GET /api/dashboard → 200, and it did for months while the page
+  # itself threw. A 200 is not a rendered page.
+  rendering:
+    name: Page render and mobile
+    runs-on: ubuntu-latest
+    needs: checks
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: lao_rendering
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/lao_rendering
+      NEXTAUTH_SECRET: rendering-verification-secret-not-for-production
+      NEXTAUTH_URL: http://localhost:3500
+      PRODUCT_ID: lao
+      NODE_ENV: production
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install
+        run: npm ci --no-audit --no-fund
+
+      # The verification scripts prefer a preinstalled browser and fall back to
+      # Playwright's own resolution, which is what happens here.
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Migrate and seed
+        run: |
+          npm run db:deploy
+          npm run seed
+
+      - name: Build
+        run: npx turbo run build
+
+      - name: Start the server
+        run: |
+          npm start --workspace=lao-web -- -p 3500 &
+          for i in $(seq 1 60); do
+            curl -sf http://localhost:3500/api/alive >/dev/null && exit 0
+            sleep 1
+          done
+          echo "server did not become ready"; exit 1
+
+      - name: Verify every page renders with its data
+        run: PAGES_BASE_URL=http://localhost:3500 npm run verify-pages
+
+      - name: Verify mobile viewports
+        run: MOBILE_BASE_URL=http://localhost:3500 npm run verify-mobile
+
+      - name: Archive the rendering evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rendering-${{ github.sha }}
+          path: |
+            page-render-report.md
+            mobile-report.md
+          retention-days: 90
+
   # Only runs where credentials exist. Never simulated: with no key this job
   # is skipped, and the release report says so rather than implying a pass.
   providers:
@@ -173,7 +254,7 @@ jobs:
   release-report:
     name: Release report
     runs-on: ubuntu-latest
-    needs: [checks, clean-room, providers]
+    needs: [checks, clean-room, rendering, providers]
     if: always()
     steps:
       - uses: actions/download-artifact@v4
@@ -186,6 +267,7 @@ jobs:
         env:
           CHECKS: ${{ needs.checks.result }}
           CLEAN_ROOM: ${{ needs.clean-room.result }}
+          RENDERING: ${{ needs.rendering.result }}
           PROVIDERS: ${{ needs.providers.result }}
         run: |
           {
@@ -195,11 +277,12 @@ jobs:
             echo "|---|---|"
             echo "| Type check, tests, build | ${CHECKS} |"
             echo "| Clean room journey | ${CLEAN_ROOM} |"
+            echo "| Page render and mobile | ${RENDERING} |"
             echo "| Provider verification | ${PROVIDERS} |"
             echo
             [ -f release-report.md ] && { echo '<details><summary>Clean room detail</summary>'; echo; cat release-report.md; echo; echo '</details>'; }
             echo
-            if [ "$CHECKS" = success ] && [ "$CLEAN_ROOM" = success ]; then
+            if [ "$CHECKS" = success ] && [ "$CLEAN_ROOM" = success ] && [ "$RENDERING" = success ]; then
               echo "Build gates green. Operational gates are tracked in BETA_READY.md."
             else
               echo "**Not releasable.** See the failing job above."
@@ -210,6 +293,8 @@ jobs:
         env:
           CHECKS: ${{ needs.checks.result }}
           CLEAN_ROOM: ${{ needs.clean-room.result }}
+          RENDERING: ${{ needs.rendering.result }}
         run: |
           [ "$CHECKS" = success ] || exit 1
           [ "$CLEAN_ROOM" = success ] || exit 1
+          [ "$RENDERING" = success ] || exit 1

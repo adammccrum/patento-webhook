@@ -15,7 +15,7 @@
  * principle applied to the standard itself.
  */
 
-import { readFileSync, readdirSync } from 'fs';
+import { existsSync, readFileSync, readdirSync } from 'fs';
 import { join } from 'path';
 
 const DOCS = join(__dirname, '..', '..', '..', '..', '..', 'docs', 'engineering');
@@ -114,22 +114,79 @@ describe('No document rivals the standard', () => {
   });
 });
 
-describe('The standard does not cite guards that do not exist', () => {
-  it('every named guard file is present', () => {
-    const repoRoot = join(__dirname, '..', '..', '..', '..', '..');
-    const named = new Set(
-      [...ves.matchAll(/`([\w.-]+\.(?:test\.ts|mjs|sh))`/g)].map((m) => m[1]!)
-    );
+const REPO = join(__dirname, '..', '..', '..', '..', '..');
 
-    // Where each kind of guard lives.
+/** Every guard file the standard names anywhere in its prose or tables. */
+const namedGuards = new Set(
+  [...ves.matchAll(/`([\w.-]+\.(?:test\.ts|mjs|sh))`/g)].map((m) => m[1]!)
+);
+
+describe('The standard cites nothing that does not exist', () => {
+  it('every named guard file is present', () => {
     const search = [
-      join(repoRoot, 'apps', 'lao-web', 'src', 'lib', '__tests__'),
-      join(repoRoot, 'scripts'),
-      join(repoRoot, 'packages', 'iriskey', 'llm'),
+      join(REPO, 'apps', 'lao-web', 'src', 'lib', '__tests__'),
+      join(REPO, 'scripts'),
+      join(REPO, 'packages', 'iriskey', 'llm'),
     ];
     const present = new Set(search.flatMap((dir) => readdirSync(dir)));
 
-    const missing = [...named].filter((f) => !present.has(f));
+    expect([...namedGuards].filter((f) => !present.has(f))).toEqual([]);
+  });
+
+  it('every cited document exists', () => {
+    const cited = new Set([...ves.matchAll(/`([A-Z][A-Z_]+\.md)`/g)].map((m) => m[1]!));
+    const missing = [...cited].filter((f) => !existsSync(join(REPO, f)));
+
     expect(missing).toEqual([]);
+  });
+
+  it('every npm script the standard names exists', () => {
+    const scripts = JSON.parse(readFileSync(join(REPO, 'package.json'), 'utf8')).scripts ?? {};
+    const named = [...ves.matchAll(/`npm run ([a-z:-]+)`/g)].map((m) => m[1]!);
+    const missing = [...new Set(named)].filter((s) => !(s in scripts));
+
+    expect(missing).toEqual([]);
+  });
+});
+
+describe('The standard tells the truth about the pipeline', () => {
+  const workflow = readFileSync(
+    join(REPO, '.github', 'workflows', 'release-candidate.yml'),
+    'utf8'
+  );
+
+  it('every guard it says runs on every push is actually invoked by the workflow', () => {
+    // This is the check that was missing. The standard claimed "all run on
+    // every push" while verify-pages.mjs and verify-mobile.mjs were not in the
+    // workflow at all — a false normative statement in the document that
+    // forbids unsupported normative statements.
+    const offenders = [...namedGuards].filter((guard) => {
+      // Jest guards are run collectively by `turbo run test`.
+      if (guard.endsWith('.test.ts')) return !/turbo run test/.test(workflow);
+      // Scripts must be invoked by name, or via the npm script that wraps them.
+      const stem = guard.replace(/\.(mjs|sh)$/, '');
+      return !workflow.includes(guard) && !workflow.includes(stem);
+    });
+
+    expect(offenders).toEqual([]);
+  });
+
+  it('no verification step is continue-on-error', () => {
+    // One exception is allowed and stated in the standard: the artefact
+    // download in the reporting job, which must tolerate a missing artefact.
+    const lines = workflow.split('\n');
+    const offenders: string[] = [];
+
+    lines.forEach((line, i) => {
+      if (!/^\s*continue-on-error:\s*true/.test(line)) return;
+      // Look back for the step this belongs to.
+      const step = lines
+        .slice(Math.max(0, i - 6), i)
+        .reverse()
+        .find((l) => /^\s*- (name|uses):/.test(l)) ?? '(unknown step)';
+      if (!/download-artifact/.test(step)) offenders.push(`${i + 1}: ${step.trim()}`);
+    });
+
+    expect(offenders).toEqual([]);
   });
 });
