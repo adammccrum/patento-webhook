@@ -5,12 +5,13 @@
 One line of evidence per criterion. Where the evidence is a command, the
 command is here so anyone can re-run it.
 
-**Status: not yet. 2 criteria of 32 lack evidence.** Both are operational and
+**Status: not yet. 2 criteria of 36 lack evidence.** Both are operational and
 may not be simulated. No engineering work is outstanding.
 
 | | |
 |---|---|
-| Last full clean-room run | commit `285e154`, 2026-08-02, verdict **NOT RELEASABLE — 1 gate failed**, 29 steps passed |
+| Last full clean-room run | CI run [30758495917](https://github.com/adammccrum/patento-webhook/actions/runs/30758495917), commit `6e7a834`, 2026-08-02 — verdict **NOT RELEASABLE — 1 gate failed**, every other step passed |
+| Rendering and mobile in CI | Same run, job **passed** — 9 pages, 3 viewports, evidence archived |
 | Blocking (operational) | official master logo; live provider credentials |
 | Everything else | evidenced below |
 
@@ -27,7 +28,8 @@ may not be simulated. No engineering work is outstanding.
 | 1.3 | Migrations apply to an empty database | Clean-room step 4: `npm run db:deploy` against a database dropped and recreated with 0 tables → 33 tables. |
 | 1.4 | Content exists without manual intervention | Clean-room step 5: `npm run seed` creates Course 1 with 5 missions; a second run reports `already present`, proving idempotence. Found because the first clean-room run returned 404 at step 4. |
 | 1.5 | Deployment documentation matches reality | `DEPLOYMENT.md` Quick Start is the five commands the clean room actually runs. The previously-documented `pnpm`/`db:push` route is marked unverified. |
-| 1.6 | A release never depends on memory | `.github/workflows/release-candidate.yml` runs the whole pipeline on every push. Replaced a workflow that installed with `pnpm --frozen-lockfile` against a repo with no pnpm lockfile, so it had never run. |
+| 1.6 | A release never depends on memory | `.github/workflows/release-candidate.yml` runs the whole pipeline on every push — verified executing, not merely configured: run 30758495917 ran checks, clean room and rendering, archiving two evidence artefacts. Replaced a workflow that installed with `pnpm --frozen-lockfile` against a repo with no pnpm lockfile, so it had never run. |
+| 1.7 | A blocked gate does not hide the rest | Same run: `checks` failed on the logo gate and the clean-room and rendering jobs still executed, because both carry `if: ${{ !cancelled() }}`. The first attempt skipped them silently. |
 
 ### 2. The learner journey
 
@@ -71,9 +73,9 @@ may not be simulated. No engineering work is outstanding.
 
 | # | Criterion | Evidence |
 |---|---|---|
-| 6.1 | Every page renders with its data | `npm run verify-pages` — 9 pages loaded in Chromium with a real session, hard-loaded as a refresh would. Fails on an uncaught exception, the Next.js error screen, a stuck spinner, an API envelope in the DOM, or a page that renders without the data the API returned. **9/9 pass.** |
+| 6.1 | Every page renders with its data | `npm run verify-pages` — 9 pages loaded in Chromium with a real session, hard-loaded as a refresh would. Fails on an uncaught exception, the Next.js error screen, a stuck spinner, an API envelope in the DOM, or a page that renders without the data the API returned. **9/9 pass locally and in CI** — run 30758495917, step "Verify every page renders with its data", 12s. |
 | 6.2 | No client-side exceptions | Same run. Proved to catch regressions: reinstating the dashboard defect failed the check by name before the fix was restored. |
-| 6.3 | Works on mobile | `npm run verify-mobile` — the journey at 375px, 320px and 768px, checking horizontal overflow, off-screen controls, tap-target size, text size and the viewport meta. **30/30 page-viewport combinations pass, 0 defects.** |
+| 6.3 | Works on mobile | `npm run verify-mobile` — the journey at 375px, 320px and 768px, checking horizontal overflow, off-screen controls, tap-target size, text size and the viewport meta. **30/30 page-viewport combinations pass, 0 defects, locally and in CI** — run 30758495917, step "Verify mobile viewports", 30s. Reports archived as artefact `rendering-…`. |
 | 6.4 | Tap targets meet WCAG 2.2 AA | Same run: no control below 24×24px. 12 nav and footer links were 20px; `py-1` takes them to 28px. |
 | 6.5 | Renders at device width | `<meta name="viewport" content="width=device-width, initial-scale=1">` from a `viewport` export in the root layout, which previously declared none. `maximumScale` deliberately unset so text can still be enlarged. |
 | 6.6 | Forms are accessible | `form-accessibility.test.ts` — no orphaned `<label>`, and no `htmlFor` pointing at an id that does not exist. 12 labels associated. Proved to fail first with a canary page. |
