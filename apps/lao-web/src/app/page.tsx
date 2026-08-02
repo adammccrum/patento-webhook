@@ -127,9 +127,9 @@ export default async function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center text-slate-600 text-sm">
           <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
             <p>© 2026 LAO Academy</p>
-            <Link href="/privacy" className="hover:text-ink">Privacy</Link>
-            <Link href="/terms" className="hover:text-ink">Terms</Link>
-            <Link href="/cookies" className="hover:text-ink">Cookies</Link>
+            <Link href="/privacy" className="hover:text-ink py-1">Privacy</Link>
+            <Link href="/terms" className="hover:text-ink py-1">Terms</Link>
+            <Link href="/cookies" className="hover:text-ink py-1">Cookies</Link>
           </div>
         </div>
       </footer>

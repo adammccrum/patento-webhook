@@ -51,7 +51,7 @@ export default function NewSolutionPage() {
           <Link href="/dashboard">
             <h1 className="text-2xl font-bold text-slate-900 hover:text-slate-700 cursor-pointer">LAO</h1>
           </Link>
-          <Link href="/solutions" className="text-sm text-slate-600 hover:text-slate-900">
+          <Link href="/solutions" className="text-sm text-slate-600 hover:text-slate-900 py-1">
             Toolbox
           </Link>
         </div>
@@ -62,8 +62,9 @@ export default function NewSolutionPage() {
 
         <div className="bg-white rounded-lg border border-slate-200 p-6 space-y-5">
           <div>
-            <label className="block text-sm font-semibold text-slate-900 mb-2">Name</label>
+            <label htmlFor="solution-name" className="block text-sm font-semibold text-slate-900 mb-2">Name</label>
             <input
+              id="solution-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Email Assistant"
@@ -72,10 +73,11 @@ export default function NewSolutionPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-slate-900 mb-2">
+            <label htmlFor="solution-problem" className="block text-sm font-semibold text-slate-900 mb-2">
               What problem does it solve?
             </label>
             <input
+              id="solution-problem"
               value={problem}
               onChange={(e) => setProblem(e.target.value)}
               placeholder="Triaging my inbox every morning"
@@ -85,8 +87,9 @@ export default function NewSolutionPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-semibold text-slate-900 mb-2">Area</label>
+              <label htmlFor="solution-area" className="block text-sm font-semibold text-slate-900 mb-2">Area</label>
               <select
+                id="solution-area"
                 value={problemArea}
                 onChange={(e) => setProblemArea(e.target.value)}
                 className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
@@ -99,10 +102,11 @@ export default function NewSolutionPage() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-semibold text-slate-900 mb-2">
+              <label htmlFor="solution-minutes" className="block text-sm font-semibold text-slate-900 mb-2">
                 Minutes saved per use
               </label>
               <input
+                id="solution-minutes"
                 value={timeSavedMinutes}
                 onChange={(e) => setTimeSavedMinutes(e.target.value)}
                 inputMode="numeric"
@@ -113,8 +117,9 @@ export default function NewSolutionPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-slate-900 mb-2">The solution</label>
+            <label htmlFor="solution-content" className="block text-sm font-semibold text-slate-900 mb-2">The solution</label>
             <textarea
+              id="solution-content"
               value={content}
               onChange={(e) => setContent(e.target.value)}
               placeholder="The instructions you give the AI."

@@ -94,7 +94,7 @@ export default function ProfilePage() {
       <nav className="border-b bg-white sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
           <h1 className="text-2xl font-bold text-slate-900">LAO</h1>
-          <Link href="/dashboard" className="text-slate-600 hover:text-slate-900">
+          <Link href="/dashboard" className="text-slate-600 hover:text-slate-900 py-1">
             ← Back to Dashboard
           </Link>
         </div>
@@ -112,10 +112,11 @@ export default function ProfilePage() {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-slate-900 mb-2">
+              <label htmlFor="profile-email" className="block text-sm font-medium text-slate-900 mb-2">
                 Email
               </label>
               <input
+                id="profile-email"
                 type="email"
                 value={profile.user.email}
                 disabled
@@ -125,10 +126,11 @@ export default function ProfilePage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-900 mb-2">
+              <label htmlFor="profile-name" className="block text-sm font-medium text-slate-900 mb-2">
                 Full Name
               </label>
               <input
+                id="profile-name"
                 type="text"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -138,10 +140,11 @@ export default function ProfilePage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-900 mb-2">
+              <label htmlFor="profile-bio" className="block text-sm font-medium text-slate-900 mb-2">
                 Bio
               </label>
               <textarea
+                id="profile-bio"
                 value={formData.bio}
                 onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
                 placeholder="Tell us about yourself"
@@ -155,10 +158,11 @@ export default function ProfilePage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-900 mb-2">
+              <label htmlFor="profile-avatar" className="block text-sm font-medium text-slate-900 mb-2">
                 Avatar URL
               </label>
               <input
+                id="profile-avatar"
                 type="url"
                 value={formData.avatar}
                 onChange={(e) => setFormData({ ...formData, avatar: e.target.value })}

@@ -124,7 +124,7 @@ export default function DashboardPage() {
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-lg font-semibold text-slate-900">Your Toolbox</h3>
                 {solutions.length > 0 && (
-                  <Link href="/solutions" className="text-sm text-slate-600 hover:text-slate-900">
+                  <Link href="/solutions" className="text-sm text-slate-600 hover:text-slate-900 py-1">
                     All solutions
                   </Link>
                 )}

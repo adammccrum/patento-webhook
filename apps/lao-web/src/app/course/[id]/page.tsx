@@ -146,7 +146,7 @@ export default function CoursePage() {
               LAO
             </h1>
           </Link>
-          <Link href="/dashboard" className="text-sm text-slate-600 hover:text-slate-900">
+          <Link href="/dashboard" className="text-sm text-slate-600 hover:text-slate-900 py-1">
             Back to Dashboard
           </Link>
         </div>
@@ -237,7 +237,7 @@ export default function CoursePage() {
           <div className="mb-12">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-semibold text-slate-900">What You Built</h3>
-              <Link href="/solutions" className="text-sm text-slate-600 hover:text-slate-900">
+              <Link href="/solutions" className="text-sm text-slate-600 hover:text-slate-900 py-1">
                 Your toolbox
               </Link>
             </div>

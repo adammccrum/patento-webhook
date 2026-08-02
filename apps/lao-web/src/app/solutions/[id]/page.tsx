@@ -347,7 +347,7 @@ export default function SolutionWorkspacePage() {
           <Link href="/dashboard">
             <h1 className="text-2xl font-bold text-slate-900 hover:text-slate-700 cursor-pointer">LAO</h1>
           </Link>
-          <Link href="/solutions" className="text-sm text-slate-600 hover:text-slate-900">
+          <Link href="/solutions" className="text-sm text-slate-600 hover:text-slate-900 py-1">
             Toolbox
           </Link>
         </div>

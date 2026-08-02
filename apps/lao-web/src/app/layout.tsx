@@ -2,7 +2,7 @@
  * Root layout
  */
 
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import { SessionProvider } from 'next-auth/react';
 import { getSession } from '@/lib/auth';
@@ -19,6 +19,15 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: 'LAO Academy',
   description: 'Solve real problems with AI, and keep the solutions.',
+};
+
+// Declared rather than left to the framework default. Without it a phone
+// renders the page at desktop width and scales it down, which makes every
+// responsive breakpoint below irrelevant. `maximumScale` is deliberately
+// unset: capping zoom locks out anyone who needs to enlarge text.
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
 };
 
 export default async function RootLayout({

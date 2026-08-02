@@ -259,11 +259,16 @@ export default function BuildPage() {
               {/* Input area */}
               {step?.inputLabel && (
                 <div className="mb-8">
-                  <label className="block text-sm font-semibold text-slate-900 mb-2">
+                  {/* Scoped to the step: the control is remounted per step. */}
+                  <label
+                    htmlFor={`build-step-${currentStep}`}
+                    className="block text-sm font-semibold text-slate-900 mb-2"
+                  >
                     {step.inputLabel}
                   </label>
                   <div className="mb-2">
                     <textarea
+                      id={`build-step-${currentStep}`}
                       value={inputs[currentStep] || ''}
                       onChange={(e) => setInputs({ ...inputs, [currentStep]: e.target.value })}
                       placeholder={step.placeholder}

@@ -194,10 +194,11 @@ export default function MissionPage() {
             </div>
 
             <div className="mb-8">
-              <label className="block text-sm font-semibold text-slate-900 mb-3">
+              <label htmlFor="mission-problem" className="block text-sm font-semibold text-slate-900 mb-3">
                 The problem I'm solving:
               </label>
               <textarea
+                id="mission-problem"
                 value={problemInput}
                 onChange={(e) => {
                   setProblemInput(e.target.value);
@@ -244,10 +245,11 @@ export default function MissionPage() {
             </div>
 
             <div className="mb-8">
-              <label className="block text-sm font-semibold text-slate-900 mb-3">
+              <label htmlFor="mission-content" className="block text-sm font-semibold text-slate-900 mb-3">
                 Your {mission.toolkitName.toLowerCase()}:
               </label>
               <textarea
+                id="mission-content"
                 value={solutionContent}
                 onChange={(e) => {
                   setSolutionContent(e.target.value);
