@@ -9,6 +9,22 @@ This is the canonical copy. It is stored in the LAO repository for now because
 that is where it was first derived; it is **not** LAO-specific and governs every
 IrisKey project.
 
+## Precedence
+
+VES is the governing engineering standard for all IrisKey software projects.
+
+- **No subsequent engineering document may contradict VES.** Where a conflict
+  exists, VES takes precedence.
+- All project-specific engineering documents are **implementation guides or
+  casebooks derived from VES**. They may add detail, name tooling, and record
+  incidents. They may not weaken, override or reinterpret a principle.
+- A document that appears to conflict with VES is wrong by definition and must
+  be corrected, not reconciled.
+
+Enforced by `ves-conformance.test.ts`, which fails the build if another
+engineering document claims normative authority or omits its derivation from
+VES.
+
 ---
 
 ## Purpose
@@ -366,6 +382,80 @@ Additional standing rules adopted by LAO and recommended company-wide:
 | `STAGING_VERIFICATION.md` | Provider verification runbook and evidence requirements. |
 | `DEAD_CONTROL_AUDIT.md` | The control audit and its guard. |
 | `AUTHORIZATION.md` | The capability model. |
+
+---
+
+## Amendment process
+
+**Future amendments to VES require explicit Founder approval.**
+
+VES evolves through evidence, not opinion. Its authority comes from verified
+engineering experience, and it loses that authority the moment a principle is
+added because someone preferred it.
+
+Every amendment must contain all four of the following. An amendment missing
+any one of them is not an amendment; it is a preference.
+
+| # | Required | Test |
+|---|---|---|
+| 1 | The defect or observation that motivated the change | Name it. What broke, where, and what it cost. |
+| 2 | Why existing principles were insufficient | If an existing principle already covered it, the failure was compliance, not the standard. Strengthen the guard instead. |
+| 3 | The permanent engineering improvement introduced | The new or strengthened guard, named. |
+| 4 | The expected effect on future verification | What will now be caught that was not being caught. |
+
+### Amendment template
+
+```markdown
+## VES vX.Y — <one-line summary>
+
+**Motivating defect.**      <what happened, where, what it cost>
+**Why VES was insufficient.** <which principle nearly covered it, and the gap>
+**Improvement introduced.**  <new or strengthened guard, by name>
+**Expected effect.**         <what is now caught that was not>
+**Approved by.**             Founder, <date>
+```
+
+### What does not justify an amendment
+
+- A preference, a convention, or a style opinion.
+- A defect already covered by an existing principle — that is a **compliance**
+  failure, and the correct response is a stronger guard under the existing
+  principle, not a ninth principle.
+- A hypothetical. VES records what has actually gone wrong.
+
+**Do not allow the standard to grow through preference alone.** Eight
+principles that are all enforced are worth more than twenty that are aspired
+to.
+
+---
+
+## Version history
+
+Each principle is recorded with the evidence that produced it, so a future
+project can understand *why* it exists rather than merely complying with it.
+Commit references are to the LAO repository.
+
+### v1.0 — 2026-08-02 · Founder
+
+Adopted from eight defect classes, each identified from a defect that had
+already reached a state we called verified.
+
+| Principle | Motivating defect | First evidence |
+|---|---|---|
+| 1 · Verify the System | `withSecurityHeaders()` imported and never called; the app shipped with no CSP, HSTS or X-Frame-Options while a unit test asserted the helper was correct. `npm run seed` pointed at a file that had never been written. | `855a177`, `dbc3477` |
+| 2 · Verify Contracts | API returns `{ success, data }`; seven client sites read the envelope as the payload. `/dashboard` — the page every learner lands on after signing in — rendered "Application error" on every load. A validation schema accepted two fields that were not columns, making every settings save return 500. | `924ae0a`, `dbc3477` |
+| 3 · Verify From Zero | Course 1 existed only because an admin had once POSTed the seed endpoint by hand; a fresh database returned 404 at the learner's first action. `prisma migrate deploy` could not run from a clean checkout at all. | `dbc3477`, `ede6410` |
+| 4 · Verify Cold Start | The audit service initialised as a side effect of loading the auth module, which the registration route does not import. The first registration on a cold server returned 500 *after* creating the account, so the retry said "already registered". | `b338ce6` |
+| 5 · Verify the Verifier | A rate limiter returned `success: true` unconditionally. A CI workflow installed with `pnpm --frozen-lockfile` against a repo with no pnpm lockfile and had never run. A provider gate returned `"NOT REFUSED — budget was ignored"` and reported PASS. | `f24df76`, `544c64e`, `7b0fbc6` |
+| 6 · Verify Documentation | The deployment guide described `pnpm`, `.env.local` and `db:push` — none of which is how the repository works — and omitted seeding entirely. | `ede6410` |
+| 7 · Verify User Behaviour | `z.string().url()` rejected the empty string the form always sends, so nobody without an avatar could save their profile. Settings offered six controls, four of which did nothing. The root layout declared no viewport, so every responsive breakpoint was irrelevant on a phone. | `dbc3477`, `9f83413` |
+| 8 · Verify the Harness | A harness measured pages before they loaded and passed a page that crashed a moment later. A killed server left its child alive, so a run probed the previous build and reported an already-fixed defect. A response body captured in a command substitution never reached the calling shell, so a response containing five missions was reported as "no missions". | `1eff563`, `08d2cda`, `9f83413` |
+
+**Supporting policies adopted at v1.0:** Engineering Rule (every significant
+defect adds a guard, strengthens one, or documents why none is required); AI
+Engineering Policy (the standard binds human and AI contributors equally);
+Release Rule (assertions, memory, confidence, opinion and expectation are not
+evidence).
 
 ---
 
