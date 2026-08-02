@@ -5,13 +5,14 @@
 One line of evidence per criterion. Where the evidence is a command, the
 command is here so anyone can re-run it.
 
-**Status: not yet. 2 criteria of 21 lack evidence.** Both are operational and
-neither may be simulated.
+**Status: not yet. 4 criteria of 31 lack evidence.** Two are operational and
+may not be simulated; two are unverified quality requirements.
 
 | | |
 |---|---|
-| Last full clean-room run | commit `7cd187e`, 2026-08-01, verdict **NOT RELEASABLE — 1 gate failed** |
-| Blocking | official master logo; live provider credentials |
+| Last full clean-room run | commit `285e154`, 2026-08-02, verdict **NOT RELEASABLE — 1 gate failed**, 29 steps passed |
+| Blocking (operational) | official master logo; live provider credentials |
+| Blocking (unverified) | mobile layout; form accessibility |
 | Everything else | evidenced below |
 
 ---
@@ -81,6 +82,8 @@ neither may be simulated.
 |---|---|---|
 | **7.1** | **Brand conformance with official assets** | The master logo has not been supplied. `brand-conformance.test.ts` fails deliberately: *"The master logo is missing from /brand/logo/."* This is the 1 failing test in every run. It must not be satisfied by recreating, redrawing, vectorising or colour-matching the logo. |
 | **7.2** | **Provider verification in staging with live credentials** | No credentials. `npm run verify-providers` refuses and exits 1 rather than pretending. Runbook: `STAGING_VERIFICATION.md`. |
+| **7.3** | **Works on mobile** | **Nothing verifies this.** The clean room tests HTTP status codes and payloads; it never renders a page. No viewport testing exists anywhere in the pipeline. Learners in a closed beta will open LAO on a phone. |
+| **7.4** | **Forms are accessible** | 21 `<label>` elements, 2 with `htmlFor`. Screen readers cannot associate the remaining 19 with their inputs. Recorded as H5 in `PRIVATE_BETA_READINESS_REVIEW.md` and never closed. |
 
 ---
 
@@ -107,8 +110,12 @@ than a green one with an asterisk.
    operator — the header now prints all six. Then re-run the clean room so the
    collaborator is exercised against a real provider rather than the degraded
    path.
+3. **Verify mobile** on real viewport sizes, and **associate the 19 orphaned
+   labels**. Neither is a feature; both are quality defects against a standing
+   requirement. Awaiting a decision on whether they are closed during the
+   freeze or logged for V1.1.
 
-When both rows have evidence, every criterion here does, and we release.
+When all four rows have evidence, every criterion here does, and we release.
 
 ## Reproducing all of it
 
