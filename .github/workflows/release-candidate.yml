@@ -147,7 +147,6 @@ jobs:
       NEXTAUTH_SECRET: rendering-verification-secret-not-for-production
       NEXTAUTH_URL: http://localhost:3500
       PRODUCT_ID: lao
-      NODE_ENV: production
 
     steps:
       - uses: actions/checkout@v4
@@ -174,6 +173,8 @@ jobs:
         run: npx turbo run build
 
       - name: Start the server
+        env:
+          NODE_ENV: production
         run: |
           npm start --workspace=lao-web -- -p 3500 &
           for i in $(seq 1 60); do
