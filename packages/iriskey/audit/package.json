@@ -1,0 +1,21 @@
+{
+  "name": "@iriskey/audit",
+  "version": "0.1.0",
+  "private": true,
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "description": "IrisKey Platform - Centralized audit logging service",
+  "scripts": {
+    "lint": "eslint src",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@iriskey/contracts": "*",
+    "@iriskey/database": "*",
+    "@iriskey/events": "*",
+    "@prisma/client": "^5.7.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  }
+}

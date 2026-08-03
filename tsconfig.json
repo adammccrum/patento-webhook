@@ -1,0 +1,99 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "lib": [
+      "ES2020",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "esModuleInterop": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "apps/lao-web/src/*"
+      ],
+      "@iriskey/auth": [
+        "packages/iriskey/auth/src"
+      ],
+      "@iriskey/database": [
+        "packages/iriskey/database/src"
+      ],
+      "@iriskey/shared": [
+        "packages/iriskey/shared/src"
+      ],
+      "@iriskey/providers": [
+        "packages/iriskey/providers/src"
+      ],
+      "@iriskey/contracts": [
+        "packages/iriskey/contracts/src"
+      ],
+      "@iriskey/config": [
+        "packages/iriskey/config/src"
+      ],
+      "@iriskey/events": [
+        "packages/iriskey/events/src"
+      ],
+      "@iriskey/audit": [
+        "packages/iriskey/audit/src"
+      ],
+      "@iriskey/middleware": [
+        "packages/iriskey/middleware/src"
+      ],
+      "@iriskey/security": [
+        "packages/iriskey/security/src"
+      ],
+      "@iriskey/ratelimit": [
+        "packages/iriskey/ratelimit/src"
+      ],
+      "@iriskey/monitoring": [
+        "packages/iriskey/monitoring/src"
+      ],
+      "@iriskey/queue": [
+        "packages/iriskey/queue/src"
+      ],
+      "@iriskey/cache": [
+        "packages/iriskey/cache/src"
+      ],
+      "@lao/ui": [
+        "packages/lao/ui/src"
+      ],
+      "@iriskey/authz": [
+        "packages/iriskey/authz/src"
+      ],
+      "@iriskey/llm": [
+        "packages/iriskey/llm/src"
+      ]
+    },
+    "jsx": "react-jsx"
+  },
+  "include": [
+    "apps/**/*.ts",
+    "apps/**/*.tsx",
+    "packages/**/*.ts",
+    "packages/**/*.tsx"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    ".turbo"
+  ]
+}

@@ -1,0 +1,55 @@
+import { withCapability, canAccessResourceOf } from '@/lib/authorization';
+import { prisma } from '@/lib/prisma';
+import { NextResponse } from 'next/server';
+
+// Reads the session from request headers, so it can never be statically rendered.
+export const dynamic = 'force-dynamic';
+
+/**
+ * Fork a solution into a new one.
+ *
+ * The copy starts fresh: its own version 1, no usage history, not shared.
+ * Useful when a tool almost fits a second job but shouldn't change for the first.
+ */
+export const POST = withCapability('solution.write', async (request: Request, { params, principal }: any) => {
+  try {
+
+    const source = await prisma.solution.findUnique({ where: { id: params.id } });
+
+    if (!source || !canAccessResourceOf(principal, source.userId)) {
+      return NextResponse.json({ error: 'Solution not found' }, { status: 404 });
+    }
+
+    const body = await request.json().catch(() => ({}));
+    const name =
+      typeof body?.name === 'string' && body.name.trim()
+        ? body.name.trim()
+        : `${source.name} (copy)`;
+
+    const solution = await prisma.solution.create({
+      data: {
+        userId: principal.userId,
+        name,
+        problem: source.problem,
+        problemArea: source.problemArea,
+        content: source.content,
+        notes: source.notes,
+        timeSavedMinutes: source.timeSavedMinutes,
+        originMissionId: source.originMissionId,
+        originCourseId: source.originCourseId,
+        versions: {
+          create: {
+            version: 1,
+            content: source.content,
+            changeNote: `Copied from "${source.name}" v${source.currentVersion}`,
+          },
+        },
+      },
+    });
+
+    return NextResponse.json({ solution }, { status: 201 });
+  } catch (error) {
+    console.error('Error duplicating solution:', error);
+    return NextResponse.json({ error: 'Failed to duplicate solution' }, { status: 500 });
+  }
+});

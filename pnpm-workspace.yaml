@@ -1,0 +1,12 @@
+packages:
+  - 'apps/*'
+  - 'packages/iriskey/*'
+  - 'packages/lao/*'
+
+# pnpm configuration
+overrides:
+  # Ensure consistent versions across monorepo
+  typescript: '^5.3.3'
+  zod: '^3.22.4'
+  eslint: '^8.55.0'
+  prettier: '^3.2.5'

@@ -1,0 +1,107 @@
+# LAO — production stack for a single small VPS.
+#
+# Three containers and nothing else. Every service here earns its place:
+#
+#   caddy     terminates TLS and obtains Let's Encrypt certificates
+#   app       the Next.js standalone server
+#   postgres  the database
+#
+# Deliberately absent: Redis. The app treats it as optional and falls back to
+# in-memory rate limiting and caching, which is correct for one instance and
+# three beta users. Adding it would be a service to run, patch and back up in
+# exchange for nothing measurable. Add it when there is more than one instance.
+#
+#   docker compose -f deploy/docker-compose.prod.yml up -d --build
+
+name: lao
+
+services:
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      # Certificates and account keys. Losing this volume means re-issuing
+      # certificates, and Let's Encrypt rate-limits that to 5 per week per
+      # domain — enough to lock you out of your own site for days.
+      - caddy_data:/data
+      - caddy_config:/config
+    environment:
+      DOMAIN: ${DOMAIN:?set DOMAIN in .env}
+      LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL:?set LETSENCRYPT_EMAIL in .env}
+    depends_on:
+      app:
+        condition: service_healthy
+    networks: [lao]
+
+  app:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    # No published ports. The app is reachable only through Caddy, so the
+    # Node server is never directly exposed to the internet.
+    expose:
+      - '3000'
+    environment:
+      NODE_ENV: production
+      PORT: '3000'
+      PRODUCT_ID: lao
+      PRODUCT_NAME: ${PRODUCT_NAME:-LAO Academy}
+      DATABASE_URL: postgresql://lao:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}@postgres:5432/lao?schema=public
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:?set NEXTAUTH_SECRET in .env}
+      NEXTAUTH_URL: https://${DOMAIN:?set DOMAIN in .env}
+      NEXT_PUBLIC_APP_URL: https://${DOMAIN}
+      # Transactional email. Without these the app runs and delivers nothing:
+      # reset links are written to the container log and every locked-out
+      # learner stays locked out.
+      EMAIL_FROM: ${EMAIL_FROM:?set EMAIL_FROM in .env}
+      EMAIL_API_URL: ${EMAIL_API_URL:-}
+      EMAIL_API_KEY: ${EMAIL_API_KEY:-}
+      SMTP_URL: ${SMTP_URL:-}
+      # The collaborator. With none set the app degrades honestly and says it
+      # cannot suggest improvements — which is a poor answer to "would you keep
+      # using this?", so set one before the beta starts.
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      ANTHROPIC_MODEL: ${ANTHROPIC_MODEL:-claude-sonnet-4-5}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD', 'curl', '-fsS', 'http://localhost:3000/api/health']
+      interval: 30s
+      timeout: 5s
+      start_period: 60s
+      retries: 3
+    networks: [lao]
+
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    # No published ports either. Postgres listens only on the internal
+    # network. Exposing 5432 on a public VPS is how databases get found.
+    environment:
+      POSTGRES_DB: lao
+      POSTGRES_USER: lao
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U lao -d lao']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks: [lao]
+
+volumes:
+  postgres_data:
+  caddy_data:
+  caddy_config:
+
+networks:
+  lao:
+    driver: bridge

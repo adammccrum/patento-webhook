@@ -1,0 +1,178 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { Download } from 'lucide-react';
+
+export default function SettingsPage() {
+  const router = useRouter();
+  const [settings, setSettings] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [confirmEmail, setConfirmEmail] = useState('');
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  useEffect(() => {
+    async function fetchSettings() {
+      try {
+        const response = await fetch('/api/settings');
+        if (!response.ok) {
+          if (response.status === 401) {
+            router.push('/auth/login');
+            return;
+          }
+          throw new Error('Failed to fetch settings');
+        }
+        const data = await response.json();
+        setSettings(data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An error occurred');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchSettings();
+  }, [router]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-surface flex items-center justify-center">
+        <div className="text-slate-600">Loading...</div>
+      </div>
+    );
+  }
+
+  if (!settings) {
+    return (
+      <div className="min-h-screen bg-surface flex items-center justify-center">
+        <div className="text-red-600">{error || 'Failed to load settings'}</div>
+      </div>
+    );
+  }
+
+  async function handleDeleteAccount() {
+    setDeleteError(null);
+    try {
+      const response = await fetch('/api/account', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ confirmEmail }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Could not delete the account');
+
+      // The session belongs to an account that no longer exists.
+      await fetch('/api/auth/signout', { method: 'POST' }).catch(() => {});
+      router.push('/');
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : 'An error occurred');
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-surface">
+      <nav className="border-b bg-white sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+          <h1 className="text-2xl font-bold text-slate-900">LAO</h1>
+          <Link href="/dashboard" className="text-slate-600 hover:text-slate-900 py-1">
+            ← Back to Dashboard
+          </Link>
+        </div>
+      </nav>
+
+      <main className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="bg-white rounded-lg shadow p-8">
+          <h2 className="text-3xl font-bold text-slate-900 mb-8">Settings</h2>
+
+          {error && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+              {error}
+            </div>
+          )}
+
+          <div className="border border-hairline rounded-card p-5">
+            <h3 className="font-medium text-ink mb-2">Notifications and security</h3>
+            <p className="text-base leading-relaxed text-ink-body">
+              There is nothing to configure yet. During private beta the only
+              emails we send are the ones you ask for — a password reset, or
+              confirming your address — and there is no two-factor option.
+            </p>
+            <p className="text-sm text-ink-muted mt-3">
+              These settings will appear here when they do something.
+            </p>
+          </div>
+
+          <div className="mt-8 pt-8 border-t border-slate-200">
+            <h3 className="text-lg font-semibold text-ink mb-2">Your data</h3>
+            <p className="text-sm text-ink-muted mb-4">
+              Your solutions are yours. Take them with you at any time, or remove
+              everything permanently.
+            </p>
+
+            <a
+              href="/api/account/export"
+              className="inline-flex items-center gap-2 px-4 py-2 border border-hairline-strong rounded-control text-ink text-sm font-medium hover:bg-surface-sunken transition"
+            >
+              <Download size={18} strokeWidth={1.5} aria-hidden />
+              Download my data
+            </a>
+
+            <div className="mt-8 pt-6 border-t border-hairline">
+              <h4 className="font-medium text-ink mb-2">Delete my account</h4>
+              <p className="text-sm text-ink-muted mb-4">
+                This removes your account, every solution, every version you saved,
+                and every conversation. It cannot be undone.
+              </p>
+
+              {!deleting ? (
+                <button
+                  type="button"
+                  onClick={() => setDeleting(true)}
+                  className="px-4 py-2 border border-red-300 text-danger rounded-control text-sm font-medium hover:bg-red-50 transition"
+                >
+                  Delete my account
+                </button>
+              ) : (
+                <div className="space-y-3 max-w-md">
+                  <label htmlFor="confirm-email" className="block text-sm text-ink">
+                    Type your email address to confirm
+                  </label>
+                  <input
+                    id="confirm-email"
+                    value={confirmEmail}
+                    onChange={(e) => setConfirmEmail(e.target.value)}
+                    placeholder="your email address"
+                    className="w-full px-3 py-2 border border-hairline-strong rounded-control text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
+                  />
+                  {deleteError && <p className="text-sm text-danger">{deleteError}</p>}
+                  <div className="flex gap-3">
+                    <button
+                      type="button"
+                      onClick={handleDeleteAccount}
+                      className="px-4 py-2 bg-danger text-white rounded-control text-sm font-medium hover:opacity-90 transition"
+                    >
+                      Delete permanently
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setDeleting(false);
+                        setConfirmEmail('');
+                        setDeleteError(null);
+                      }}
+                      className="px-4 py-2 border border-hairline-strong text-ink rounded-control text-sm hover:bg-surface-sunken transition"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}

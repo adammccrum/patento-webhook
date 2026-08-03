@@ -1,0 +1,312 @@
+# The release pipeline.
+#
+# A release must never depend on somebody remembering which commands to run.
+#
+# This replaces a workflow that could not have run: it installed with
+# `pnpm install --frozen-lockfile` against a repository that has no
+# pnpm-lock.yaml, and marked its test and lint steps `continue-on-error`. It
+# looked like a gate and was incapable of failing for the right reason, or of
+# passing at all.
+#
+# No verification step here is `continue-on-error`. The single exception is
+# the artefact download in the reporting job, which must tolerate a missing
+# artefact from a job that failed before producing one. A red pipeline means
+# not releasable.
+
+name: Release candidate
+
+on:
+  push:
+    branches: [main, develop, 'claude/**']
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+concurrency:
+  group: rc-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '20.x'
+
+jobs:
+  # Fast feedback on the working tree. The clean room repeats these against a
+  # fresh clone; this exists so an obvious break is reported in two minutes
+  # rather than fifteen.
+  checks:
+    name: Type check, tests, build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install
+        run: npm ci --no-audit --no-fund
+
+      - name: Type check
+        run: npx turbo run type-check
+
+      - name: Tests
+        run: npx turbo run test
+
+      - name: Build
+        run: npx turbo run build
+
+  # The gate. Everything from nothing: fresh clone of the committed HEAD, an
+  # empty database, and the complete learner journey over HTTP.
+  clean-room:
+    name: Clean room release candidate
+    runs-on: ubuntu-latest
+    needs: checks
+    # Run even when `checks` failed. A known outstanding gate — today the
+    # master logo — must not hide whether everything else works. Same reason
+    # the script itself takes RC_REPORT_ALL. The run still fails.
+    if: ${{ !cancelled() }}
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # The script clones the repository locally. A shallow checkout has
+          # no HEAD to clone from.
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install psql client
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends postgresql-client
+
+      - name: Run the release candidate verification
+        env:
+          RC_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/lao_release_candidate
+          RC_REPORT: ${{ github.workspace }}/release-report.md
+          RC_ENVIRONMENT: github-actions/${{ runner.os }}
+          RC_OPERATOR: ${{ github.actor }}
+          RC_PORT: '3400'
+          # Record every step rather than stopping at the first failure, so a
+          # known outstanding gate does not leave the rest unproven. The job
+          # still fails — this changes how much we learn, never the verdict.
+          RC_REPORT_ALL: '1'
+        run: npm run verify-release-candidate
+
+      # Always — a failed run is evidence too, and the reason not to release.
+      - name: Archive the release report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-report-${{ github.sha }}
+          path: release-report.md
+          retention-days: 90
+
+  # Renders the product. Everything above this point is HTTP-level: the clean
+  # room asserts GET /api/dashboard → 200, and it did for months while the page
+  # itself threw. A 200 is not a rendered page.
+  rendering:
+    name: Page render and mobile
+    runs-on: ubuntu-latest
+    needs: checks
+    # As above: evidence is gathered even when an earlier gate is red.
+    if: ${{ !cancelled() }}
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: lao_rendering
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/lao_rendering
+      NEXTAUTH_SECRET: rendering-verification-secret-not-for-production
+      NEXTAUTH_URL: http://localhost:3500
+      # @iriskey/config requires all five of PRODUCT_ID, PRODUCT_NAME,
+      # DATABASE_URL, NEXTAUTH_SECRET and NEXTAUTH_URL. Omitting PRODUCT_NAME
+      # failed the build at "Collecting page data", not at startup.
+      PRODUCT_ID: lao
+      PRODUCT_NAME: LAO Academy
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install
+        run: npm ci --no-audit --no-fund
+
+      # The verification scripts prefer a preinstalled browser and fall back to
+      # Playwright's own resolution, which is what happens here.
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Migrate and seed
+        run: |
+          npm run db:deploy
+          npm run seed
+
+      - name: Build
+        run: npx turbo run build
+
+      - name: Start the server
+        env:
+          NODE_ENV: production
+        run: |
+          npm start --workspace=lao-web -- -p 3500 &
+          for i in $(seq 1 60); do
+            curl -sf http://localhost:3500/api/alive >/dev/null && exit 0
+            sleep 1
+          done
+          echo "server did not become ready"; exit 1
+
+      - name: Verify every page renders with its data
+        run: PAGES_BASE_URL=http://localhost:3500 npm run verify-pages
+
+      - name: Verify mobile viewports
+        run: MOBILE_BASE_URL=http://localhost:3500 npm run verify-mobile
+
+      - name: Archive the rendering evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rendering-${{ github.sha }}
+          path: |
+            page-render-report.md
+            mobile-report.md
+          retention-days: 90
+
+  # Only runs where credentials exist. Never simulated: with no key this job
+  # is skipped, and the release report says so rather than implying a pass.
+  providers:
+    name: Provider verification
+    runs-on: ubuntu-latest
+    needs: clean-room
+    # Secrets are not available to forked pull requests, and an empty key
+    # would verify nothing. `!cancelled()` so a red gate upstream does not
+    # suppress this one.
+    if: ${{ !cancelled() && github.event_name != 'pull_request' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install
+        run: npm ci --no-audit --no-fund
+
+      - name: Are any credentials configured?
+        id: creds
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          OPENAI_COMPATIBLE_BASE_URL: ${{ secrets.OPENAI_COMPATIBLE_BASE_URL }}
+        run: |
+          if [ -n "$ANTHROPIC_API_KEY$OPENAI_API_KEY$GEMINI_API_KEY$OPENAI_COMPATIBLE_BASE_URL" ]; then
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::notice title=Provider verification skipped::No credentials configured. This gate is NOT satisfied — see STAGING_VERIFICATION.md."
+          fi
+
+      - name: Verify providers
+        if: steps.creds.outputs.configured == 'true'
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          OPENAI_COMPATIBLE_BASE_URL: ${{ secrets.OPENAI_COMPATIBLE_BASE_URL }}
+          OPENAI_COMPATIBLE_MODEL: ${{ secrets.OPENAI_COMPATIBLE_MODEL }}
+          OPENAI_COMPATIBLE_API_KEY: ${{ secrets.OPENAI_COMPATIBLE_API_KEY }}
+          LLM_OPERATOR: ${{ github.actor }}
+          LLM_ENVIRONMENT: github-actions
+        run: |
+          npm run verify-providers --workspace=@iriskey/llm 2>&1 \
+            | tee provider-verification.txt
+
+      - name: Archive the provider evidence
+        if: always() && steps.creds.outputs.configured == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: provider-verification-${{ github.sha }}
+          path: provider-verification.txt
+          retention-days: 90
+
+  # One place to look. Runs whatever happened above.
+  release-report:
+    name: Release report
+    runs-on: ubuntu-latest
+    needs: [checks, clean-room, rendering, providers]
+    if: always()
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: release-report-*
+          merge-multiple: true
+        continue-on-error: true
+
+      - name: Summarise
+        env:
+          CHECKS: ${{ needs.checks.result }}
+          CLEAN_ROOM: ${{ needs.clean-room.result }}
+          RENDERING: ${{ needs.rendering.result }}
+          PROVIDERS: ${{ needs.providers.result }}
+        run: |
+          {
+            echo "## Release candidate — \`${GITHUB_SHA:0:8}\`"
+            echo
+            echo "| Gate | Result |"
+            echo "|---|---|"
+            echo "| Type check, tests, build | ${CHECKS} |"
+            echo "| Clean room journey | ${CLEAN_ROOM} |"
+            echo "| Page render and mobile | ${RENDERING} |"
+            echo "| Provider verification | ${PROVIDERS} |"
+            echo
+            [ -f release-report.md ] && { echo '<details><summary>Clean room detail</summary>'; echo; cat release-report.md; echo; echo '</details>'; }
+            echo
+            if [ "$CHECKS" = success ] && [ "$CLEAN_ROOM" = success ] && [ "$RENDERING" = success ]; then
+              echo "Build gates green. Operational gates are tracked in BETA_READY.md."
+            else
+              echo "**Not releasable.** See the failing job above."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Fail if any gate failed
+        env:
+          CHECKS: ${{ needs.checks.result }}
+          CLEAN_ROOM: ${{ needs.clean-room.result }}
+          RENDERING: ${{ needs.rendering.result }}
+        run: |
+          [ "$CHECKS" = success ] || exit 1
+          [ "$CLEAN_ROOM" = success ] || exit 1
+          [ "$RENDERING" = success ] || exit 1

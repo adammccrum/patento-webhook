@@ -1,1 +1,39 @@
-{"name": "patento-webhook", "version": "1.0.0", "description": "A Node.js application for handling webhooks.", "main": "index.js", "dependencies": {"claude-sdk": "^1.0.0", "webhook-tools": "^1.0.0"}, "scripts": {"start": "node index.js"}}
+{
+  "name": "iriskey-platform",
+  "version": "0.1.0",
+  "description": "IrisKey Platform - Reusable infrastructure for AI products",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/iriskey/*",
+    "packages/lao/*",
+    "packages/lao-engine"
+  ],
+  "scripts": {
+    "postinstall": "npm run db:generate",
+    "dev": "turbo run dev --parallel",
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "lint": "turbo run lint",
+    "type-check": "turbo run type-check",
+    "format": "prettier --write \"**/*.{ts,tsx,json,md}\"",
+    "db:migrate": "npm run db:migrate --workspace=@iriskey/database",
+    "db:generate": "npm run db:generate --workspace=@iriskey/database",
+    "db:deploy": "prisma migrate deploy --schema=packages/iriskey/database/prisma/schema.prisma",
+    "seed": "npm run seed --workspace=@iriskey/database",
+    "verify-release-candidate": "bash scripts/verify-release-candidate.sh",
+    "verify-mobile": "node scripts/verify-mobile.mjs",
+    "verify-pages": "node scripts/verify-pages.mjs"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.11",
+    "@types/node": "^20.10.6",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "playwright": "^1.62.1",
+    "prettier": "^3.2.5",
+    "ts-jest": "^29.1.2",
+    "turbo": "^1.13.3",
+    "typescript": "^5.3.3"
+  }
+}

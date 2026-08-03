@@ -1,0 +1,4 @@
+Next.js serves this directory at the site root, and the production image copies
+it alongside the standalone bundle — the standalone trace deliberately excludes
+it. The directory was absent, so `COPY .../public` failed the image build
+before it ever started. Kept tracked so it cannot vanish again.

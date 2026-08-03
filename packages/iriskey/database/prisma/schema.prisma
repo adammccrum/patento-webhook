@@ -1,0 +1,710 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Product {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  description String?
+  enabled     Boolean   @default(true)
+  metadata    Json      @default("{}")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  providerConfigs ProviderConfig[]
+  featureFlags    FeatureFlag[]
+
+  @@index([enabled])
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  emailVerified DateTime?
+  name          String?
+  image         String?
+  password      String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  profile       Profile?
+  accounts      Account[]
+  sessions      Session[]
+  roles         Role[]
+  permissions   Permission[]
+  auditLogs     AuditLog[]
+  credits       Credits?
+  settings      Settings?
+  analyticsEvents AnalyticsEvent[]
+  sessionMetrics SessionMetrics[]
+  courseEnrollments CourseEnrollment[]
+  solutions     Solution[]
+  learnerGoals  LearnerGoal[]
+  personalMissions PersonalMission[]
+  assets        Asset[]
+  portfolio     Portfolio[]
+  learnerState  LearnerState?
+
+  @@index([email])
+  @@index([createdAt])
+}
+
+model Profile {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bio           String?
+  avatar        String?
+  timezone      String   @default("UTC")
+  language      String   @default("en")
+  preferences   Json     @default("{}")
+  onboardingCompleted Boolean @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  user               User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?
+  access_token       String?
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?
+  session_state      String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+  @@index([provider])
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  sessionToken String @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expires   DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([sessionToken])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+  type       String   @default("email-verify")
+  createdAt  DateTime @default(now())
+
+  @@unique([identifier, token])
+  @@index([token])
+  @@index([expires])
+}
+
+model Role {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  description String?
+  permissions Permission[]
+  users       User[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([name])
+}
+
+model Permission {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  description String?
+  resource    String
+  action      String
+  roles       Role[]
+  users       User[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([resource, action])
+  @@index([resource])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  productId String?
+  action    String
+  resource  String
+  details   Json
+  ipAddress String?
+  userAgent String?
+  status    String   @default("success")
+  error     String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([productId])
+  @@index([action])
+  @@index([resource])
+  @@index([createdAt])
+}
+
+model Credits {
+  id               String   @id @default(cuid())
+  userId           String   @unique
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  balance          Int      @default(1000)
+  spent            Int      @default(0)
+  monthlyReset     Int      @default(1000)
+  lastResetDate    DateTime @default(now())
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model ProviderConfig {
+  id        String    @id @default(cuid())
+  productId String
+  product   Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  name      String
+  type      String
+  enabled   Boolean   @default(false)
+  priority  Int       @default(0)
+  config    Json
+  secrets   Json
+  health    String    @default("unknown")
+  lastCheck DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@unique([productId, name])
+  @@index([productId])
+  @@index([type])
+  @@index([enabled])
+}
+
+model Settings {
+  id               String   @id @default(cuid())
+  userId           String   @unique
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  twoFactorEnabled Boolean  @default(false)
+  emailNotifications Boolean @default(true)
+  publicProfile    Boolean  @default(false)
+  // DEPRECATED — no dark theme exists and none is planned; LAO's identity is a
+  // clean, bright workspace. Retained for database compatibility only. Remove in
+  // a later cleanup, or revive only if beta demand justifies it.
+  darkMode         Boolean  @default(false)
+  metadata         Json     @default("{}")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model FeatureFlag {
+  id        String    @id @default(cuid())
+  productId String
+  product   Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  name      String
+  enabled   Boolean   @default(false)
+  rollout   Int       @default(0)
+  targets   Json      @default("[]")
+  metadata  Json      @default("{}")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@unique([productId, name])
+  @@index([productId])
+  @@index([enabled])
+}
+
+// Analytics and Instrumentation
+
+model AnalyticsEvent {
+  id            String   @id @default(cuid())
+  eventType     String   // session_started, discover_completed, build_completed, etc.
+  sessionId     String   // Correlate all events in a session
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  goalId        String?
+  goal          LearnerGoal? @relation(fields: [goalId], references: [id], onDelete: SetNull)
+
+  // Event metadata (flexible JSON for different event types)
+  metadata      Json     @default("{}")
+
+  // Timestamps
+  createdAt     DateTime @default(now())
+
+  @@index([sessionId])
+  @@index([userId])
+  @@index([eventType])
+  @@index([goalId])
+  @@index([createdAt])
+}
+
+model SessionMetrics {
+  id                String   @id @default(cuid())
+  sessionId         String   @unique
+  userId            String
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  goalId            String?
+  goal              LearnerGoal? @relation(fields: [goalId], references: [id], onDelete: SetNull)
+
+  // Core metrics
+  confidenceBefore  Float?   // 0-1, captured at session start
+  confidenceAfter   Float?   // 0-1, captured at reflection
+
+  // Time metrics
+  startedAt         DateTime
+  completedAt       DateTime?
+  ttftMillis        Int?     // Time to First Transformation (reflection submission)
+  ttcMillis         Int?     // Time to Confidence (when learner felt capable)
+  buildDurationMillis Int?   // Time from build start to completion
+
+  // Session outcomes
+  completed         Boolean  @default(false)
+  assetCreated      Boolean  @default(false)
+  reflectionSubmitted Boolean @default(false)
+
+  // Return behavior
+  returnedWithin24h Boolean  @default(false)
+  returnedWithin7d  Boolean  @default(false)
+
+  // Learner voice
+  reflection        String?
+
+  // Quality signals
+  hasConfidenceLanguage Boolean @default(false)
+  pauseCount        Int      @default(0) // How many pauses during session
+  abandonmentPoint  String?  // Page where learner abandoned, if any
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([userId])
+  @@index([completedAt])
+  @@index([ttftMillis])
+}
+
+// LAO Learning Models
+
+model LearnerGoal {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Goal details
+  description   String   // "What I want to achieve"
+  problem       String   // "What task takes too much time?"
+  timeframe     String   // "8 weeks", "3 months", etc.
+  confidence    Float    @default(0.5) // 0-1: learner's confidence in achieving goal
+
+  // Status
+  status        String   @default("active") // active, completed, paused
+  progress      Int      @default(0) // 0-100%
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  missions      PersonalMission[]
+  portfolio     Portfolio[]
+  analyticsEvents AnalyticsEvent[]
+  sessionMetrics SessionMetrics[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model PersonalMission {
+  id            String   @id @default(cuid())
+  goalId        String
+  goal          LearnerGoal @relation(fields: [goalId], references: [id], onDelete: Cascade)
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Mission details
+  title         String   // "Solve Your First Real Problem with AI"
+  problemArea   String   // "Writing", "Email", "Admin", etc.
+  solutionType  String   // "ContentAssistant", "EmailAssistant", "IdeaGenerator", etc.
+  solutionDescription String // "AI Content Assistant for LinkedIn"
+
+  // Instructions for the coach
+  instructions  String   // JSON: step-by-step guide for building
+
+  // Status
+  status        String   @default("active") // active, in_progress, completed, abandoned
+  startedAt     DateTime?
+  completedAt   DateTime?
+
+  // Learner interaction
+  confidenceAtStart Float?  // Confidence when starting mission
+  confidenceAtEnd   Float?  // Confidence after completion
+  timeSpent         Int?    // Minutes spent
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  assets        Asset[]
+  portfolio     Portfolio?
+
+  @@index([goalId])
+  @@index([userId])
+  @@index([status])
+  @@index([completedAt])
+}
+
+model Asset {
+  id            String   @id @default(cuid())
+  missionId     String
+  mission       PersonalMission  @relation(fields: [missionId], references: [id], onDelete: Cascade)
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Asset details
+  name          String   // "AI Content Assistant", "Email Template", etc.
+  description   String   // What it does
+  type          String   // "assistant", "template", "workflow", "tool", etc.
+
+  // The actual built content
+  content       Json     // The artifact created (prompt, config, etc.)
+  metadata      Json     @default("{}")
+
+  // Usage
+  isInUseToday  Boolean  @default(false)
+  useCount      Int      @default(0)
+  lastUsedAt    DateTime?
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([missionId])
+  @@index([userId])
+  @@index([type])
+}
+
+model Portfolio {
+  id            String   @id @default(cuid())
+  missionId     String   @unique
+  mission       PersonalMission  @relation(fields: [missionId], references: [id], onDelete: Cascade)
+  goalId        String
+  goal          LearnerGoal @relation(fields: [goalId], references: [id], onDelete: Cascade)
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // What they built
+  problemSolved String   // "Writing LinkedIn posts"
+  solutionCreated String // "AI Content Assistant"
+
+  // How they feel about it
+  reflection    String?  // Answer to "What surprised you?"
+  confidenceGained Float? // Change in confidence (0-1)
+
+  // Evidence for graph
+  timeSpentMinutes Int?
+  missionCompletedAt DateTime @default(now())
+  status        String   @default("in_daily_use") // in_daily_use, completed, planned
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([goalId])
+  @@index([userId])
+  @@index([missionCompletedAt])
+}
+
+model LearnerState {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Overall confidence in ability to learn and build
+  overallConfidence Float @default(0.5) // 0-1
+
+  // How many problems solved
+  problemsSolved Int @default(0)
+
+  // When will they likely return
+  predictedReturnDate DateTime?
+
+  // Graph-sourced state (updated by engine)
+  graphMasteryLevel Int? // 0-100, from knowledge engine
+  graphConfidence Float? // 0-1, from belief engine
+
+  // When was state last updated
+  lastUpdatedAt DateTime @default(now())
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+// AI Coach conversation state
+model CoachConversation {
+  id            String   @id @default(cuid())
+  // A conversation starts from a goal; the mission is only created once the
+  // coach has something to recommend, so missionId is set later.
+  goalId        String?
+  missionId     String?
+  userId        String
+
+  // Conversation flow
+  step          Int      @default(0) // 0: problem, 1: explore, 2: recommend, 3: build
+  messages      Json     @default("[]") // Array of {role: "user"|"coach", content: "..."}
+
+  // Learner's stated problem
+  problem       String?  // "What task takes too much time?"
+
+  // Coach's understanding
+  exploration   String?  // Notes from exploration
+  recommendedSolution String? // What the coach recommends
+
+  // Build state
+  buildingPhase String? // "setup", "configuration", "testing", "completion"
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  expiresAt     DateTime // Conversation expires after 24 hours
+
+  @@index([userId])
+  @@index([goalId])
+  @@index([missionId])
+  @@index([expiresAt])
+}
+
+// Learning Courses
+model Course {
+  id            String   @id @default(cuid())
+  // Stable, human-readable address. Links point at this, never at the cuid,
+  // so /course/course-1 works on any environment including a fresh seed.
+  slug          String   @unique
+  title         String   // "Building AI Assistants for Your Work"
+  description   String
+  position      Int      @default(1) // Course 1, 2, 3, etc.
+  status        String   @default("active") // active, draft, archived
+
+  missions      Mission[]
+  enrollments   CourseEnrollment[]
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([status])
+  @@index([slug])
+}
+
+model Mission {
+  id            String   @id @default(cuid())
+  courseId      String
+  course        Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  // Mission identity (not "Lesson 1" but "Win Back One Hour")
+  title         String   // "Win Back One Hour", "Clear Your Inbox Faster", etc.
+  tagline       String   // Short description: "Automate a task that eats your time"
+  description   String   // What learner will build and why it matters
+
+  position      Int      // Order within course (1-5)
+
+  // The problem this mission solves
+  problemArea   String   // Email, Writing, Analysis, etc.
+  toolkitName   String   // "Email Assistant", "Content Assistant", etc.
+
+  // Learning content (markdown)
+  overview      String   // Introduction and context
+  coachPrompt   String   // Initial coach message
+
+  // What learner builds (template/example)
+  buildTemplate String? // Starting point or example
+
+  // Reflection guidance
+  reflectionPrompt String // What to think about after building
+
+  // Success criteria (what makes a good asset)
+  successCriteria String? // JSON array of criteria
+
+  // Outcome/achievement
+  achievement   String   // "You saved 1 hour per week", "Your inbox now works for you", etc.
+  timeSavedMinutes Int?   // Estimated weekly time saved
+
+  status        String   @default("active") // active, draft, archived
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([courseId])
+  @@index([position])
+}
+
+model CourseEnrollment {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courseId      String
+  course        Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  // Progress tracking (as achievements, not percentages)
+  currentMissionPosition Int @default(0)
+  missionsCompleted  Int @default(0)
+
+  // Toolkit (the assistants they've built)
+  toolkitItems  Json     @default("[]") // Array of {missionId, title, toolkitName, completedAt}
+
+  // Confidence journey
+  confidenceStart Float? // Captured at enrollment
+  confidenceEnd   Float? // Captured at graduation
+
+  // Engagement
+  enrolledAt    DateTime @default(now())
+  lastAccessedAt DateTime?
+  completedAt   DateTime?
+
+  @@unique([userId, courseId])
+  @@index([userId])
+  @@index([courseId])
+  @@index([completedAt])
+}
+
+// A Solution is a living tool the learner owns and keeps using.
+// The course creates the first one; the toolbox is where it stays alive.
+model Solution {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Identity — the learner names this, and renames it as it evolves
+  name          String   // "My Email Assistant", "Proposal Writer"
+  problem       String   // The problem it solves, in the learner's words
+  problemArea   String   @default("General")
+
+  // The working content of the current version (prompt, instructions, template)
+  content       String
+
+  // The learner's own notes — how to use it, what to watch for
+  notes         String?
+
+  currentVersion Int     @default(1)
+
+  // Usage — this is what tells us it's genuinely relied on
+  useCount      Int      @default(0)
+  lastUsedAt    DateTime?
+
+  // Time saved per use, and the accumulated total across all runs
+  timeSavedMinutes      Int @default(0)
+  totalTimeSavedMinutes Int @default(0)
+
+  // Where it came from (null when created directly in the toolbox)
+  originMissionId String?
+  originCourseId  String?
+
+  // Sharing — null means private. Set to a random token to publish read-only.
+  shareId       String?  @unique
+
+  status        String   @default("active") // active, archived
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  versions      SolutionVersion[]
+  runs          SolutionRun[]
+  conversation  SolutionConversation?
+
+  // Collaborator engagement — how often this solution is opened, which is the
+  // difference between a tool someone owns and one they rely on.
+  openCount     Int      @default(0)
+  lastOpenedAt  DateTime?
+
+  @@index([userId])
+  @@index([userId, status])
+  @@index([lastUsedAt])
+  @@index([originMissionId])
+}
+
+// One ongoing conversation per solution. The collaborator is a teammate on
+// this tool, not a chat session, so the thread belongs to the solution and
+// outlives any single visit.
+model SolutionConversation {
+  id            String   @id @default(cuid())
+  solutionId    String   @unique
+  solution      Solution @relation(fields: [solutionId], references: [id], onDelete: Cascade)
+
+  messages      SolutionMessage[]
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([solutionId])
+}
+
+model SolutionMessage {
+  id             String   @id @default(cuid())
+  conversationId String
+  conversation   SolutionConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  // 'learner' or 'collaborator' — never a vendor or model name.
+  role           String
+  content        String
+
+  // What the learner was trying to do: improve, explain, diagnose, draft.
+  intent         String?
+
+  // A revision offered by the collaborator, before the learner decides.
+  proposedContent String?
+
+  // Set to the new version number once the learner accepts a proposal.
+  acceptedVersion Int?
+
+  // Which model served this turn. Operational only; never shown to a learner.
+  servedByModel  String?
+
+  createdAt      DateTime @default(now())
+
+  @@index([conversationId])
+  @@index([createdAt])
+}
+
+// Every solution remembers its own story. Nothing is ever finished.
+model SolutionVersion {
+  id            String   @id @default(cuid())
+  solutionId    String
+  solution      Solution @relation(fields: [solutionId], references: [id], onDelete: Cascade)
+
+  version       Int
+  content       String
+  changeNote    String?  // "Made it shorter", "Added tone guidance"
+
+  createdAt     DateTime @default(now())
+
+  @@unique([solutionId, version])
+  @@index([solutionId])
+}
+
+// One record per time the learner actually used the solution.
+model SolutionRun {
+  id            String   @id @default(cuid())
+  solutionId    String
+  solution      Solution @relation(fields: [solutionId], references: [id], onDelete: Cascade)
+
+  version       Int      // Which version was used
+  timeSavedMinutes Int?  // Learner's own estimate for this run
+  note          String?  // Optional: what they used it for
+
+  ranAt         DateTime @default(now())
+
+  @@index([solutionId])
+  @@index([ranAt])
+}

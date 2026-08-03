@@ -1,0 +1,18 @@
+{
+  "name": "@iriskey/events",
+  "version": "0.1.0",
+  "private": true,
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "description": "IrisKey Platform - Event system for event-driven architecture",
+  "scripts": {
+    "lint": "eslint src",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@iriskey/contracts": "*"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  }
+}

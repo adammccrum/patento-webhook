@@ -1,0 +1,23 @@
+{
+  "name": "@iriskey/auth",
+  "version": "0.1.0",
+  "private": true,
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "description": "IrisKey Platform - Multi-product authentication",
+  "scripts": {
+    "lint": "eslint src",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@auth/core": "^0.18.4",
+    "@auth/prisma-adapter": "^1.0.4",
+    "@prisma/client": "^5.7.1",
+    "@iriskey/database": "*",
+    "bcryptjs": "^2.4.3"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "typescript": "^5.3.3"
+  }
+}
