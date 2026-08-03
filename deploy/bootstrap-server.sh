@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# One-time server preparation. Fasthosts VPS, Ubuntu 22.04 or 24.04 LTS.
+# One-time server preparation. Fasthosts VPS, Ubuntu 22.04 LTS or newer.
 #
 # Run once as root on a freshly provisioned box:
 #
@@ -81,14 +81,46 @@ if ! command -v docker >/dev/null 2>&1; then
   curl -fsSL https://download.docker.com/linux/ubuntu/gpg \
     | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
   chmod a+r /etc/apt/keyrings/docker.gpg
+
+  # Docker publishes per Ubuntu release, and a very new one may not be there
+  # yet. Asking apt to fetch a suite that does not exist fails the whole
+  # `apt-get update`, which then breaks every later install for a reason that
+  # has nothing to do with the reason it looks like. So check first, and fall
+  # back to the most recent release Docker does publish for.
+  CODENAME="$(. /etc/os-release && echo "$VERSION_CODENAME")"
+  if ! curl -fsI "https://download.docker.com/linux/ubuntu/dists/$CODENAME/Release" >/dev/null 2>&1; then
+    for FALLBACK in noble jammy; do
+      if curl -fsI "https://download.docker.com/linux/ubuntu/dists/$FALLBACK/Release" >/dev/null 2>&1; then
+        say "NOTE: Docker has no repository for '$CODENAME' yet — using '$FALLBACK'"
+        echo "    Packages are built against an older Ubuntu but run correctly."
+        echo "    Worth revisiting once Docker publishes for $CODENAME."
+        CODENAME="$FALLBACK"
+        break
+      fi
+    done
+  fi
+
   echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] \
-https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$VERSION_CODENAME") stable" \
+https://download.docker.com/linux/ubuntu $CODENAME stable" \
     > /etc/apt/sources.list.d/docker.list
-  apt-get update -qq
+
+  if ! apt-get update -qq; then
+    echo "[bootstrap] apt update failed after adding the Docker repository." >&2
+    echo "            Removing it so the system is left usable, and stopping." >&2
+    rm -f /etc/apt/sources.list.d/docker.list
+    apt-get update -qq || true
+    exit 1
+  fi
+
   apt-get install -y -qq docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 else
   say "Docker already installed"
 fi
+
+# Both are required. `docker compose` is a plugin, not the old standalone
+# binary, and a missing plugin only shows up when the first deploy runs.
+docker --version
+docker compose version
 
 usermod -aG docker "$APP_USER"
 systemctl enable --now docker
