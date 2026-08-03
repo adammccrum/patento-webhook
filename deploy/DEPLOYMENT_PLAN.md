@@ -7,8 +7,10 @@ Confirmed. The earlier Grow shared-hosting plan could not have worked: it
 provides MySQL/MariaDB, and the schema is `provider = "postgresql"` with 13
 JSONB columns across 4 migrations. That is a database port, not a deployment.
 
-Two facts still outstanding, both DNS. Nothing that touches DNS should be run
-until they are answered — see the bottom.
+**Domain: `learnaionlineacademy.co.uk`. DNS: Fasthosts Cloud Panel.**
+
+One fact still outstanding — the VPS IP — and one check that is time-sensitive:
+whether the domain already carries mail. See the bottom.
 
 ---
 
@@ -88,19 +90,16 @@ The sequence matters. Two steps fail permanently if taken early.
 
 ## DNS records
 
-**Provider unconfirmed.** Nameservers were changed and the destination has not
-been established, so these go either in LCN or in Fasthosts — the values are
-the same, the panel is not.
-
-Replace `example.com` with the domain and `203.0.113.10` with the server IP.
+**All records go in the Fasthosts Cloud Panel**, which now holds the zone for
+`learnaionlineacademy.co.uk`. Replace `<VPS-IP>` with the server address.
 
 | Type | Name | Value | TTL | Why |
 |---|---|---|---|---|
-| A | `@` | `203.0.113.10` | 300 | The site |
-| A | `www` | `203.0.113.10` | 300 | Caddy redirects it to the apex |
-| AAAA | `@` | *(server IPv6, if issued)* | 300 | Skip if the VPS has none |
+| A | `@` | `<VPS-IP>` | 300 | The site |
+| A | `www` | `<VPS-IP>` | 300 | Caddy redirects it to the apex |
+| AAAA | `@` | *(server IPv6, if Fasthosts issued one)* | 300 | Omit entirely if there is none — a broken AAAA is worse than no AAAA, because clients prefer IPv6 and will fail before trying IPv4 |
 | CAA | `@` | `0 issue "letsencrypt.org"` | 3600 | Only Let's Encrypt may issue for this domain |
-| TXT | `_dmarc` | `v=DMARC1; p=none; rua=mailto:dmarc@example.com` | 3600 | Reporting first, enforcement later |
+| TXT | `_dmarc` | `v=DMARC1; p=none; rua=mailto:adam@learnaionlineacademy.co.uk` | 3600 | Reporting first, enforcement later |
 
 **Use a 300-second TTL until go-live.** A 24-hour TTL on a wrong record means
 a day of downtime; you can raise it once things are stable.
@@ -118,7 +117,7 @@ keeps beta email reputation away from your main domain.
 | TXT | `send` | `v=spf1 include:amazonses.com ~all` | SPF — authorises Resend to send |
 | TXT | `resend._domainkey` | *(the long `p=MIGfMA0…` key Resend shows)* | DKIM — signs the mail |
 
-Then set `EMAIL_FROM="LAO Academy <noreply@send.example.com>"`.
+Then set `EMAIL_FROM="LAO Academy <noreply@send.learnaionlineacademy.co.uk>"`.
 
 **On DMARC:** start at `p=none`. It reports without rejecting. Moving to
 `p=quarantine` or `p=reject` before SPF and DKIM are confirmed passing will
@@ -129,7 +128,7 @@ email never arrives" — looks exactly like the bug that was just fixed.
 
 Delegating nameservers replaces the whole zone. **Any existing MX records must
 be recreated on the new nameservers or inbound mail stops** — silently, with no
-bounce. Check with `dig MX example.com +short` before the change propagates.
+bounce. Check with `dig MX learnaionlineacademy.co.uk +short` before the change propagates.
 
 ---
 
@@ -240,11 +239,11 @@ Nothing here is "looks fine". Each line is a thing observed.
 
 **After**
 
-- [ ] `https://domain/api/health` returns 200
+- [ ] `https://learnaionlineacademy.co.uk/api/health` returns 200
 - [ ] Certificate is Let's Encrypt and not self-signed:
-      `echo | openssl s_client -connect domain:443 2>/dev/null | openssl x509 -noout -issuer -dates`
-- [ ] `http://domain` redirects to HTTPS
-- [ ] `https://www.domain` redirects to the apex
+      `echo | openssl s_client -connect learnaionlineacademy.co.uk:443 2>/dev/null | openssl x509 -noout -issuer -dates`
+- [ ] `http://learnaionlineacademy.co.uk` redirects to HTTPS
+- [ ] `https://www.learnaionlineacademy.co.uk` redirects to the apex
 - [ ] Register a real account and **receive the email** — in an inbox, not a log
 - [ ] Forgot password, **receive it**, follow the link, change the password,
       sign in with the new one
@@ -262,13 +261,11 @@ Nothing here is "looks fine". Each line is a thing observed.
 
 Three answers block execution.
 
-1. **The domain name**, and where the nameservers now point. `dig NS domain
-   +short` answers it.
-2. **Whether that domain has a working mailbox** — `dig MX domain +short`.
-   Time-sensitive: delegation is in flight, and any existing MX records must be
-   recreated on the new nameservers or inbound mail stops silently.
-3. **The VPS IP address**, once provisioned. No DNS record can be written
-   without it.
+1. **The VPS IP address.** No DNS record can be written without it.
+2. **Whether the domain already carries mail** —
+   `dig MX learnaionlineacademy.co.uk +short`. Time-sensitive: the zone has
+   moved to the Fasthosts Cloud Panel, and any MX records that existed at LCN
+   must be recreated there or inbound mail stops silently, with no bounce.
 
 Two known gaps, neither of which blocks deployment but both of which affect the
 beta:
