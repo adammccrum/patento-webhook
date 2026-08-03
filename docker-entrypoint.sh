@@ -13,7 +13,11 @@
 set -eu
 
 echo "[entrypoint] applying migrations"
-if ! ./node_modules/.bin/prisma migrate deploy --schema=./prisma/schema.prisma; then
+# Invoked through node rather than node_modules/.bin/prisma, which is a
+# symlink the runtime image does not carry: only node_modules/prisma is copied,
+# not node_modules/.bin. The entrypoint would have exited 1 with "not found"
+# and the container would never have served a request.
+if ! node ./node_modules/prisma/build/index.js migrate deploy --schema=./prisma/schema.prisma; then
   echo "[entrypoint] migrations failed — refusing to start" >&2
   # Exit rather than serve. A server running against a schema it does not
   # expect fails later, in front of a user, with a worse error.
