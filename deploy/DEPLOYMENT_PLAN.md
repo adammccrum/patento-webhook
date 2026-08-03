@@ -2,15 +2,21 @@
 
 For a public beta serving three people: Michael, Keith and the Founder.
 
-**Not yet executable.** Three facts are outstanding and every one of them
-changes the instructions. They are listed at the bottom, and nothing here
-should be run until they are answered.
+**Target: Fasthosts VPS — 4 vCPU, 4 GB RAM, 120 GB NVMe, Ubuntu LTS.**
+Confirmed. The earlier Grow shared-hosting plan could not have worked: it
+provides MySQL/MariaDB, and the schema is `provider = "postgresql"` with 13
+JSONB columns across 4 migrations. That is a database port, not a deployment.
+
+Two facts still outstanding, both DNS. Nothing that touches DNS should be run
+until they are answered — see the bottom.
 
 ---
 
 ## The shape
 
-One small VPS running three containers behind Caddy.
+One VPS running three containers behind Caddy. At 4 vCPU / 4 GB the box can
+build the image itself, so there is no registry, no CI publishing step and no
+second place for the artefact to live.
 
 ```
         internet
@@ -37,10 +43,10 @@ up in exchange for nothing measurable at this size. Add it when there is more
 than one instance — not before.
 
 **Cost.** The VPS is the only recurring charge. Resend's free tier covers
-3,000 emails a month, which is roughly 2,999 more than this beta needs. If the
-Fasthosts product turns out to be more than about £10/month for a 2 vCPU /
-4 GB box, it is worth comparing before committing — but hosting is bought, so
-this is a note for renewal rather than a reason to move now.
+3,000 emails a month, which is roughly 2,999 more than this beta needs.
+
+The Grow shared-hosting subscription is now redundant. Worth checking whether
+it is inside a cooling-off period before it becomes sunk cost.
 
 ---
 
@@ -49,8 +55,20 @@ this is a note for renewal rather than a reason to move now.
 The sequence matters. Two steps fail permanently if taken early.
 
 1. **Confirm the DNS provider** and whether the domain has existing mail.
-2. **Provision the VPS** — Ubuntu LTS, Docker Engine, a non-root user, SSH keys
-   only, `ufw` allowing 22, 80 and 443 and nothing else.
+2. **Provision the VPS** — choose **Ubuntu 22.04 or 24.04 LTS**, then run
+   `deploy/bootstrap-server.sh` as root. It installs Docker, creates the `lao`
+   user, adds swap, caps container logs, and configures `ufw` to allow 22, 80
+   and 443 and nothing else.
+
+   It refuses to disable password authentication until an SSH key is actually
+   present, because hardening a box you can no longer log into is the usual way
+   to lose a server on day one. Copy your key first:
+   `ssh-copy-id lao@<ip>`, then re-run it to finish the job.
+
+   **Fasthosts also has a firewall in its own control panel**, outside the OS.
+   If 80 and 443 look open in `ufw` but are unreachable from outside, that
+   panel is where to look — and Let's Encrypt will keep failing until both
+   agree.
 3. **DNS records** (table below). Point A/AAAA at the server.
 4. **Wait for DNS to resolve** before starting Caddy. Let's Encrypt validates
    by connecting to the domain; issuing before DNS resolves fails, and
@@ -118,14 +136,19 @@ bounce. Check with `dig MX example.com +short` before the change propagates.
 ## Deploy
 
 ```bash
-ssh lao@203.0.113.10
+ssh lao@<ip>
 git clone <repo> /opt/lao && cd /opt/lao
 git checkout claude/lao-master-build-directive-ih1mi8
 
 cp .env.example deploy/.env && $EDITOR deploy/.env   # see below
-docker compose -f deploy/docker-compose.prod.yml up -d --build
-docker compose -f deploy/docker-compose.prod.yml logs -f app
+deploy/deploy.sh --no-backup     # --no-backup only on the very first deploy
 ```
+
+`deploy.sh` refuses to run with the example `NEXTAUTH_SECRET` still in place,
+takes a backup before every subsequent deploy — migrations run at container
+start and Prisma has no down-migrations — waits for the containers to report
+healthy, and prints the rollback command rather than exiting 0 on a stack that
+came up broken.
 
 `deploy/.env` must set: `DOMAIN`, `LETSENCRYPT_EMAIL`, `POSTGRES_PASSWORD`,
 `NEXTAUTH_SECRET`, `EMAIL_FROM`, `EMAIL_API_URL`, `EMAIL_API_KEY`, and at least
@@ -239,12 +262,13 @@ Nothing here is "looks fine". Each line is a thing observed.
 
 Three answers block execution.
 
-1. **Which Fasthosts product.** If it is shared hosting (cPanel/Plesk), none of
-   this applies — LAO needs a long-running Node process, PostgreSQL and Docker,
-   and the product would have to change.
-2. **The domain name**, and where the nameservers now point.
-3. **Whether that domain has a working mailbox**, before the delegation
-   completes.
+1. **The domain name**, and where the nameservers now point. `dig NS domain
+   +short` answers it.
+2. **Whether that domain has a working mailbox** — `dig MX domain +short`.
+   Time-sensitive: delegation is in flight, and any existing MX records must be
+   recreated on the new nameservers or inbound mail stops silently.
+3. **The VPS IP address**, once provisioned. No DNS record can be written
+   without it.
 
 Two known gaps, neither of which blocks deployment but both of which affect the
 beta:
