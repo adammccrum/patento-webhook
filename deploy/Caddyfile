@@ -1,0 +1,61 @@
+# TLS, and the smallest amount of everything else.
+#
+# Caddy obtains and renews Let's Encrypt certificates automatically, over
+# HTTP-01 on port 80. There is no certbot, no cron job and no renewal to
+# forget: the certificate that expires unnoticed is the classic way a small
+# site goes dark, and the fix is to not own the problem.
+#
+# Requires ports 80 and 443 open, and DNS already pointing at this server.
+# Let's Encrypt validates by connecting to the domain, so issuing a
+# certificate before DNS resolves will fail — and failures count against a
+# rate limit of 5 per week per domain.
+
+{
+	email {$LETSENCRYPT_EMAIL}
+	# Uncomment to rehearse against the staging CA, which issues untrusted
+	# certificates but has generous limits. Worth doing if the first attempt
+	# fails for any reason other than DNS.
+	# acme_ca https://acme-staging-v02.api.letsencrypt.org/directory
+}
+
+{$DOMAIN}, www.{$DOMAIN} {
+	encode zstd gzip
+
+	# Redirect the www form to the canonical host. NEXTAUTH_URL names one
+	# origin, and a session set on the other will not be seen by it.
+	@www host www.{$DOMAIN}
+	redir @www https://{$DOMAIN}{uri} permanent
+
+	reverse_proxy app:3000 {
+		health_uri /api/health
+		health_interval 30s
+	}
+
+	header {
+		# HSTS. Deliberately without `preload`: preloading is effectively
+		# irreversible and should not be committed to during a beta.
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		# The application already sets its own security headers through
+		# middleware, including CSP. These are the ones that belong at the
+		# edge, where they apply even to a response the app never produced.
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
+
+	log {
+		output file /data/access.log {
+			roll_size 10MiB
+			roll_keep 5
+		}
+		# The default includes full request URIs. Reset tokens travel in a
+		# query string, so this format omits it: a log that records a valid
+		# reset link is a log that can take over an account.
+		format filter {
+			wrap console
+			fields {
+				request>uri query_omit
+			}
+		}
+	}
+}
