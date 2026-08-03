@@ -5,7 +5,7 @@
 One line of evidence per criterion. Where the evidence is a command, the
 command is here so anyone can re-run it.
 
-**Status: not yet. 2 criteria of 36 lack evidence.** Both are operational and
+**Status: not yet. 2 criteria of 37 lack evidence.** Both are operational and
 may not be simulated. No engineering work is outstanding.
 
 | | |
@@ -40,6 +40,7 @@ may not be simulated. No engineering work is outstanding.
 | 2.3 | No dead controls | `DEAD_CONTROL_AUDIT.md` — 66 buttons, 55 links, 5 selects, 10 forms, 2 keyboard handlers across 24 pages. Enforced by `dead-controls.test.ts`, proved to catch regressions with a canary page. |
 | 2.4 | First registration works on a cold server | Clean-room step 10 row "register → 201". Previously 500 — an import-order dependency on the audit service, thrown *after* the account was created, so the retry said "already registered". Guarded by `cold-start.test.ts`. |
 | 2.5 | Account deletion removes everything | Clean-room queries the database directly after the DELETE: user rows 0, solution rows 0. Not the API's word for it. |
+| 2.6 | A locked-out learner can get back in | `password-reset.test.ts`, 10 checks. `forgot-password` had been minting tokens and emailing links to `/auth/reset-password` — a page that did not exist, served by an endpoint that did not exist, so anyone who forgot their password was locked out permanently while every step reported success. Not a dead control on any page: the form worked and returned 200, and the dead half was on the other side of an email. Now completed and guarded, including that a 24-hour `email-verify` token cannot be used to change a password. |
 
 ### 3. Security
 

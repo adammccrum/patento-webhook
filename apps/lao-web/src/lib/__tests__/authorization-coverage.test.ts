@@ -23,6 +23,7 @@ const PUBLIC_ROUTES: Record<string, string> = {
   'auth/[...nextauth]/route.ts': 'NextAuth handlers',
   'auth/register/route.ts': 'sign-up must work before a principal exists',
   'auth/forgot-password/route.ts': 'password reset must work when locked out',
+  'auth/reset-password/route.ts': 'completing a reset must work when locked out; the token is the authorisation',
   'auth/verify-email/route.ts': 'email verification is reached from a link',
   'shared/[shareId]/route.ts': 'read-only shared solution, by design',
 };
