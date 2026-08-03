@@ -103,8 +103,17 @@ else
   CHECKED=$((CHECKED + 1))
 fi
 
+# These live inside the runtime image, so the only local stand-in is the
+# builder's node_modules. Without an install there is nothing to compare
+# against, and reporting that as a missing file is a false alarm — which is
+# how a checker teaches people to skip it.
 for target in $(echo "$ENTRYPOINT_CODE" | grep -oE 'node \./[^ ]+' | awk '{print $2}'); do
-  report "entrypoint runs $target" "${target#./}"
+  local_path="${target#./}"
+  if [ ! -d node_modules ]; then
+    printf '  skip    entrypoint runs %s  (no node_modules here; run npm ci first)\n' "$target"
+    continue
+  fi
+  report "entrypoint runs $target" "$local_path"
 done
 
 echo ""
