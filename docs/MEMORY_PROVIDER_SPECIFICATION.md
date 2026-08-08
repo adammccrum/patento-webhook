@@ -1,7 +1,7 @@
 # Memory Provider Specification
 
-**Version:** 1.0
-**Status:** Draft — design only, not implemented
+**Version:** 1.1
+**Status:** Active — implemented by `LocalMemoryAdapter`
 **Last Updated:** 2026-08-08
 **Related:** [ADAPTER_SPECIFICATION.md](ADAPTER_SPECIFICATION.md), [AUTHORIZATION_AND_AUDIT.md](AUTHORIZATION_AND_AUDIT.md), [TENCENTDB_MEMORY_ASSESSMENT.md](TENCENTDB_MEMORY_ASSESSMENT.md)
 
@@ -13,9 +13,11 @@ Define the memory abstraction that agents use for persistent recall, so that no
 application code is ever coupled to a specific memory engine.
 
 This document specifies the contract. It does not authorise any engine for
-production use. The first concrete adapter to be built is the **local** one;
-TencentDB Agent Memory is a candidate second adapter and remains gated pending
-review (see [TENCENTDB_MEMORY_ASSESSMENT.md](TENCENTDB_MEMORY_ASSESSMENT.md)).
+production use. The **local** adapter is implemented and validated:
+`src/providers/adapters/memory/local-memory-adapter.js`, exercised by
+`tests/memory/`. TencentDB Agent Memory is a candidate second adapter: research
+approved, production integration not approved, `enabled: false` — see
+[TENCENTDB_MEMORY_ASSESSMENT.md](TENCENTDB_MEMORY_ASSESSMENT.md).
 
 ---
 
@@ -27,7 +29,7 @@ Agent / Claude Code
         ▼
 MemoryProvider interface          ← application code stops here
         │
-        ├─ LocalMemoryAdapter      (default, SQLite, no egress)
+        ├─ LocalMemoryAdapter      (default, on-disk journal, no egress)
         ├─ TencentMemoryAdapter    (candidate, disabled)
         └─ MockMemoryAdapter       (tests)
         │
@@ -197,6 +199,30 @@ module.exports = MemoryAdapter;
 already defined in [AUTHORIZATION_AND_AUDIT.md](AUTHORIZATION_AND_AUDIT.md). No
 adapter method may be called without it.
 
+Two further methods are implemented beyond the minimum contract:
+
+```javascript
+// Raise trust after corroboration or human confirmation. A memory can never be
+// verified by its own author, and a writer can never assert its own trust level.
+async verify(id, { level, verified_by }, context) {}
+
+// Physically remove records whose expiry has passed.
+async sweepExpired(context) {}
+```
+
+### Storage backend
+
+`LocalMemoryAdapter` persists to an append-only JSONL journal behind a
+`JournalStore` interface, rather than SQLite as first specified. Append-only
+gives supersede-not-overwrite and a replayable history directly, and needs no
+native module — `better-sqlite3` would otherwise have been the repository's
+first native build dependency, on a project that currently installs nothing.
+
+Erasure takes precedence over append-only: `hardRemove()` rewrites the journal
+without the erased content and appends a contentless tombstone, so a deleted or
+purged record leaves no content on disk while the fact of the erasure stays
+auditable. Substituting SQLite later is one file and no adapter change.
+
 ---
 
 ## Write Discipline
@@ -212,6 +238,12 @@ Memory writes are explicit operations, not a side effect of talking.
    high-impact approval gate.
 5. **Writes are reversible.** `correct()` supersedes rather than overwrites, so
    the record of what the system used to believe survives.
+6. **Every write states a reason.** `write()` and `correct()` reject a record
+   with no `reason` string. The reason lands in the audit event, so the trail
+   answers *why* this was remembered, not merely *that* it was.
+7. **Approvals are single-use and content-bound.** A proposal is consumed on
+   use, cannot be approved by its proposer, and its content hash must match what
+   is actually written — an approval for one memory cannot be spent on another.
 
 Audit event shape reuses the existing audit schema with:
 
@@ -301,13 +333,15 @@ memory:
   local:
     enabled: true
     adapter: LocalMemoryAdapter
-    store: sqlite
-    path: ./.memory/memory.db
+    store: jsonl          # append-only journal; SQLite is a drop-in backend later
+    path: ./.memory/memory.jsonl
+    audit_path: ./.memory/audit.jsonl
   tencentdb:
     enabled: false          # gated — see TENCENTDB_MEMORY_ASSESSMENT.md
     adapter: TencentMemoryAdapter
     allow_egress: false
     allowed_scopes: []      # learner never permitted
+    declared_destinations: []  # required before allow_egress may be true
 ```
 
 Rules:

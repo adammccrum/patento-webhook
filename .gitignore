@@ -1,0 +1,13 @@
+node_modules/
+
+# Local memory store and its audit journal. Never commit memory contents.
+.memory/
+*.jsonl
+
+# Memory-engine credentials. `sk-mem-...` keys are written here by external
+# engines on first boot — see docs/TENCENTDB_MEMORY_ASSESSMENT.md R7.
+.admin-key
+
+.env
+.env.*
+!.env.example

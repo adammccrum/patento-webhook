@@ -14,28 +14,35 @@ Design: [MEMORY_PROVIDER_SPECIFICATION.md](MEMORY_PROVIDER_SPECIFICATION.md)
 Evaluation: [TENCENTDB_MEMORY_ASSESSMENT.md](TENCENTDB_MEMORY_ASSESSMENT.md)
 
 ### MEM-1 — Ratify the MemoryProvider specification
-**Priority:** High · **Status:** Ready for review · **Blocks:** everything below
+**Priority:** High · **Status:** Accepted 2026-08-08 · **Blocks:** everything below
 
 Review and sign off the interface, the four scopes, the record schema, the
 trust model and the egress gate. Resolve the open design questions at the end
 of the spec.
 
 ### MEM-2 — Implement `LocalMemoryAdapter`
-**Priority:** High · **Status:** Not started · **Depends on:** MEM-1
+**Priority:** High · **Status:** **Done** — `src/providers/adapters/memory/local-memory-adapter.js`
 
-SQLite-backed, no network egress. Full interface including `correct()`,
-`delete(hard)`, `expire()`, `purgeSubject()`, `getProvenance()` and `export()`.
-This is the default and the reference implementation. It must ship and pass
-before any external engine is evaluated further.
+No network egress, no runtime dependencies. Full interface including
+`correct()`, `delete(hard)`, `expire()`, `purgeSubject()`, `getProvenance()`
+and `export()`. This is the default and the reference implementation.
+
+Storage is an append-only JSONL journal behind a `JournalStore` interface,
+**not** SQLite as originally specified. Append-only gives supersede-not-
+overwrite and a replayable history directly, and needs no native module — which
+matters because `better-sqlite3` would have been the first native build
+dependency in the repo. Erasure beats append-only: `hardRemove()` rewrites the
+journal without the erased content and leaves a contentless tombstone. Swapping
+in SQLite later is one file and no adapter change.
 
 ### MEM-3 — Implement `MockMemoryAdapter` and the conformance suite
-**Priority:** High · **Status:** Not started · **Depends on:** MEM-1
+**Priority:** High · **Status:** Partial — 82 tests live in `tests/memory/`; the shared cross-adapter conformance harness and `MockMemoryAdapter` are still to be extracted from them
 
 One shared test suite every memory adapter must pass. Includes the
 replaceability tests from the specification.
 
 ### MEM-4 — Wire memory writes into the audit trail
-**Priority:** High · **Status:** Not started · **Depends on:** MEM-2
+**Priority:** High · **Status:** **Done** within the memory subsystem — `AuditSink` still to be pointed at the system-wide audit logger when that exists
 
 Every `write`/`correct`/`delete` emits an audit event before acknowledgement,
 using the schema in [AUTHORIZATION_AND_AUDIT.md](AUTHORIZATION_AND_AUDIT.md).
@@ -43,7 +50,7 @@ Failed audit write ⇒ failed memory write. Restricted-scope writes route throug
 the existing approval gate.
 
 ### MEM-5 — Untrusted-recall context framing
-**Priority:** High · **Status:** Not started · **Depends on:** MEM-2
+**Priority:** High · **Status:** **Done** — `recall.js`, with an adversarial corpus in `tests/memory/prompt-injection.test.js`
 
 Retrieved memory is delimited, attributed, labelled with its trust level, and
 placed in user-turn context — never in the system prompt. Includes a
@@ -57,7 +64,7 @@ Local-first must hold for search as well as storage. Evaluate local embedding
 via the existing Ollama/vLLM registry entries, or BM25-only as a first cut.
 
 ### MEM-7 — TencentDB Agent Memory spike (time-boxed)
-**Priority:** Medium · **Status:** Blocked on MEM-2 · **Gates:** G1–G8
+**Priority:** Medium · **Status:** Gated — G8 met, G1–G7 outstanding · **Gates:** G1–G7
 
 Steps 1–5 of the integration path in the assessment. Local-only, read-mostly,
 `project` scope only, pinned commit SHA, no proxy, no service mode, no
@@ -93,3 +100,6 @@ CI later. Note that `MemoryProxy/package.json` declares no licence field.
 | 2026-08-08 | Memory fails closed, never falls back to another store | A split memory record defeats the audit trail |
 | 2026-08-08 | `learner` scope is local-only and never eligible for an external adapter | Requirement 2; data protection |
 | 2026-08-08 | Local adapter ships before any external engine is adopted | Avoids designing the abstraction around one vendor |
+| 2026-08-08 | TencentDB Agent Memory: **research approved, production integration not approved** | Assessment accepted; risks R1–R10 stand |
+| 2026-08-08 | Six integration modes explicitly rejected (proxy, auto end-of-turn writes, system-prompt injection, default external egress, TCVDB/COS for learner data, any governance-bypassing path) | Each conflicts with a stated requirement; not reopened by a successful spike |
+| 2026-08-08 | Only eligible TencentDB surface is the MemoryCore `/v3/...` API behind our own adapter | Smallest boundary that avoids all six rejected modes |

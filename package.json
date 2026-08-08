@@ -1,1 +1,14 @@
-{"name": "patento-webhook", "version": "1.0.0", "description": "A Node.js application for handling webhooks.", "main": "index.js", "dependencies": {"claude-sdk": "^1.0.0", "webhook-tools": "^1.0.0"}, "scripts": {"start": "node index.js"}}
+{
+  "name": "patento-webhook",
+  "version": "1.0.0",
+  "description": "A Node.js application for handling webhooks.",
+  "main": "index.js",
+  "dependencies": {
+    "claude-sdk": "^1.0.0",
+    "webhook-tools": "^1.0.0"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "test": "node --test \"tests/**/*.test.js\""
+  }
+}

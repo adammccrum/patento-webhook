@@ -709,16 +709,18 @@ capabilities:
 deployment:
   local_support: true
   cloud_support: false
-  store: sqlite
+  store: jsonl           # append-only journal; SQLite is a drop-in backend later
+  dependencies: none     # no runtime dependencies, no native modules
 cost:
   type: free
 status:
   enabled: true
-  health: unknown
+  health: healthy
+  validated: 2026-08-08  # 82 tests in tests/memory/
 adapter:
   interface: MemoryAdapter
   adapter_file: src/providers/adapters/memory/local-memory-adapter.js
-  implemented: false
+  implemented: true
 egress:
   allow_egress: false
   destinations: []
@@ -750,7 +752,9 @@ cost:
 status:
   enabled: false         # GATED — do not enable
   health: unknown
-  approval: evaluation-candidate
+  approval:
+    research: approved
+    production_integration: not-approved
 adapter:
   interface: MemoryAdapter
   adapter_file: src/providers/adapters/memory/tencent-memory-adapter.js
@@ -758,11 +762,17 @@ adapter:
 egress:
   allow_egress: false
   allowed_scopes: []     # learner never permitted
+rejected:                # settled decisions, not open questions
+  - Claude Code reverse-proxy integration (ANTHROPIC_BASE_URL interception)
+  - Automatic end-of-turn memory writes
+  - Retrieved memory injected directly into system prompts
+  - Default external LLM/embedding egress
+  - Tencent TCVDB/COS storage for LAO learner data
+  - Any memory path capable of bypassing EOS governance
 constraints:
-  - Proxy mode (ANTHROPIC_BASE_URL interception) is REJECTED — never enable
-  - Service mode, TCVDB, COS and CodeGraph on private repos are out of scope
-  - MemoryCore HTTP API only; pin to a commit SHA, never a branch or :latest
-  - Blocked on decision gates G1-G8 in TENCENTDB_MEMORY_ASSESSMENT.md
+  - Only eligible surface is the MemoryCore /v3/... HTTP API behind our adapter
+  - Pin to a commit SHA, never a branch or :latest
+  - Blocked on decision gates G1-G7 in TENCENTDB_MEMORY_ASSESSMENT.md
 ```
 
 ---

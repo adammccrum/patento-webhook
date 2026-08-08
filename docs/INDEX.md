@@ -63,18 +63,20 @@
    - Common issues and fixes
 
 ### 8. **[MEMORY_PROVIDER_SPECIFICATION.md](MEMORY_PROVIDER_SPECIFICATION.md)**
-   Persistent agent memory, engine-agnostic (draft — not implemented):
+   Persistent agent memory, engine-agnostic (implemented by `LocalMemoryAdapter`):
    - `MemoryProvider` interface and record schema
    - Four separated scopes: session, project, learner, operational
    - Explicit, audited writes; correction, deletion and expiry
    - Provenance and the untrusted-recall trust model
    - Local-first egress gate and replaceability tests
+   - Storage backend rationale (append-only journal)
 
 ### 9. **[TENCENTDB_MEMORY_ASSESSMENT.md](TENCENTDB_MEMORY_ASSESSMENT.md)**
-   Evaluation of TencentDB Agent Memory (**not approved for production**):
+   Evaluation of TencentDB Agent Memory (**research approved · production integration NOT approved**):
    - Repository, licence and dependency findings
    - Mac and Claude Code compatibility
    - Security and privacy risks R1–R10
+   - Six explicitly rejected integration modes
    - Smallest integration path and decision gates G1–G8
 
 ### 10. **[BACKLOG.md](BACKLOG.md)**
@@ -389,15 +391,19 @@ Cost control: Alpha selects provider based on:
 │   ├── TENCENTDB_MEMORY_ASSESSMENT.md
 │   └── BACKLOG.md
 │
-├── src/                                    ← To be created
-│   ├── core/                              ← Orchestration
+├── src/
+│   ├── core/                              ← Orchestration (to be created)
 │   ├── providers/                         ← Registry & adapters
+│   │   ├── adapter-base.js
+│   │   ├── memory-provider.js             ← Egress gate, fail-closed routing
+│   │   └── adapters/memory/               ← LocalMemoryAdapter + recall framing
 │   ├── agents/                            ← Specialist agents
 │   ├── authorization/                     ← Auth & audit
 │   ├── config/                            ← Configuration
 │   └── utils/                             ← Logging, helpers
 │
-├── tests/                                  ← Unit & integration tests
+├── tests/
+│   └── memory/                            ← 82 memory subsystem tests
 ├── config/                                 ← YAML configurations
 ├── package.json                            ← Dependencies
 └── .env                                    ← Environment variables
