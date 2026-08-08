@@ -1,10 +1,39 @@
 # TencentDB Agent Memory — Evaluation
 
-**Version:** 1.0
-**Status:** Assessment complete — **NOT approved for production**
+**Version:** 1.1
+**Status:** **RESEARCH APPROVED · PRODUCTION INTEGRATION NOT APPROVED**
 **Last Updated:** 2026-08-08
 **Repository:** https://github.com/TencentCloud/TencentDB-Agent-Memory
 **Related:** [MEMORY_PROVIDER_SPECIFICATION.md](MEMORY_PROVIDER_SPECIFICATION.md), [BACKLOG.md](BACKLOG.md)
+
+---
+
+## Status
+
+| | |
+|---|---|
+| **Research** | **APPROVED** — investigation may proceed under the constraints below |
+| **Production integration** | **NOT APPROVED** |
+| Adapter enabled | No. `tencentdb-agent-memory` stays `enabled: false` |
+| Packages installed | None. No TencentDB dependency exists in this repository |
+
+### Explicitly rejected for our architecture
+
+These are settled decisions, not open questions. None is revisited by a
+successful spike.
+
+1. **Claude Code reverse-proxy integration** (`ANTHROPIC_BASE_URL` repointed at
+   MemoryProxy).
+2. **Automatic end-of-turn memory writes.**
+3. **Retrieved memory injected directly into system prompts.**
+4. **Default external LLM / embedding egress.**
+5. **Tencent TCVDB / COS storage for LAO learner data.**
+6. **Any memory path capable of bypassing EOS governance.**
+
+### The only eligible surface
+
+The smallest MemoryCore API boundary — the `/v3/...` HTTP endpoints — called by
+our own adapter behind `MemoryProvider`. Nothing else.
 
 ---
 
@@ -349,14 +378,18 @@ All must pass before adoption is even reconsidered:
 | G5 | Runs natively on Apple Silicon without emulation | ☐ Not tested |
 | G6 | SBOM / transitive licence audit clean | ☐ Not started |
 | G7 | Provenance survives write → read → export round-trip | ☐ Not tested |
-| G8 | Local adapter shipped and passing first | ☐ Not started |
+| G8 | Local adapter shipped and passing first | ☑ **Done** — `LocalMemoryAdapter`, 82 tests passing |
 
 ---
 
 ## 8. Current Position
 
-- **Approved for the engineering stack as:** *evaluation candidate, memory
-  category, disabled.*
-- **Not approved for:** production, `learner` data, proxy mode, service mode,
-  or any dependency in this repository.
-- **Next action:** build `LocalMemoryAdapter` (G8). Everything else waits.
+- **Research:** approved, under the six rejections and the single eligible
+  surface recorded at the top of this document.
+- **Production integration:** not approved. No packages installed, no proxy, no
+  telemetry, no production wiring changed.
+- **G8 is met.** `LocalMemoryAdapter` is implemented and validated against
+  [MEMORY_PROVIDER_SPECIFICATION.md](MEMORY_PROVIDER_SPECIFICATION.md), with
+  adversarial coverage for stored prompt injection and authority isolation.
+- **Next action:** MEM-7 sub-tasks (G1–G7). Those are evidence-gathering
+  exercises in a scratch workspace; none of them adds a dependency here.
