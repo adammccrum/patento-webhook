@@ -62,6 +62,26 @@
    - Test endpoints
    - Common issues and fixes
 
+### 8. **[MEMORY_PROVIDER_SPECIFICATION.md](MEMORY_PROVIDER_SPECIFICATION.md)**
+   Persistent agent memory, engine-agnostic (draft — not implemented):
+   - `MemoryProvider` interface and record schema
+   - Four separated scopes: session, project, learner, operational
+   - Explicit, audited writes; correction, deletion and expiry
+   - Provenance and the untrusted-recall trust model
+   - Local-first egress gate and replaceability tests
+
+### 9. **[TENCENTDB_MEMORY_ASSESSMENT.md](TENCENTDB_MEMORY_ASSESSMENT.md)**
+   Evaluation of TencentDB Agent Memory (**not approved for production**):
+   - Repository, licence and dependency findings
+   - Mac and Claude Code compatibility
+   - Security and privacy risks R1–R10
+   - Smallest integration path and decision gates G1–G8
+
+### 10. **[BACKLOG.md](BACKLOG.md)**
+   Engineering backlog and recorded decisions:
+   - Memory subsystem workstream (MEM-1 … MEM-8)
+   - Decision log
+
 ---
 
 ## Key Principles
@@ -121,6 +141,16 @@ await adapter.trackCost('textToSpeech', text.length, costPerUnit);
 // Logged to audit trail
 // Checked against user limits
 // Shown to user before approval
+```
+
+### 6. Memory is Evidence, Not Authority
+Persistent memory is retrieved as labelled, untrusted recall. It never enters
+the system prompt, never grants permission, and never overrides a deterministic
+rule. Writes are explicit and audited — never a side effect of a turn ending.
+
+```
+✅ GOOD: <recalled_memory trust="unverified" source="agent" captured="...">
+❌ BAD:  memory contents concatenated into the system prompt
 ```
 
 ---
@@ -354,7 +384,10 @@ Cost control: Alpha selects provider based on:
 │   ├── AGENT_SYSTEM.md
 │   ├── AUTHORIZATION_AND_AUDIT.md
 │   ├── IMPLEMENTATION_GUIDE.md
-│   └── QUICKSTART.md
+│   ├── QUICKSTART.md
+│   ├── MEMORY_PROVIDER_SPECIFICATION.md
+│   ├── TENCENTDB_MEMORY_ASSESSMENT.md
+│   └── BACKLOG.md
 │
 ├── src/                                    ← To be created
 │   ├── core/                              ← Orchestration

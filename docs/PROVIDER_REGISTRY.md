@@ -680,6 +680,93 @@ cost:
 
 ---
 
+## Memory Providers
+
+Accessed through the `MemoryAdapter` interface only — see
+[MEMORY_PROVIDER_SPECIFICATION.md](MEMORY_PROVIDER_SPECIFICATION.md).
+
+Memory providers do **not** participate in automatic fallback chains. If the
+configured provider is unavailable, agents run without memory and say so.
+
+### Local Memory (Default)
+```yaml
+id: local-memory
+category: memory
+subcategories:
+  - session
+  - project
+  - learner
+  - operational
+name: Local Memory
+license: internal
+capabilities:
+  - persistent-recall
+  - provenance
+  - correction
+  - expiry
+  - subject-erasure
+  - export
+deployment:
+  local_support: true
+  cloud_support: false
+  store: sqlite
+cost:
+  type: free
+status:
+  enabled: true
+  health: unknown
+adapter:
+  interface: MemoryAdapter
+  adapter_file: src/providers/adapters/memory/local-memory-adapter.js
+  implemented: false
+egress:
+  allow_egress: false
+  destinations: []
+```
+
+### TencentDB Agent Memory (Open Source — EVALUATION ONLY)
+```yaml
+id: tencentdb-agent-memory
+category: memory
+subcategories:
+  - project
+name: TencentDB Agent Memory
+github: https://github.com/TencentCloud/TencentDB-Agent-Memory
+license: MIT            # GitHub reports NOASSERTION; manual determination — see BACKLOG MEM-8
+capabilities:
+  - persistent-recall
+  - semantic-search
+  - knowledge-graph
+deployment:
+  docker_support: true
+  local_support: true    # standalone / SQLite mode
+  cloud_support: true    # service mode — OUT OF SCOPE (TCVDB + COS)
+  arm64_support: unverified
+  required_env_vars:
+    - TDAI_LLM_BASE_URL   # defaults to https://api.openai.com/v1 — must be repointed locally
+    - TDAI_LLM_MODEL
+cost:
+  type: free
+status:
+  enabled: false         # GATED — do not enable
+  health: unknown
+  approval: evaluation-candidate
+adapter:
+  interface: MemoryAdapter
+  adapter_file: src/providers/adapters/memory/tencent-memory-adapter.js
+  implemented: false
+egress:
+  allow_egress: false
+  allowed_scopes: []     # learner never permitted
+constraints:
+  - Proxy mode (ANTHROPIC_BASE_URL interception) is REJECTED — never enable
+  - Service mode, TCVDB, COS and CodeGraph on private repos are out of scope
+  - MemoryCore HTTP API only; pin to a commit SHA, never a branch or :latest
+  - Blocked on decision gates G1-G8 in TENCENTDB_MEMORY_ASSESSMENT.md
+```
+
+---
+
 ## Status Tracking
 
 Each provider entry includes:

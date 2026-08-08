@@ -251,6 +251,43 @@ class DocumentAdapter extends ProviderAdapter {
 module.exports = DocumentAdapter;
 ```
 
+### Memory Adapter
+
+Memory has extra obligations that the other categories do not — provenance,
+explicit and audited writes, correction and erasure, an untrusted-recall trust
+model, and a local-first egress gate. The full interface is specified
+separately in
+**[MEMORY_PROVIDER_SPECIFICATION.md](MEMORY_PROVIDER_SPECIFICATION.md)**.
+
+```javascript
+// src/providers/adapters/memory/memory-adapter-base.js
+// Summary only — see MEMORY_PROVIDER_SPECIFICATION.md for the full contract.
+
+class MemoryAdapter extends ProviderAdapter {
+  constructor(config) {
+    super(config);
+    this.category = 'memory';
+  }
+
+  async write(record, context) {}        // explicit + audited, never implicit
+  async propose(record, context) {}      // stage for approval
+  async read(query, context) {}          // returns records with provenance
+  async search(query, context) {}
+  async correct(id, newRecord, context) {}   // supersedes, never overwrites
+  async delete(id, options, context) {}
+  async expire(id, expiresAt, context) {}
+  async purgeSubject(subjectId, context) {}
+  async getProvenance(id, context) {}
+  async export(subjectId, context) {}
+}
+
+module.exports = MemoryAdapter;
+```
+
+Note: memory adapters are exempt from the automatic fallback chain. Failing
+over to a second store would split the record of what the system believes and
+defeat the audit trail — memory fails closed instead.
+
 ### Vision Adapter
 
 ```javascript
