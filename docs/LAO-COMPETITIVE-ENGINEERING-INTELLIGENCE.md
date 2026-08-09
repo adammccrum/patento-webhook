@@ -54,6 +54,9 @@ n8n is source-available under the Sustainable Use License, not open source. Use 
 **A7. The best learning-platform code is nearly all network copyleft.**
 Moodle is GPL-3.0; Open edX, Canvas LMS, SuiteCRM, and Cal.com core are AGPL-3.0; Mautic is GPL-3.0. AGPL's network clause triggers source-disclosure obligations when the software is *accessed over a network* — which is exactly how LAO would serve it. *Implication: this category is "study, don't adopt." The lessons are free; the code is not, at LAO's intended posture.*
 
+**A8. Piper — a provider already named in LAO's registry — relicensed, and the safe version is now unmaintained.**
+`PROVIDER_REGISTRY.md` lists Piper as a local TTS provider. The MIT-licensed repository (`rhasspy/piper`) was **archived on 6 October 2025** and is read-only. Development moved to `OHF-Voice/piper1-gpl`, which is **GPL-3.0**. This forces a real choice: use the MIT version and accept unmaintained software with no security updates, or use the maintained version and accept GPL-3.0 obligations. *Implication: this is not hypothetical licence trivia — it is a live decision on a component LAO has already specified. It also demonstrates why the register below records licence posture as a thing that must be re-verified at adoption rather than assumed from memory: this licence changed within the last year.*
+
 ### What this means in one sentence
 
 The competitive opportunity is not more features. It is that **almost every incumbent optimises for course consumption, while the evidence says outcomes come from mastery gating, short units, real commitment, and an AI that withholds answers** — and nobody is doing all four at once, because each one individually depresses the engagement metrics these products are measured on.
@@ -379,11 +382,11 @@ Build instead: an **opportunity record** attached to the progression engine — 
 | LangGraph | MIT | ✅ Permissive |
 | CrewAI | MIT | ✅ Permissive |
 | AutoGen / AG2 | Apache-2.0 | ✅ Permissive; note the AutoGen→AG2 community fork when pinning |
-| OpenHands | (verify at adoption) | Confirm before adoption |
-| Aider | Apache-2.0 (verify) | Patterns are more valuable than the code |
-| Continue | Apache-2.0 (verify) | Patterns more valuable than the code |
+| OpenHands | MIT | ✅ Permissive |
+| Aider | Apache-2.0 | ✅ Permissive; patterns more valuable than the code |
+| Continue | Apache-2.0 | ✅ Permissive; patterns more valuable than the code |
 
-Permissive across the board — this is the safest category in the document. Attribution and copyright notices must still be preserved.
+Permissive across the board — this is the safest category in the document, and the only one where adoption carries no licence-driven constraint. Attribution and copyright notices must still be preserved.
 
 #### LAO verdict
 
@@ -824,7 +827,7 @@ The standing principle ends in TEST → MEASURE. These are the measurements that
 
 ## G. Open-source component register
 
-Per the standing open-source policy. Licences marked ✅ were verified against primary or authoritative sources during this research (see Sources). Entries marked *(verify)* are believed correct but **must be confirmed before adoption**.
+Per the standing open-source policy. **Every licence below marked ✅ was verified against the project's own repository or documentation during this research** (see Sources) — none are asserted from memory. Two carry active warnings (Remotion, Piper) and one is rejected outright (n8n).
 
 **Version and maintenance activity are deliberately not recorded here** — they change continuously and a stale value in a compliance register is worse than none. Both must be captured, pinned, and security-reviewed at the moment of adoption, and this register updated at that point.
 
@@ -836,13 +839,14 @@ Per the standing open-source policy. Licences marked ✅ were verified against p
 | **LangGraph** | MIT ✅ | Agent execution strategy | No | No | CrewAI, AG2 | LAO agent adapter |
 | **CrewAI** | MIT ✅ | Role-based agent orchestration | No | No | LangGraph, AG2 | LAO agent adapter |
 | **AutoGen / AG2** | Apache-2.0 ✅ | Multi-agent conversation patterns | No | No | LangGraph | LAO agent adapter |
-| **OpenHands** | *(verify)* | Sandboxing patterns | No | No | Own sandbox | Study; LAO owns sandboxing |
-| **Aider** | Apache-2.0 *(verify)* | Git-commit-per-change audit pattern | No | No | — | Pattern only |
-| **Continue** | Apache-2.0 *(verify)* | Human-in-loop patterns | No | No | — | Pattern only |
+| **OpenHands** | MIT ✅ | Sandboxing patterns | No | No | Own sandbox | Study; LAO owns sandboxing |
+| **Aider** | Apache-2.0 ✅ | Git-commit-per-change audit pattern | No | No | — | Pattern only |
+| **Continue** | Apache-2.0 ✅ | Human-in-loop patterns | No | No | — | Pattern only |
 | **Remotion** | ⚠️ Proprietary / Company Licence ✅ | Programmatic video composition | Rendered output only | No | Direct FFmpeg composition | LAO render adapter — **exit path mandatory** |
 | **FFmpeg** | ⚠️ LGPL-2.1+ default; GPL-2.0+ with `--enable-gpl` ✅ | Encode / transcode substrate | Yes, if bundled | No | — | LAO media adapter; **build flags are a licence decision** |
-| **Whisper** | MIT *(verify)* | Speech-to-text | No | No | Vosk | LAO voice adapter |
-| **Piper** | MIT *(verify)* | Local TTS | No | No | Other TTS | LAO voice adapter |
+| **Whisper** | MIT ✅ (code *and* model weights) | Speech-to-text | No | No | Vosk | LAO voice adapter |
+| **Piper** (`rhasspy/piper`) | MIT ✅ — ⚠️ **archived 2025-10-06, read-only** | Local TTS | No | No | See below | LAO voice adapter |
+| **Piper** (`OHF-Voice/piper1-gpl`) | ⚠️ **GPL-3.0** ✅ — the maintained successor | Local TTS | No | No | Kokoro, other TTS behind same adapter | LAO voice adapter — **decision required (A8)** |
 | **Moodle** | GPL-3.0 ✅ | ❌ Study only | — | — | — | None |
 | **Open edX** | AGPL-3.0 ✅ | ❌ Study only — network copyleft | — | — | — | None |
 | **Canvas LMS** | AGPL-3.0 ✅ | ❌ Study only — network copyleft | — | — | — | None |
@@ -850,9 +854,9 @@ Per the standing open-source policy. Licences marked ✅ were verified against p
 | **Mautic** | GPL-3.0 ✅ | ❌ Study only | — | — | — | None |
 | **Odoo (community)** | LGPL-3.0 ✅ | Study only — ERP-shaped | — | — | — | None |
 | **Cal.com** | AGPL-3.0 core + proprietary `/ee` ✅ | ❌ Not adopted — link out instead | — | — | Calendly (external) | None |
-| **Discourse** | GPL-2.0 *(verify)* | Community, if ever integrated | No — separate service | No | Circle, Discord | Integration boundary only |
+| **Discourse** | GPL-2.0-or-later ✅ | Community, if ever integrated | No — separate service | No | Circle, Discord | Integration boundary only |
 | **freeCodeCamp** | BSD-3-Clause code; curriculum separate ✅ | Study — project-based certification model | — | — | — | None |
-| **axe-core** | MPL-2.0 *(verify)* | CI accessibility testing | No — dev dependency | No | Other a11y tooling | CI only, not shipped |
+| **axe-core** | MPL-2.0 ✅ | CI accessibility testing | No — dev dependency | No | Other a11y tooling | CI only, not shipped |
 
 ### Standing licence rules
 
@@ -896,6 +900,7 @@ Recorded honestly rather than resolved prematurely. Each needs an answer before 
 4. **Phone-primary learners who cannot access a desktop.** §D12's split-session model assumes desktop availability for BUILD. For learners without it, what is the genuine path? This may be the most important unanswered accessibility question in the product.
 5. **Duolingo's adaptive model.** IRT/computer-adaptive testing in the Duolingo English Test is well documented, but the internals of their consumer-app adaptive system are not publicly verified. LAO should base its own adaptivity on the published IRT/CAT and spacing literature rather than inferred competitor behaviour.
 6. **Community timing.** Community helps retention but is negative when empty. What learner volume justifies starting it?
+7. **Piper decision (A8).** Unmaintained MIT versus maintained GPL-3.0 versus a different TTS engine entirely. Because Piper sits behind LAO's voice adapter, this is a low-cost decision to defer — but it should be made deliberately, not by whichever version someone installs first.
 
 ---
 
@@ -924,6 +929,10 @@ Primary and authoritative sources consulted for the verified claims in this docu
 - [Open-source LMS licence comparison](https://selleo.com/blog/open-source-lms-comparison)
 - [Temporal repository](https://github.com/temporalio/temporal) · [Kestra repository](https://github.com/kestra-io/kestra)
 - [CrewAI](https://en.wikipedia.org/wiki/CrewAI)
+- [OpenHands (MIT)](https://github.com/All-Hands-AI/OpenHands) · [Aider (Apache-2.0)](https://github.com/Aider-AI/aider) · [Continue (Apache-2.0)](https://github.com/continuedev/continue)
+- [Whisper (MIT, code and weights)](https://github.com/openai/whisper)
+- [Piper — archived MIT repository](https://github.com/rhasspy/piper) · [Piper — maintained GPL-3.0 successor](https://github.com/OHF-Voice/piper1-gpl)
+- [Discourse (GPL-2.0-or-later)](https://github.com/discourse/discourse) · [axe-core (MPL-2.0)](https://github.com/dequelabs/axe-core)
 
 **Learning science and outcomes**
 - [Generative AI without guardrails can harm learning — PNAS](https://www.pnas.org/doi/10.1073/pnas.2422633122) · [preprint PDF](https://hamsabastani.github.io/education_llm.pdf)
