@@ -26,6 +26,7 @@ This is the single source of truth for LAO's architecture, specifications, imple
 | Building an agent | Part IV → Part V → **Part IX §1** |
 | Deciding what to build next | Part VIII (§A findings, §B value test, §C build-vs-borrow) |
 | Assessing legal/licence risk | Part VIII §G → **Part IX §3** |
+| Deciding whether LAO is right at all | **Part VIII §L** → §K → §I |
 
 ### Document lifecycles
 
@@ -50,7 +51,7 @@ The Parts do **not** change at the same rate. Treat them accordingly:
 - **[Part V — Authorization and Audit](#part-v--authorization-and-audit)** — authorization flow, IrisKey, permissions, audit events, storage, approval gates, cost tracking
 - **[Part VI — Implementation Guide](#part-vi--implementation-guide)** — phased buildout, testing strategy, deployment
 - **[Part VII — Quick Start](#part-vii--quick-start)** — the 30-minute path (see Part IX §4 before running)
-- **[Part VIII — Competitive Engineering Intelligence](#part-viii--competitive-engineering-intelligence)** — 13 researched categories, verified licence posture, build-vs-borrow, original LAO IP, metrics
+- **[Part VIII — Competitive Engineering Intelligence](#part-viii--competitive-engineering-intelligence)** — 13 researched categories, verified licence posture, build-vs-borrow, original LAO IP, metrics, plus **§K source-quality audit** and **§L the strongest arguments that LAO is wrong**
 - **[Part IX — Reconciliation Log](#part-ix--reconciliation-log)** — every conflict consolidation exposed
 
 ---
@@ -4570,8 +4571,22 @@ Moodle is GPL-3.0; Open edX, Canvas LMS, SuiteCRM, and Cal.com core are AGPL-3.0
 **A8. Piper — a provider already named in LAO's registry — relicensed, and the safe version is now unmaintained.**
 `PROVIDER_REGISTRY.md` lists Piper as a local TTS provider. The MIT-licensed repository (`rhasspy/piper`) was **archived on 6 October 2025** and is read-only. Development moved to `OHF-Voice/piper1-gpl`, which is **GPL-3.0**. This forces a real choice: use the MIT version and accept unmaintained software with no security updates, or use the maintained version and accept GPL-3.0 obligations. *Implication: this is not hypothetical licence trivia — it is a live decision on a component LAO has already specified. It also demonstrates why the register below records licence posture as a thing that must be re-verified at adoption rather than assumed from memory: this licence changed within the last year.*
 
-**A9. The demand LAO's graduates would serve is documented, quantified, and describes itself as a skills problem.**
-Between 50% and 71% of non-adopting small businesses cite **lack of expertise** as their primary barrier to AI adoption — ahead of cost, regulation, and data privacy. Among small businesses already using AI, 45% cite lack of technical expertise and 47% struggle to choose the right tools, while **77% have no formal prompting strategy**. 76% are using or exploring AI and 79% plan to increase investment. Meanwhile the freelance marketplaces that ought to connect this demand to new supply reject newcomers structurally: every trust signal they rank on (Job Success Score, reviews, badges) requires a track record a beginner cannot have, making them *algorithmically invisible and socially unverified at once*. *Implication: LAO's output and this demand are shaped for each other, and the thing preventing the match is a credibility gap that LAO — uniquely — holds the evidence to close. This is the basis of the Opportunity Engine (§E6).*
+**A9. SMEs report a skills barrier — but the evidence does not establish that they will hire beginners to fix it.** *(Revised 2026-08-09 after source audit — see §K.)*
+
+What is established by primary sources:
+
+| Claim | Figure | Source | Grade |
+|---|---|---|---|
+| SMEs reporting employees lack the skills to use generative AI effectively | **50%** | OECD, across four G7 countries | **A** |
+| SMEs not yet using generative AI who say skills are the main reason | **more than half** | OECD | **A** |
+| SMEs providing AI training despite that | **under 30%** | OECD | **A** |
+| EU AI adoption, large enterprises vs. small (10–49 employees) | **55% vs ~17%** | Eurostat, 2025 | **A** |
+
+Meanwhile the marketplaces that ought to connect this demand to new supply reject newcomers structurally: every trust signal they rank on (Job Success Score, reviews, badges) requires a track record a beginner cannot have.
+
+**The implication is weaker than it first appears, and the weakness matters.** A skills barrier plus low internal training tells us SMEs have an unmet need. It does **not** tell us how they will meet it. Three responses are consistent with the same data: hire an agency, buy a tool that hides the complexity, or do nothing. Hiring a newly-capable individual is a fourth possibility with no evidence behind it — and arguably the *least* likely, because a buyer whose stated problem is "we lack expertise" has an obvious reason to prefer demonstrated expertise over a beginner.
+
+*Implication: A9 establishes that a problem exists, not that LAO's graduates are the solution the market will buy. The Opportunity Engine (§E6) rests on that unevidenced step, which is why §E6's smallest version tests it before anything is built on top of it.*
 
 #### What this means in one sentence
 
@@ -5233,41 +5248,41 @@ Sessions should be *designed* for the phone; building should be *supported* on d
 - **Structured opportunity records.** Reducing messy demand to typed fields (scope, budget, deadline, required skills) is what makes matching possible at all.
 - **Toptal's pre-vetting.** Screening once, then vouching, is more efficient than making every client re-evaluate every candidate. It is also the only model in the category that solves credibility *before* a track record exists.
 - **Escrow and milestones.** Both sides need protection; this is the genuine service marketplaces provide.
-- **Upwork's Rising Talent badge** is an explicit acknowledgement that the cold-start problem is real enough to need a manufactured signal.
+- **Upwork's Rising Talent badge** is a signal for freelancers without review history, based on profile completeness and verifiable prior experience. An earlier draft called this "a manufactured signal" — that was editorialising. It is a reasonable proxy, and its existence indicates the platform treats cold start as a real problem.
 
 ##### Where they fail — and the failure is structural
 
-**The cold-start trap is the defining failure of this category.** Platform trust signals — Job Success Score, badges, review count, star rating — all require completed contracts. A newcomer has none, which makes them *algorithmically invisible and socially unverified simultaneously*. Clients filter on exactly the signals the newcomer cannot have. Reported outcome: typically 2–3 weeks to a first job, with some sending 20+ proposals before a single reply.
+**The cold-start trap is the defining failure of this category.** Platform trust signals — Job Success Score, badges, review count, star rating — all require completed contracts. A newcomer has none, which makes them *algorithmically invisible and socially unverified simultaneously*. Clients filter on exactly the signals the newcomer cannot have. Commonly reported outcomes are 2–3 weeks to a first job and 20+ proposals before a first reply — **grade C/D: practitioner blogs and anecdote, not measured data.** Directionally consistent with the structural argument; not citable as a statistic.
 
 This is a catch-22 by construction: **you need reviews to get hired and hiring to get reviews.** It is not a bug the platforms can fix, because their only evidence of capability *is* prior platform activity.
 
 Compounding it:
 
 - **Applying costs money.** Upwork's Connects run ~$0.15 each at 6–16 per application, so an active search costs roughly $10–20/month before earning anything. Beginners pay to be ignored.
-- **Fees are material.** Upwork takes a variable 0–15% service fee (most contracts near 10%); Fiverr takes a flat **20%** of every order and tip.
+- **Fees are material.** Upwork is reported to take a variable 0–15% service fee (most contracts near 10%) and Fiverr a flat 20% of every order and tip — **grade C, unverified**: these come from affiliate comparison sites, and Upwork's own fee documentation was unreachable from this environment. Verify against primary sources before relying on the figures.
 - **Race to the bottom.** Undifferentiated newcomers compete on price alone, which is the one axis where a beginner should never compete.
 - **Matching is keyword-based**, not capability-based. Nobody knows what the candidate can actually *do*.
 - **Nobody teaches.** A rejected freelancer receives no diagnosis and no path. The marketplace has no interest in their development.
 
 ##### The demand-side finding that matters most
 
-The market's stated bottleneck is *precisely what LAO teaches*:
+*Revised 2026-08-09 in the §K source audit. Earlier drafts of this table carried additional figures — 77% without a prompting strategy, 47% struggling to choose tools, a 50–71% barrier range, 76%/79% adoption and investment intent — drawn from vendor marketing content graded **C**. They have been removed. What follows is what survives on primary sources.*
 
-| Signal | Figure |
-|---|---|
-| Non-adopting small businesses citing **lack of expertise** as the primary barrier | **50–71%** — ahead of cost, regulation, and privacy |
-| SMB AI users citing lack of technical expertise as a challenge | 45% |
-| SMB AI users who find it hard to choose the right tools | 47% |
-| SMBs using AI with **no formal prompting strategy or system** | **77%** |
-| Small businesses actively using or exploring AI | 76% (with 79% planning increased investment) |
-| EU adoption gap, large enterprise vs. small (10–49 employees) | 55% vs **17%** |
+| Signal | Figure | Source | Grade |
+|---|---|---|---|
+| SMEs reporting employees lack the skills to use generative AI effectively | **50%** | OECD (four G7 countries) | **A** |
+| SMEs not yet using gen AI who say skills are the main reason | **more than half** | OECD | **A** |
+| SMEs providing AI training regardless | **under 30%** | OECD | **A** |
+| EU AI adoption, large enterprises vs. small (10–49 employees) | **55% vs ~17%** | Eurostat 2025 | **A** |
 
-The barrier is explicitly *skills and confidence, not access or cost*. That is a demand pool shaped like LAO's output.
+The reported barrier is explicitly *skills, not access or cost*.
+
+⚠️ **Do not read this as demand for LAO's graduates.** An unmet skills need does not establish how the market will meet it. The "under 30% train internally" figure is equally consistent with buyers hiring an agency, buying a tool that hides the complexity, or doing nothing — and a buyer whose stated problem is missing expertise has an obvious reason to prefer *proven* expertise. See §A9 and §L2.
 
 ##### Architecture lessons
 
 1. **Matching must run on demonstrated capability, not self-asserted skills.** This is the one thing LAO can do that no marketplace can, because LAO holds the mastery evidence.
-2. **Do not invent a skills vocabulary.** ESCO (~3,000 occupations, ~14,000 competencies, 28 languages) and O*NET already exist, are permissively licensed, and give interoperability with external job data. LAO's originality belongs in the *mastery model*, not the noun list.
+2. **Do not invent a skills vocabulary.** ESCO (reported as ~3,000 occupations and ~14,000 competencies across ~28 languages — **grade C, from a secondary summary rather than ESCO itself; verify at adoption**) and O*NET already exist, are permissively licensed, and give interoperability with external job data. LAO's originality belongs in the *mastery model*, not the noun list.
 3. **Opportunity is a typed record, not a CRM object** — and it is the same record the narrow EARN-stage slice in §D3 needs. Do not build two.
 4. **Sourcing and matching must be separable.** Matching can be tested against learner-entered opportunities long before LAO sources any.
 
@@ -5401,7 +5416,9 @@ An enforced escalation ladder, with the constraint implemented in LAO code rathe
 
 ##### Why LAO can do this and marketplaces cannot
 
-A marketplace's only evidence of capability is prior activity on that marketplace. LAO holds something no marketplace has: a **causal, timestamped record of how a capability was acquired and demonstrated** (E3). That converts the cold-start problem from unsolvable into merely hard.
+A marketplace's only evidence of capability is prior activity on that marketplace. LAO holds something no marketplace has: a **causal, timestamped record of how a capability was acquired and demonstrated** (E3).
+
+⚠️ **But holding better evidence is not the same as that evidence being believed.** The advantage below is real only if a buyer accepts LAO's attestation, and there is currently no reason they would — see risk 1. Read this table as *what LAO could offer*, not as *what a buyer would value*.
 
 | | Upwork / Fiverr | LinkedIn | Coursera / Udemy | **LAO** |
 |---|---|---|---|---|
@@ -5448,15 +5465,20 @@ Opportunity  ──requires──▶  Capability
 These are design boundaries, not preferences:
 
 - **LAO does not become a marketplace.** No liquidity to bootstrap, no escrow, no disputes, no payments, no fraud surface. LAO matches and vouches; the transaction happens wherever the two parties prefer. This is a deliberate refusal of the largest, most off-thesis build in this document.
-- **LAO does not take a transaction cut.** A percentage of learner earnings would make LAO's incentive transaction volume rather than learner outcome — and would directly corrupt mastery gating (E2), because a gated learner is a learner not earning. The incentive must stay aligned with the learner getting *good*, not with them transacting.
+- **LAO does not take a transaction cut.** *(Recorded as a constraint, but the argument for it is weaker than first stated.)* The case against: a percentage of earnings makes LAO's incentive transaction volume rather than learner outcome, and would pressure mastery gating (E2), since a gated learner is a learner not earning. **The case for, which should not be dismissed:** a revenue share means LAO only earns when the learner earns, which is the tightest possible alignment with the stated goal — whereas a subscription pays LAO whether or not the learner ever earns anything, and is arguably the *worse* incentive, rewarding retention over outcomes. The honest position is that both models have a failure mode, that this is a business-model decision rather than an architectural one, and that it should be decided deliberately rather than inherited from this document.
 - **LAO never auto-applies on a learner's behalf.** Proposal spam is the documented failure mode of §D13. Automating it would make LAO the problem and would destroy the credibility instrument in a single quarter.
 - **Calibration over optimism.** An evidence-backed introduction is only worth something while it is *reliably* accurate. One oversold beginner damages the signal for every subsequent learner. The engine must be willing to say "not yet, here is what's missing."
 
 ##### Honest risks
 
-1. **Sourcing is the hard half, and it has its own cold start.** An empty opportunity feed is worse than none — the same failure recorded for community in §D10. Matching must therefore be proven against learner-entered opportunities (their own network, local businesses they already know) *before* any sourcing investment.
-2. **A bad match costs the learner's scarcest resource.** Not time — motivation. Precision must beat recall at every stage; one good match beats fifty plausible ones.
-3. **Evidence credibility is a one-way door.** It compounds while accurate and collapses permanently when abused.
+**The three at the top are potentially fatal to the design, not just complications.**
+
+1. 🔴 **LAO's vouching has its own cold-start problem — the design moves the problem rather than solving it.** The claim above is that LAO's evidence converts a beginner from unverified to verified. But *why would a client trust LAO's attestation?* LAO has no reputation with that client either. Toptal's vouching works because Toptal spent a decade building brand credibility with buyers; the screening is only valuable because the screener is known. An unknown platform asserting "we verified this person" is worth approximately nothing, and may be worth less than nothing if it reads as marketing. **The evidence graph solves the learner's cold start by inheriting it at the platform level.** No part of this design addresses that, and it should not be built as though the problem is solved.
+2. 🔴 **The demand evidence may argue for agencies, not beginners.** A9 (revised) establishes SMEs report a skills barrier. A buyer whose stated problem is "we lack expertise" has an obvious reason to prefer *demonstrated* expertise. The same data that appears to support LAO's supply may better support an agency's. This is not a hedge — it is a plausible reading in which the engine's core premise is simply wrong.
+3. 🟠 **"Matching is commodity" is probably false, and the design leans on it.** Mapping a messy real-world opportunity description onto a capability ontology is an open research problem — the body of ESCO skill-extraction literature exists precisely because it is hard. If matching is the difficult part rather than the trivial part, the effort estimate implied by "the loop is the IP" is wrong, and the loop cannot run at all until matching works.
+4. **Sourcing is the hard half, and it has its own cold start.** An empty opportunity feed is worse than none — the same failure recorded for community in §D10. Matching must therefore be proven against learner-entered opportunities *before* any sourcing investment.
+5. **A bad match costs the learner's scarcest resource.** Not time — motivation. Precision must beat recall; one good match beats fifty plausible ones.
+6. **Evidence credibility is a one-way door.** It compounds while accurate and collapses permanently when abused.
 4. **Regulatory exposure.** Matching people to paid work can touch employment-agency and labour regulation depending on jurisdiction, and grant matching may touch financial-promotion rules. **Requires Uniform (UU) review before any sourcing or introduction feature ships** — not before design.
 
 ##### Smallest valuable version
@@ -5600,15 +5622,88 @@ Revise this document when:
 - A capability in §D is about to be built — re-verify that category's licences and re-run the value test.
 - A licence changes. Remotion's terms and n8n's SUL are the highest-risk watch items; both have changed before.
 - A measurement in §F contradicts a finding here. **Measured evidence from LAO's own learners supersedes this research.**
+- A claim graded **C** in §K is either upgraded by a primary source or dropped. C-grade claims are not allowed to harden into assumptions by repetition.
+- An argument in §L is tested. Record the result whether it supports LAO or not — **§L must not be allowed to shrink over time without evidence.** A research document whose objections quietly disappear has become a marketing document.
 - A significant new product or open-source project appears in a category.
 
 Do not let this document become a static artifact. An unmaintained competitive intelligence document is worse than none, because it is trusted.
 
 ---
 
+### K. Source quality audit
+
+Added 2026-08-09 after an audit found this document applied **two different evidentiary standards to itself**. §G boasts that every licence was verified against the project's own repository — while §A9 and §D13 accepted figures from vendor marketing blogs and freelancer SEO content and presented them in clean tables, indistinguishable from peer-reviewed findings. That is the failure this document's own §17 brief warned against: *"Do not dump copied marketing material into this document. Analyse it."*
+
+**Grading scheme — applied from now on to every quantitative claim:**
+
+| Grade | Meaning |
+|---|---|
+| **A** | Primary source: peer-reviewed research, official statistics, or the project's own repository/licence |
+| **B** | Credible secondary: quality journalism, systematic review of primary work |
+| **C** | Vendor or SEO content, affiliate comparison sites, practitioner blogs — **directionally useful, not citable as fact** |
+| **D** | Anecdote |
+
+**Audit outcome:**
+
+| Claim | Was presented as | Actual grade | Action |
+|---|---|---|---|
+| SMEs citing skills as the main AI barrier (50%) | fact | **A** (OECD) | Retained, re-sourced |
+| SMEs providing AI training (<30%) | *not previously cited* | **A** (OECD) | **Added** — cuts both ways |
+| EU adoption gap 55% vs ~17% | fact | **A** (Eurostat) | Retained, re-sourced |
+| "50–**71%**" upper bound | part of one range | **C** | **Dropped.** Two different-quality sources were collapsed into a single range. |
+| 77% of SMBs have no prompting strategy | fact | **C** | **Removed from findings** |
+| 47% struggle to choose tools; 76% using/exploring; 79% raising investment | fact | **C** | **Removed from findings** |
+| "2–3 weeks to first job", "20+ proposals" | typical outcome | **C/D** | Retained in §D13 **marked as practitioner-reported, not measured** |
+| Upwork 0–15% / Fiverr 20% fees | fact | **C** | Retained, **marked unverified** — Upwork's own fee documentation was unreachable from this environment |
+| ESCO ~3,000 occupations / ~14,000 competencies / 28 languages | fact | **C** | **Marked unverified** — taken from a secondary summary, not ESCO |
+| Learning-science findings (§A1–A4) | fact | **A/B** | Unaffected — PNAS, Education Next, Open Praxis, Eurostat-grade throughout |
+
+**The learning-science half of this document is well-sourced. The market-demand half was not.** That asymmetry mattered, because §E6 was designed on the weaker half.
+
+---
+
+### L. The strongest arguments that LAO is wrong
+
+A document that only accumulates reasons to proceed is a marketing artifact. These are the strongest cases *against* LAO's direction, argued as well as I can argue them. They are not hedges — several would, if correct, invalidate substantial parts of the plan.
+
+**L1. LAO's core value may be a closing arbitrage.** 🔴
+LAO teaches people to build with AI. That is valuable only while there is a meaningful gap between someone who can use AI effectively and someone who cannot. Every model release narrows that gap — and the *same* improvement that makes LAO's graduate productive also lets the SME do the work themselves without hiring anyone. LAO may be building a bridge across a river that is drying up. The counter-argument is real (adoption lags capability by years, and the OECD data shows exactly that lag), but "the gap persists for now" is not "the gap is durable," and nothing in LAO's design would tell us which is true. **This is the deepest risk in the entire plan and it was not previously written down anywhere.**
+
+**L2. Mastery gating and time-to-first-earning are in direct conflict, and the document never resolves it.** 🔴
+§A1 makes mastery gating the mechanism. §F makes time-to-first-earning the headline metric. **Gating delays earning by construction.** If a learner could win work at 60% mastery and LAO withholds them until 85%, LAO has cost that person real money in service of a metric they did not choose. This document presents the two as complementary. They are not; they trade off directly, and which one wins when they collide is undecided. That is a product decision masquerading as a technical one.
+
+**L3. The micro-learning evidence is probably a selection artifact.** 🟠
+§A3 cites 80–90% completion for sub-2-hour content versus 5–10% for 40h+ courses, and concludes LAO should refuse long formats. But short courses attract lower-commitment learners *and* define "completion" at a trivially lower bar. Comparing completion rates across wildly different durations measures the denominator as much as the content. The conclusion may still be right; **this particular evidence does not establish it**, and it was presented as though it did.
+
+**L4. 0.37σ cuts against LAO as well as for it.** 🟠
+§A1 uses the corrected tutoring effect to argue for mastery learning. Fair. But 0.37σ is a *modest* effect for the best-case intervention — expert human one-to-one tutoring. An AI approximation is more likely to land below that than above. LAO's differentiation on tutoring quality may be real but small, and the document's tone implies a bigger prize than the cited number supports.
+
+**L5. There is no evidence anyone on the demand side wants the evidence graph.** 🟠
+§E3 and §E6 treat provenance-backed evidence as a credibility instrument. But clients and employers are notoriously poor at reading portfolios, and GitHub works as a signal because it is **standard and externally verifiable**, not because it is rich. A bespoke LAO evidence format has no recognised meaning outside LAO. The entire construct is justified by supply-side reasoning — it is what LAO happens to be able to produce — with nothing establishing demand-side appetite.
+
+**L6. The project is documenting far faster than it is building, and this document made that worse.** 🟠
+There is no `src/`. Part IX found that the *specifications had already drifted into mutual contradiction* — two incompatible definitions of the same base class — before a single line of the system existed. That is strong evidence the binding constraint on LAO is not insufficient design. This research document then added roughly 13,000 words to a repository with zero working code. **The honest reading is that it is part of the pattern it diagnoses.** §E6's smallest-valuable-version discipline should be applied to documentation with the same severity it is applied to features.
+
+**L7. Multi-modal derivation is expensive and unvalidated.** 🟡
+§D11 mandates that every lesson be authored modality-neutral so text/voice/video/interaction can all be derived. Architecturally elegant, genuinely expensive, and **no evidence in this document shows learners use enough modalities to justify it.** The accessibility case for *some* multi-modality is strong and independent; the case for deriving *all* of them from a single source is an engineering preference wearing an accessibility argument.
+
+#### How to use this section
+
+These are not reasons to stop. They are the claims that should be attacked first, because each is cheap to test relative to what it would cost to discover late:
+
+| Argument | Cheapest disconfirming test |
+|---|---|
+| L1 | Ask current SMEs whether they would hire a person or wait for a better tool |
+| L2 | Decide the gating-vs-earning tradeoff explicitly, in writing, before building either |
+| L3 | Compare completion at matched durations, not across them |
+| L5 | Show a real buyer an evidence-graph output and see if it changes their decision |
+| L6 | Ship the smallest working thing before writing another specification |
+
+---
+
 ### Sources
 
-Primary and authoritative sources consulted for the verified claims in this document.
+Primary and authoritative sources consulted for the verified claims in this document. Graded per §K.
 
 **Licensing**
 - [Remotion licence terms](https://www.remotion.dev/docs/license/terms) · [Remotion licence FAQ](https://www.remotion.dev/docs/license/faq) · [Remotion company licensing](https://www.remotion.pro/license)
@@ -5637,7 +5732,8 @@ Primary and authoritative sources consulted for the verified claims in this docu
 **Opportunity, demand, and skills taxonomies**
 - [Upwork — top reasons you can't get a job on Upwork](https://www.upwork.com/resources/cant-get-jobs-on-upwork) · [Upwork first client with no reviews](https://zenlance.net/upwork-first-client-with-no-reviews/) · [Fiverr — building credibility with no reviews](https://community.fiverr.com/public/blogs/how-to-build-credibility-on-fiverr-when-you-have-no-reviews-2025-09-23)
 - [Upwork vs Fiverr — fee comparison](https://freelancecompare.com/blog/upwork-vs-fiverr-comparison) · [Upwork vs Fiverr fees, pay and Connects](https://sidequesthustle.com/guides/upwork-vs-fiverr-comparison)
-- [SME AI adoption in 2026 — what the data shows](https://www.omago.ai/blog/sme-ai-adoption-2026-data) · [Small business AI adoption statistics](https://capsulecrm.com/blog/small-business-ai-adoption-statistics/) · [US small business AI adoption data points](https://epiphanydynamics.ai/blog/state-of-ai-adoption-us-small-business-2026/)
+- **Grade A —** [OECD: AI adoption by small and medium-sized enterprises (Dec 2025)](https://www.oecd.org/en/publications/2025/12/ai-adoption-by-small-and-medium-sized-enterprises_9c48eae6.html) · [OECD: AI and Skills (Jun 2026)](https://www.oecd.org/en/publications/ai-and-skills_f843b352-en/full-report.html) · [Eurostat: Use of artificial intelligence in enterprises](https://ec.europa.eu/eurostat/statistics-explained/index.php?title=Use_of_artificial_intelligence_in_enterprises) · [Eurostat: 20% of EU enterprises use AI technologies](https://ec.europa.eu/eurostat/web/products-eurostat-news/w/ddn-20251211-2)
+- **Grade C (retained only where marked, not citable as fact) —** [SME AI adoption commentary](https://www.omago.ai/blog/sme-ai-adoption-2026-data) · [Small business AI adoption statistics](https://capsulecrm.com/blog/small-business-ai-adoption-statistics/) · [US small business AI adoption data points](https://epiphanydynamics.ai/blog/state-of-ai-adoption-us-small-business-2026/)
 - [ESCO copyright notice — skills and competences](https://esco.ec.europa.eu/en/copyright-notice-esco-skills-competences) · [ESCO API terms](https://esco.ec.europa.eu/en/use-esco/use-esco-services-api) · [EUPL 1.2](https://eupl.eu/)
 
 
