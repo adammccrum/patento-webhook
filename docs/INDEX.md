@@ -64,7 +64,7 @@
 
 ### 8. **[LAO-COMPETITIVE-ENGINEERING-INTELLIGENCE.md](LAO-COMPETITIVE-ENGINEERING-INTELLIGENCE.md)**
    Study the best, build better. Read before building any significant capability:
-   - Category-by-category analysis (learning, AI tutoring, automation, agents, video, accessibility, mobile)
+   - Category-by-category analysis (learning, AI tutoring, automation, agents, video, opportunity matching, accessibility, mobile)
    - Verified licence posture for every candidate open-source component
    - Build-vs-borrow classification (USE / ADAPT / STUDY-THEN-BUILD / LAO ORIGINAL)
    - Proposed original LAO IP and the metrics that would prove it works

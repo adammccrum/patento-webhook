@@ -57,6 +57,9 @@ Moodle is GPL-3.0; Open edX, Canvas LMS, SuiteCRM, and Cal.com core are AGPL-3.0
 **A8. Piper — a provider already named in LAO's registry — relicensed, and the safe version is now unmaintained.**
 `PROVIDER_REGISTRY.md` lists Piper as a local TTS provider. The MIT-licensed repository (`rhasspy/piper`) was **archived on 6 October 2025** and is read-only. Development moved to `OHF-Voice/piper1-gpl`, which is **GPL-3.0**. This forces a real choice: use the MIT version and accept unmaintained software with no security updates, or use the maintained version and accept GPL-3.0 obligations. *Implication: this is not hypothetical licence trivia — it is a live decision on a component LAO has already specified. It also demonstrates why the register below records licence posture as a thing that must be re-verified at adoption rather than assumed from memory: this licence changed within the last year.*
 
+**A9. The demand LAO's graduates would serve is documented, quantified, and describes itself as a skills problem.**
+Between 50% and 71% of non-adopting small businesses cite **lack of expertise** as their primary barrier to AI adoption — ahead of cost, regulation, and data privacy. Among small businesses already using AI, 45% cite lack of technical expertise and 47% struggle to choose the right tools, while **77% have no formal prompting strategy**. 76% are using or exploring AI and 79% plan to increase investment. Meanwhile the freelance marketplaces that ought to connect this demand to new supply reject newcomers structurally: every trust signal they rank on (Job Success Score, reviews, badges) requires a track record a beginner cannot have, making them *algorithmically invisible and socially unverified at once*. *Implication: LAO's output and this demand are shaped for each other, and the thing preventing the match is a credibility gap that LAO — uniquely — holds the evidence to close. This is the basis of the Opportunity Engine (§E6).*
+
 ### What this means in one sentence
 
 The competitive opportunity is not more features. It is that **almost every incumbent optimises for course consumption, while the evidence says outcomes come from mastery gating, short units, real commitment, and an AI that withholds answers** — and nobody is doing all four at once, because each one individually depresses the engagement metrics these products are measured on.
@@ -73,6 +76,7 @@ Per the standing principle, no capability is built without answering the four qu
 | Hint-ladder AI coach | Answer-giving AI creates dependency and worse outcomes (A2) | Every learner using a generic chatbot | ✅ | ✅ | — | — | **Build** |
 | Evidence graph → portfolio | Completion certificates are not credible proof of capability | Learners with no employment/client signal | — | ✅ | ✅ | ✅ | **Build** |
 | Progression engine (L→B→L→E) | The learn-to-earn gap is unstructured and most people fall in it | Learners who finish learning and stop | ✅ | ✅ | ✅ | ✅ | **Build** |
+| **Opportunity Engine** | Capable learners are structurally locked out of paid work by cold-start; real demand cannot find them (A9) | Every learner reaching the end of BUILD | ✅ | ✅ | ✅ | ✅ | **Build (smallest slice)** |
 | Lesson video generation | Text-only lessons exclude several learning modes; manual video is slow | Neurodivergent and low-literacy learners; LAO content ops | ✅ | — | — | — | **Build (thin)** |
 | Automation workflows | Repeated manual steps in launching/running a small venture | Learners at LAUNCH/EARN | — | ✅ | ✅ | ✅ | **Adapt** |
 | Lightweight project tracking | Beginners drown in enterprise PM tools | Learners at BUILD | — | ✅ | ✅ | — | **Build (minimal)** |
@@ -95,6 +99,9 @@ Classification per the standing rule: **A — USE** (commodity, no advantage), *
 | AI coaching architecture (hint ladder) | **D** | A2 makes this a correctness-critical contract, not a prompt. |
 | Evidence graph / portfolio intelligence | **D** | Trust mechanism. Directly serves EARN. Nothing comparable exists. |
 | LEARN→BUILD→LAUNCH→EARN progression | **D** | The product thesis. Cannot be borrowed. |
+| Opportunity matching & mission generation | **D** | The demand↔curriculum loop requires holding learning, evidence, and demand together. Only LAO does. |
+| Skills vocabulary (ESCO / O*NET) | **A** | Mature, permissive (CC BY 4.0), gives external interoperability. Inventing one is pure cost. |
+| Marketplace: escrow, payments, disputes | **—** | **Explicitly refused.** Off-thesis and enormous (§E6). |
 | Lesson authoring & delivery | **C** | LMS category is mature but bloated and copyleft (A7). Build small. |
 | Assessment & spaced practice scheduling | **C** | Algorithms are public and well-understood; implementations are heavy. |
 | Workflow / automation engine | **B** | Temporal (MIT) or Kestra (Apache-2.0) behind an LAO workflow interface. |
@@ -702,6 +709,87 @@ Sessions should be *designed* for the phone; building should be *supported* on d
 
 ---
 
+### D13. Opportunity marketplaces and matching
+
+**Leading products:** Upwork, Fiverr, Toptal, Contra, LinkedIn Jobs, Braintrust
+**Adjacent:** grant/funding databases, local business directories
+**Open reference data:** ESCO (CC BY 4.0 data; EUPL-1.2 API), O*NET (CC BY 4.0)
+
+#### What works
+
+- **Structured opportunity records.** Reducing messy demand to typed fields (scope, budget, deadline, required skills) is what makes matching possible at all.
+- **Toptal's pre-vetting.** Screening once, then vouching, is more efficient than making every client re-evaluate every candidate. It is also the only model in the category that solves credibility *before* a track record exists.
+- **Escrow and milestones.** Both sides need protection; this is the genuine service marketplaces provide.
+- **Upwork's Rising Talent badge** is an explicit acknowledgement that the cold-start problem is real enough to need a manufactured signal.
+
+#### Where they fail — and the failure is structural
+
+**The cold-start trap is the defining failure of this category.** Platform trust signals — Job Success Score, badges, review count, star rating — all require completed contracts. A newcomer has none, which makes them *algorithmically invisible and socially unverified simultaneously*. Clients filter on exactly the signals the newcomer cannot have. Reported outcome: typically 2–3 weeks to a first job, with some sending 20+ proposals before a single reply.
+
+This is a catch-22 by construction: **you need reviews to get hired and hiring to get reviews.** It is not a bug the platforms can fix, because their only evidence of capability *is* prior platform activity.
+
+Compounding it:
+
+- **Applying costs money.** Upwork's Connects run ~$0.15 each at 6–16 per application, so an active search costs roughly $10–20/month before earning anything. Beginners pay to be ignored.
+- **Fees are material.** Upwork takes a variable 0–15% service fee (most contracts near 10%); Fiverr takes a flat **20%** of every order and tip.
+- **Race to the bottom.** Undifferentiated newcomers compete on price alone, which is the one axis where a beginner should never compete.
+- **Matching is keyword-based**, not capability-based. Nobody knows what the candidate can actually *do*.
+- **Nobody teaches.** A rejected freelancer receives no diagnosis and no path. The marketplace has no interest in their development.
+
+#### The demand-side finding that matters most
+
+The market's stated bottleneck is *precisely what LAO teaches*:
+
+| Signal | Figure |
+|---|---|
+| Non-adopting small businesses citing **lack of expertise** as the primary barrier | **50–71%** — ahead of cost, regulation, and privacy |
+| SMB AI users citing lack of technical expertise as a challenge | 45% |
+| SMB AI users who find it hard to choose the right tools | 47% |
+| SMBs using AI with **no formal prompting strategy or system** | **77%** |
+| Small businesses actively using or exploring AI | 76% (with 79% planning increased investment) |
+| EU adoption gap, large enterprise vs. small (10–49 employees) | 55% vs **17%** |
+
+The barrier is explicitly *skills and confidence, not access or cost*. That is a demand pool shaped like LAO's output.
+
+#### Architecture lessons
+
+1. **Matching must run on demonstrated capability, not self-asserted skills.** This is the one thing LAO can do that no marketplace can, because LAO holds the mastery evidence.
+2. **Do not invent a skills vocabulary.** ESCO (~3,000 occupations, ~14,000 competencies, 28 languages) and O*NET already exist, are permissively licensed, and give interoperability with external job data. LAO's originality belongs in the *mastery model*, not the noun list.
+3. **Opportunity is a typed record, not a CRM object** — and it is the same record the narrow EARN-stage slice in §D3 needs. Do not build two.
+4. **Sourcing and matching must be separable.** Matching can be tested against learner-entered opportunities long before LAO sources any.
+
+#### UX lessons
+
+- One well-matched opportunity beats a feed of fifty. Volume is the incumbent's model and it is what produces spam.
+- Show *why* a match was made and what the gap is — an unexplained match is unactionable.
+- Never let a rejection be terminal with no diagnosis; that is the category's cruellest failure.
+
+#### Accessibility lessons
+
+- Opportunity records must be readable as plain structured text, not only as cards in a visual feed.
+- Deadline pressure needs accommodation paths, consistent with §D11.
+
+#### Licence posture
+
+| Source | Licence | Verdict |
+|---|---|---|
+| ESCO classification data | CC BY 4.0 ✅ | ✅ Usable with attribution |
+| ESCO API | EUPL-1.2 ✅ | Weak copyleft; fine behind a service boundary |
+| O*NET | CC BY 4.0 ✅ | ✅ Usable with attribution |
+| Upwork / Fiverr / LinkedIn | Proprietary | Study only; check ToS before any programmatic access |
+
+> ⚠️ Attribution is a **condition** of CC BY 4.0, not a courtesy. If ESCO or O*NET vocabulary is used, the attribution must ship with the product.
+
+#### LAO verdict
+
+- **Use:** ESCO/O*NET vocabulary, with attribution.
+- **Avoid:** building a two-sided marketplace; taking a transaction cut; auto-applying on a learner's behalf; volume feeds.
+- **Improve:** match on evidence rather than reviews, and return a *diagnosis* rather than a rejection.
+- **Class:** **D — LAO ORIGINAL** (the engine); **A — USE** (the skills vocabulary).
+- **Agent mapping:** Kilo (KK) opportunities, Lima (LL) grants/funding, Charlie (CC) sourcing, Uniform (UU) compliance review.
+
+---
+
 ## E. Proposed LAO original implementations
 
 These are the strategic capabilities that should be written as LAO IP. They are described here as *designs to be evaluated*, not as approved work. Each must still pass §B and §18 discipline.
@@ -794,7 +882,83 @@ An enforced escalation ladder, with the constraint implemented in LAO code rathe
 
 **Measurable success criterion, derived directly from A2:** learners must perform *better* on unaided assessment after coached practice than a control cohort without coaching. If LAO cannot demonstrate that, the coach is reproducing the −17% and must be changed.
 
-### E6. Friction Budget
+### E6. Opportunity Engine
+
+**Problem:** LAO's learner reaches the end of BUILD with genuine capability and no route to EARN. The marketplaces that exist reject them *structurally* — not for lack of skill, but because their trust signals require a track record the learner cannot have yet (§D13). Meanwhile a large, documented demand pool reports that its primary barrier is exactly the expertise LAO teaches. **Supply and demand both exist and cannot find each other.** That gap is the Opportunity Engine's entire reason to exist.
+
+#### Why LAO can do this and marketplaces cannot
+
+A marketplace's only evidence of capability is prior activity on that marketplace. LAO holds something no marketplace has: a **causal, timestamped record of how a capability was acquired and demonstrated** (E3). That converts the cold-start problem from unsolvable into merely hard.
+
+| | Upwork / Fiverr | LinkedIn | Coursera / Udemy | **LAO** |
+|---|---|---|---|---|
+| Sees capability evidence | Only prior platform work | Self-asserted claims | Course completion | **Full causal chain** |
+| Finds work | ✅ | ⚠️ | ❌ | ✅ (matching, not brokering) |
+| Teaches the gap | ❌ | ❌ | ✅ (generic) | ✅ (**targeted at a real opportunity**) |
+| Closes the loop | ❌ | ❌ | ❌ | ✅ |
+
+#### The loop (the original mechanism)
+
+The engine's value is not matching. Matching is commodity. The value is that **matching runs in both directions**:
+
+```
+Opportunity  ──requires──▶  Capability
+                               │
+                    ┌──────────┴──────────┐
+                    │                     │
+              mastery held          mastery missing
+                    │                     │
+                    ▼                     ▼
+        Evidence-backed approach    Targeted learning mission
+                    │                     │
+                    │                     ▼
+                    │             mastery + new evidence
+                    │                     │
+                    └──────────◀──────────┘
+```
+
+**A capability gap is not a rejection — it is a curriculum.** Demand pulls the syllabus rather than a syllabus being pushed at the learner. No product in §D13 or §D1 does this, because doing it requires holding the opportunity, the mastery model, and the evidence graph at once.
+
+#### Components
+
+| Component | Responsibility |
+|---|---|
+| **Opportunity record** | Typed: source, kind (client work / grant / local need / own product), required capabilities (ESCO-vocabulary), effort, expected value, deadline, evidence expected. Same record as the EARN-stage slice in §D3 — built once. |
+| **Capability matcher** | Matches required capabilities against the **Mastery Ledger** (E2) — demonstrated, not claimed. Returns a ranked match *with its reasoning exposed*. |
+| **Gap analyser** | The difference between required and held mastery. The engine's most valuable output — more useful than the match itself. |
+| **Mission generator** | Converts a gap into a targeted LEARN mission routed through the Progression Engine (E4). This is the loop-closing component. |
+| **Evidence-backed introduction** | Assembles a verifiable Evidence Graph (E3) link into the learner's approach, so a beginner arrives with proof instead of assertions. |
+| **Calibration guard** | Refuses to back an approach the evidence does not support (see risks). |
+
+#### Hard constraints
+
+These are design boundaries, not preferences:
+
+- **LAO does not become a marketplace.** No liquidity to bootstrap, no escrow, no disputes, no payments, no fraud surface. LAO matches and vouches; the transaction happens wherever the two parties prefer. This is a deliberate refusal of the largest, most off-thesis build in this document.
+- **LAO does not take a transaction cut.** A percentage of learner earnings would make LAO's incentive transaction volume rather than learner outcome — and would directly corrupt mastery gating (E2), because a gated learner is a learner not earning. The incentive must stay aligned with the learner getting *good*, not with them transacting.
+- **LAO never auto-applies on a learner's behalf.** Proposal spam is the documented failure mode of §D13. Automating it would make LAO the problem and would destroy the credibility instrument in a single quarter.
+- **Calibration over optimism.** An evidence-backed introduction is only worth something while it is *reliably* accurate. One oversold beginner damages the signal for every subsequent learner. The engine must be willing to say "not yet, here is what's missing."
+
+#### Honest risks
+
+1. **Sourcing is the hard half, and it has its own cold start.** An empty opportunity feed is worse than none — the same failure recorded for community in §D10. Matching must therefore be proven against learner-entered opportunities (their own network, local businesses they already know) *before* any sourcing investment.
+2. **A bad match costs the learner's scarcest resource.** Not time — motivation. Precision must beat recall at every stage; one good match beats fifty plausible ones.
+3. **Evidence credibility is a one-way door.** It compounds while accurate and collapses permanently when abused.
+4. **Regulatory exposure.** Matching people to paid work can touch employment-agency and labour regulation depending on jurisdiction, and grant matching may touch financial-promotion rules. **Requires Uniform (UU) review before any sourcing or introduction feature ships** — not before design.
+
+#### Smallest valuable version
+
+Per §18 discipline, the first build is deliberately unglamorous:
+
+> **Learner-entered opportunities + gap analysis + mission generation.** No sourcing. No introductions. No marketplace. No automation.
+
+That tests the only genuinely novel claim — *that turning a real opportunity's requirements into a targeted learning mission produces better outcomes than a generic syllabus* — at the lowest possible cost. If the loop does not create value at this size, no amount of sourcing will rescue it. Evidence-backed introductions come second, and only once the Evidence Graph (E3) has enough substance to be worth showing.
+
+#### Why original
+
+The opportunity record is commodity, the skills vocabulary is borrowed (ESCO/O*NET, CC BY 4.0), and the matching maths is standard. **The loop is the IP** — and it is only constructible by a system that holds learning, evidence, and demand together. It is also the capability that makes the LEARN→BUILD→LAUNCH→EARN thesis a mechanism rather than a slogan.
+
+### E7. Friction Budget
 
 **Problem:** the stated target is "least possible friction" — currently unmeasurable, therefore unmanageable.
 
@@ -816,6 +980,9 @@ The standing principle ends in TEST → MEASURE. These are the measurements that
 | First-two-weeks design | 14-day retention (attacks the 50%-of-dropouts window) | Not achieved via engagement mechanics |
 | Progression engine | Stage transition rates, especially BUILD→LAUNCH | Regression rate stays healthy, not zero |
 | Evidence graph | Portfolio artifacts generated per learner; external engagement with them | Learner consent rate stays high |
+| **Opportunity Engine — the loop** | **Gap → mission → mastery → win conversion rate** (the claim that demand-derived missions beat generic syllabus) | Learner does not abandon after a failed pursuit |
+| Opportunity Engine — matching | Match *precision*: share of pursued opportunities that convert | Precision must not be bought with recall collapse |
+| Evidence-backed introduction | Response rate vs. an unbacked approach baseline | **Calibration: share of backed approaches that the work justified** — if this falls, stop |
 | Multi-modal lessons | Modality usage distribution; outcome parity across modalities | No modality is systematically worse |
 | Video pipeline | Cost per lesson-minute; correction turnaround | Caption accuracy |
 | Friction budget | Time-to-first-earning | — |
@@ -857,6 +1024,9 @@ Per the standing open-source policy. **Every licence below marked ✅ was verifi
 | **Discourse** | GPL-2.0-or-later ✅ | Community, if ever integrated | No — separate service | No | Circle, Discord | Integration boundary only |
 | **freeCodeCamp** | BSD-3-Clause code; curriculum separate ✅ | Study — project-based certification model | — | — | — | None |
 | **axe-core** | MPL-2.0 ✅ | CI accessibility testing | No — dev dependency | No | Other a11y tooling | CI only, not shipped |
+| **ESCO** (classification data) | CC BY 4.0 ✅ | Skills/occupation vocabulary for matching | Yes — vocabulary ships | No | O*NET | LAO capability model — **attribution must ship** |
+| **ESCO** (API) | EUPL-1.2 ✅ | Optional lookup service | No — service boundary | No | Local copy of the data | Weak copyleft; keep behind a service boundary |
+| **O*NET** | CC BY 4.0 ✅ | Alternative/complementary skills taxonomy | Yes — vocabulary ships | No | ESCO | Same as ESCO; **attribution must ship** |
 
 ### Standing licence rules
 
@@ -887,6 +1057,10 @@ Recording rejections is as valuable as recording adoptions, because rejected ide
 | Author lessons in a single modality | Forecloses multi-modal delivery permanently (§D11) |
 | Design desktop-first | Violates the mobile-first principle (§D12) |
 | Cite Bloom's 2σ in any LAO material | It does not replicate; ~0.37σ is the honest figure (A1) |
+| Build a two-sided marketplace | Liquidity, escrow, disputes, fraud — enormous and off-thesis (§E6) |
+| Take a cut of learner earnings | Would make LAO's incentive transaction volume, corrupting mastery gating (§E6) |
+| Auto-apply to opportunities for learners | Proposal spam is the category's documented failure mode (§D13) |
+| Invent a skills taxonomy | ESCO and O*NET exist under CC BY 4.0; originality belongs in the mastery model |
 
 ---
 
@@ -900,7 +1074,9 @@ Recorded honestly rather than resolved prematurely. Each needs an answer before 
 4. **Phone-primary learners who cannot access a desktop.** §D12's split-session model assumes desktop availability for BUILD. For learners without it, what is the genuine path? This may be the most important unanswered accessibility question in the product.
 5. **Duolingo's adaptive model.** IRT/computer-adaptive testing in the Duolingo English Test is well documented, but the internals of their consumer-app adaptive system are not publicly verified. LAO should base its own adaptivity on the published IRT/CAT and spacing literature rather than inferred competitor behaviour.
 6. **Community timing.** Community helps retention but is negative when empty. What learner volume justifies starting it?
-7. **Piper decision (A8).** Unmaintained MIT versus maintained GPL-3.0 versus a different TTS engine entirely. Because Piper sits behind LAO's voice adapter, this is a low-cost decision to defer — but it should be made deliberately, not by whichever version someone installs first.
+7. **Opportunity sourcing (§E6).** The engine's hard half. Learner-entered opportunities prove the loop but do not scale it. Which source comes next — public listings, local business outreach, partner channels, grant databases — is unresolved, and each carries different ToS and regulatory weight.
+8. **Does the demand pool actually hire beginners?** A9 establishes that small businesses report a skills barrier. It does *not* establish that they will hire a newly-capable beginner rather than an agency. This assumption underpins the Opportunity Engine and should be tested with real learners before sourcing is built.
+9. **Piper decision (A8).** Unmaintained MIT versus maintained GPL-3.0 versus a different TTS engine entirely. Because Piper sits behind LAO's voice adapter, this is a low-cost decision to defer — but it should be made deliberately, not by whichever version someone installs first.
 
 ---
 
@@ -944,3 +1120,9 @@ Primary and authoritative sources consulted for the verified claims in this docu
 **Accessibility**
 - [WCAG 2.2 checklist and success criteria](https://www.levelaccess.com/blog/wcag-2-2-aa-summary-and-checklist-for-website-owners/) · [WCAG 2.2 success criteria explained](https://216digital.com/wcag-2-2-success-criteria-explained-the-2026-compliance-guide/)
 - [WCAG 3.0 status and timeline](https://www.webability.io/blog/wcag-3-0-explained)
+
+**Opportunity, demand, and skills taxonomies**
+- [Upwork — top reasons you can't get a job on Upwork](https://www.upwork.com/resources/cant-get-jobs-on-upwork) · [Upwork first client with no reviews](https://zenlance.net/upwork-first-client-with-no-reviews/) · [Fiverr — building credibility with no reviews](https://community.fiverr.com/public/blogs/how-to-build-credibility-on-fiverr-when-you-have-no-reviews-2025-09-23)
+- [Upwork vs Fiverr — fee comparison](https://freelancecompare.com/blog/upwork-vs-fiverr-comparison) · [Upwork vs Fiverr fees, pay and Connects](https://sidequesthustle.com/guides/upwork-vs-fiverr-comparison)
+- [SME AI adoption in 2026 — what the data shows](https://www.omago.ai/blog/sme-ai-adoption-2026-data) · [Small business AI adoption statistics](https://capsulecrm.com/blog/small-business-ai-adoption-statistics/) · [US small business AI adoption data points](https://epiphanydynamics.ai/blog/state-of-ai-adoption-us-small-business-2026/)
+- [ESCO copyright notice — skills and competences](https://esco.ec.europa.eu/en/copyright-notice-esco-skills-competences) · [ESCO API terms](https://esco.ec.europa.eu/en/use-esco/use-esco-services-api) · [EUPL 1.2](https://eupl.eu/)
