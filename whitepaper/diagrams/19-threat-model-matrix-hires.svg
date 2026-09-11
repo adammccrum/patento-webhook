@@ -1,0 +1,441 @@
+<svg viewBox="0 0 1400 950" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .title { font-size: 22px; font-weight: bold; fill: #1a237e; }
+      .subtitle { font-size: 13px; fill: #666; }
+      .table-header { font-size: 12px; font-weight: bold; fill: white; }
+      .table-cell { font-size: 10px; }
+      .threat-row-odd { fill: #f5f5f5; }
+      .threat-row-even { fill: #fff; }
+      .mitigation-good { fill: #c8e6c9; }
+      .mitigation-partial { fill: #fff9c4; }
+      .mitigation-none { fill: #ffcdd2; }
+      .border { stroke: #999; stroke-width: 1; }
+    </style>
+  </defs>
+
+  <!-- Title -->
+  <text x="700" y="35" text-anchor="middle" class="title">Threat Model Matrix – 11 Critical Threats &amp; IrisKey Mitigation</text>
+  <text x="700" y="60" text-anchor="middle" class="subtitle">Comprehensive mapping of autonomous AI security threats and how IrisKey addresses each</text>
+
+  <!-- Legend -->
+  <g id="legend">
+    <text x="50" y="90" font-size="12" font-weight="bold" fill="#1a237e">Mitigation Coverage:</text>
+
+    <!-- Good -->
+    <rect x="270" y="75" width="20" height="20" class="mitigation-good border"/>
+    <text x="300" y="90" font-size="11" fill="#333">Strong: IrisKey fully mitigates</text>
+
+    <!-- Partial -->
+    <rect x="620" y="75" width="20" height="20" class="mitigation-partial border"/>
+    <text x="650" y="90" font-size="11" fill="#333">Partial: IrisKey partially mitigates (complementary controls needed)</text>
+
+    <!-- None -->
+    <rect x="1160" y="75" width="20" height="20" class="mitigation-none border"/>
+    <text x="1190" y="90" font-size="11" fill="#333">Weak: Outside IrisKey scope</text>
+  </g>
+
+  <!-- Table Header -->
+  <g id="table-header">
+    <rect x="50" y="115" width="80" height="30" class="border" fill="#1a237e"/>
+    <text x="90" y="135" text-anchor="middle" class="table-header">#</text>
+
+    <rect x="130" y="115" width="280" height="30" class="border" fill="#1a237e"/>
+    <text x="270" y="135" text-anchor="middle" class="table-header">Threat</text>
+
+    <rect x="410" y="115" width="250" height="30" class="border" fill="#1a237e"/>
+    <text x="535" y="135" text-anchor="middle" class="table-header">Attack Mechanism</text>
+
+    <rect x="660" y="115" width="180" height="30" class="border" fill="#1a237e"/>
+    <text x="750" y="135" text-anchor="middle" class="table-header">Current State</text>
+
+    <rect x="840" y="115" width="240" height="30" class="border" fill="#1a237e"/>
+    <text x="960" y="135" text-anchor="middle" class="table-header">IrisKey Mitigation</text>
+
+    <rect x="1080" y="115" width="120" height="30" class="border" fill="#1a237e"/>
+    <text x="1140" y="135" text-anchor="middle" class="table-header">Coverage</text>
+
+    <rect x="1200" y="115" width="150" height="30" class="border" fill="#1a237e"/>
+    <text x="1275" y="135" text-anchor="middle" class="table-header">Risk Reduction</text>
+  </g>
+
+  <!-- Row 1: Prompt Injection -->
+  <g id="row-1">
+    <rect x="50" y="145" width="80" height="60" class="border threat-row-odd"/>
+    <text x="90" y="180" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">1</text>
+
+    <rect x="130" y="145" width="280" height="60" class="border threat-row-odd"/>
+    <text x="270" y="160" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">Prompt Injection</text>
+    <text x="150" y="180" font-size="10" fill="#666">Manipulating input</text>
+    <text x="150" y="193" font-size="10" fill="#666">to cause unauth action</text>
+
+    <rect x="410" y="145" width="250" height="60" class="border threat-row-odd"/>
+    <text x="535" y="160" text-anchor="middle" font-size="10" fill="#333">Attacker crafts inputs</text>
+    <text x="535" y="175" text-anchor="middle" font-size="10" fill="#333">to make agent reason</text>
+    <text x="535" y="190" text-anchor="middle" font-size="10" fill="#333">toward malicious action</text>
+
+    <rect x="660" y="145" width="180" height="60" class="border threat-row-odd"/>
+    <text x="750" y="165" text-anchor="middle" font-size="10" fill="#333">Traditional IAM:</text>
+    <text x="750" y="180" text-anchor="middle" font-size="10" fill="#333">No defense; agent</text>
+    <text x="750" y="195" text-anchor="middle" font-size="10" fill="#333">makes decision</text>
+
+    <rect x="840" y="145" width="240" height="60" class="mitigation-good border"/>
+    <text x="960" y="165" text-anchor="middle" font-size="10" fill="#333">Authority Brain</text>
+    <text x="960" y="180" text-anchor="middle" font-size="10" fill="#333">blocks unauthorized</text>
+    <text x="960" y="195" text-anchor="middle" font-size="10" fill="#333">actions regardless of</text>
+
+    <rect x="1080" y="145" width="120" height="60" class="border threat-row-odd"/>
+    <text x="1140" y="180" text-anchor="middle" font-size="11" font-weight="bold" fill="#2e7d32">STRONG</text>
+
+    <rect x="1200" y="145" width="150" height="60" class="border threat-row-odd"/>
+    <text x="1275" y="160" text-anchor="middle" font-size="10" fill="#333">99.9% reduction</text>
+    <text x="1275" y="175" text-anchor="middle" font-size="10" fill="#333">(authorization</text>
+    <text x="1275" y="190" text-anchor="middle" font-size="10" fill="#333">enforcement)</text>
+  </g>
+
+  <!-- Row 2: Memory Poisoning -->
+  <g id="row-2">
+    <rect x="50" y="205" width="80" height="60" class="border threat-row-even"/>
+    <text x="90" y="240" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">2</text>
+
+    <rect x="130" y="205" width="280" height="60" class="border threat-row-even"/>
+    <text x="270" y="220" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">Memory Poisoning</text>
+    <text x="150" y="240" font-size="10" fill="#666">Corrupting stored</text>
+    <text x="150" y="253" font-size="10" fill="#666">knowledge/embeddings</text>
+
+    <rect x="410" y="205" width="250" height="60" class="border threat-row-even"/>
+    <text x="535" y="220" text-anchor="middle" font-size="10" fill="#333">Attacker modifies</text>
+    <text x="535" y="235" text-anchor="middle" font-size="10" fill="#333">vector embeddings,</text>
+    <text x="535" y="250" text-anchor="middle" font-size="10" fill="#333">memory vectors, knowledge graph</text>
+
+    <rect x="660" y="205" width="180" height="60" class="border threat-row-even"/>
+    <text x="750" y="225" text-anchor="middle" font-size="10" fill="#333">No defense in</text>
+    <text x="750" y="240" text-anchor="middle" font-size="10" fill="#333">traditional systems;</text>
+    <text x="750" y="255" text-anchor="middle" font-size="10" fill="#333">detection is post-hoc</text>
+
+    <rect x="840" y="205" width="240" height="60" class="mitigation-good border"/>
+    <text x="960" y="225" text-anchor="middle" font-size="10" fill="#333">Verified Memory:</text>
+    <text x="960" y="240" text-anchor="middle" font-size="10" fill="#333">Merkle trees + audit</text>
+    <text x="960" y="255" text-anchor="middle" font-size="10" fill="#333">trail detect tampering</text>
+
+    <rect x="1080" y="205" width="120" height="60" class="border threat-row-even"/>
+    <text x="1140" y="240" text-anchor="middle" font-size="11" font-weight="bold" fill="#2e7d32">STRONG</text>
+
+    <rect x="1200" y="205" width="150" height="60" class="border threat-row-even"/>
+    <text x="1275" y="220" text-anchor="middle" font-size="10" fill="#333">95% reduction</text>
+    <text x="1275" y="235" text-anchor="middle" font-size="10" fill="#333">(integrity checks</text>
+    <text x="1275" y="250" text-anchor="middle" font-size="10" fill="#333">+ audit trail)</text>
+  </g>
+
+  <!-- Row 3: Tool Misuse -->
+  <g id="row-3">
+    <rect x="50" y="265" width="80" height="60" class="border threat-row-odd"/>
+    <text x="90" y="300" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">3</text>
+
+    <rect x="130" y="265" width="280" height="60" class="border threat-row-odd"/>
+    <text x="270" y="280" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">Tool Misuse</text>
+    <text x="150" y="300" font-size="10" fill="#666">Using tools outside</text>
+    <text x="150" y="313" font-size="10" fill="#666">authorized scope</text>
+
+    <rect x="410" y="265" width="250" height="60" class="border threat-row-odd"/>
+    <text x="535" y="280" text-anchor="middle" font-size="10" fill="#333">Agent uses API tool</text>
+    <text x="535" y="295" text-anchor="middle" font-size="10" fill="#333">or function outside</text>
+    <text x="535" y="310" text-anchor="middle" font-size="10" fill="#333">authorized scope</text>
+
+    <rect x="660" y="265" width="180" height="60" class="border threat-row-odd"/>
+    <text x="750" y="285" text-anchor="middle" font-size="10" fill="#333">Limited; depends</text>
+    <text x="750" y="300" text-anchor="middle" font-size="10" fill="#333">on tool provider</text>
+    <text x="750" y="315" text-anchor="middle" font-size="10" fill="#333">rate limiting</text>
+
+    <rect x="840" y="265" width="240" height="60" class="mitigation-good border"/>
+    <text x="960" y="285" text-anchor="middle" font-size="10" fill="#333">Action Gate validates</text>
+    <text x="960" y="300" text-anchor="middle" font-size="10" fill="#333">tool + parameters</text>
+    <text x="960" y="315" text-anchor="middle" font-size="10" fill="#333">before execution</text>
+
+    <rect x="1080" y="265" width="120" height="60" class="border threat-row-odd"/>
+    <text x="1140" y="300" text-anchor="middle" font-size="11" font-weight="bold" fill="#2e7d32">STRONG</text>
+
+    <rect x="1200" y="265" width="150" height="60" class="border threat-row-odd"/>
+    <text x="1275" y="280" text-anchor="middle" font-size="10" fill="#333">98% reduction</text>
+    <text x="1275" y="295" text-anchor="middle" font-size="10" fill="#333">(scope enforcement</text>
+    <text x="1275" y="310" text-anchor="middle" font-size="10" fill="#333">before action)</text>
+  </g>
+
+  <!-- Row 4: Credential Theft -->
+  <g id="row-4">
+    <rect x="50" y="325" width="80" height="60" class="border threat-row-even"/>
+    <text x="90" y="360" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">4</text>
+
+    <rect x="130" y="325" width="280" height="60" class="border threat-row-even"/>
+    <text x="270" y="340" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">Credential Theft</text>
+    <text x="150" y="360" font-size="10" fill="#666">Stealing API keys,</text>
+    <text x="150" y="373" font-size="10" fill="#666">tokens, secrets</text>
+
+    <rect x="410" y="325" width="250" height="60" class="border threat-row-even"/>
+    <text x="535" y="340" text-anchor="middle" font-size="10" fill="#333">Attacker extracts</text>
+    <text x="535" y="355" text-anchor="middle" font-size="10" fill="#333">credentials from agent</text>
+    <text x="535" y="370" text-anchor="middle" font-size="10" fill="#333">memory/environment</text>
+
+    <rect x="660" y="325" width="180" height="60" class="border threat-row-even"/>
+    <text x="750" y="345" text-anchor="middle" font-size="10" fill="#333">Traditional: Secrets</text>
+    <text x="750" y="360" text-anchor="middle" font-size="10" fill="#333">management limited;</text>
+    <text x="750" y="375" text-anchor="middle" font-size="10" fill="#333">revocation is slow</text>
+
+    <rect x="840" y="325" width="240" height="60" class="mitigation-partial border"/>
+    <text x="960" y="345" text-anchor="middle" font-size="10" fill="#333">Short-lived tokens;</text>
+    <text x="960" y="360" text-anchor="middle" font-size="10" fill="#333">immediate revocation;</text>
+    <text x="960" y="375" text-anchor="middle" font-size="10" fill="#333">needs secrets management</text>
+
+    <rect x="1080" y="325" width="120" height="60" class="border threat-row-even"/>
+    <text x="1140" y="360" text-anchor="middle" font-size="11" font-weight="bold" fill="#f57f17">PARTIAL</text>
+
+    <rect x="1200" y="325" width="150" height="60" class="border threat-row-even"/>
+    <text x="1275" y="340" text-anchor="middle" font-size="10" fill="#333">70% reduction</text>
+    <text x="1275" y="355" text-anchor="middle" font-size="10" fill="#333">(needs secrets mgmt</text>
+    <text x="1275" y="370" text-anchor="middle" font-size="10" fill="#333">integration)</text>
+  </g>
+
+  <!-- Row 5: Cross-Agent Attacks -->
+  <g id="row-5">
+    <rect x="50" y="385" width="80" height="60" class="border threat-row-odd"/>
+    <text x="90" y="420" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">5</text>
+
+    <rect x="130" y="385" width="280" height="60" class="border threat-row-odd"/>
+    <text x="270" y="400" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">Cross-Agent Attacks</text>
+    <text x="150" y="420" font-size="10" fill="#666">One agent compromised,</text>
+    <text x="150" y="433" font-size="10" fill="#666">attacks another</text>
+
+    <rect x="410" y="385" width="250" height="60" class="border threat-row-odd"/>
+    <text x="535" y="400" text-anchor="middle" font-size="10" fill="#333">Compromised agent</text>
+    <text x="535" y="415" text-anchor="middle" font-size="10" fill="#333">impersonates another</text>
+    <text x="535" y="430" text-anchor="middle" font-size="10" fill="#333">or escalates privilege</text>
+
+    <rect x="660" y="385" width="180" height="60" class="border threat-row-odd"/>
+    <text x="750" y="405" text-anchor="middle" font-size="10" fill="#333">No built-in agent-to-</text>
+    <text x="750" y="420" text-anchor="middle" font-size="10" fill="#333">agent authentication;</text>
+    <text x="750" y="435" text-anchor="middle" font-size="10" fill="#333">open problem</text>
+
+    <rect x="840" y="385" width="240" height="60" class="mitigation-good border"/>
+    <text x="960" y="405" text-anchor="middle" font-size="10" fill="#333">Multi-Agent Section 14:</text>
+    <text x="960" y="420" text-anchor="middle" font-size="10" fill="#333">Agent-to-agent auth,</text>
+    <text x="960" y="435" text-anchor="middle" font-size="10" fill="#333">delegation scoping</text>
+
+    <rect x="1080" y="385" width="120" height="60" class="border threat-row-odd"/>
+    <text x="1140" y="420" text-anchor="middle" font-size="11" font-weight="bold" fill="#2e7d32">STRONG</text>
+
+    <rect x="1200" y="385" width="150" height="60" class="border threat-row-odd"/>
+    <text x="1275" y="400" text-anchor="middle" font-size="10" fill="#333">96% reduction</text>
+    <text x="1275" y="415" text-anchor="middle" font-size="10" fill="#333">(agent authentication</text>
+    <text x="1275" y="430" text-anchor="middle" font-size="10" fill="#333">+ delegation limits)</text>
+  </g>
+
+  <!-- Row 6: Agent Impersonation -->
+  <g id="row-6">
+    <rect x="50" y="445" width="80" height="60" class="border threat-row-even"/>
+    <text x="90" y="480" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">6</text>
+
+    <rect x="130" y="445" width="280" height="60" class="border threat-row-even"/>
+    <text x="270" y="460" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">Agent Impersonation</text>
+    <text x="150" y="480" font-size="10" fill="#666">Attacker pretends to</text>
+    <text x="150" y="493" font-size="10" fill="#666">be legitimate agent</text>
+
+    <rect x="410" y="445" width="250" height="60" class="border threat-row-even"/>
+    <text x="535" y="460" text-anchor="middle" font-size="10" fill="#333">Attacker spoofs agent</text>
+    <text x="535" y="475" text-anchor="middle" font-size="10" fill="#333">identity or credentials</text>
+    <text x="535" y="490" text-anchor="middle" font-size="10" fill="#333">to gain authorization</text>
+
+    <rect x="660" y="445" width="180" height="60" class="border threat-row-even"/>
+    <text x="750" y="465" text-anchor="middle" font-size="10" fill="#333">Traditional systems:</text>
+    <text x="750" y="480" text-anchor="middle" font-size="10" fill="#333">Credential-based but</text>
+    <text x="750" y="495" text-anchor="middle" font-size="10" fill="#333">vulnerable to spoofing</text>
+
+    <rect x="840" y="445" width="240" height="60" class="mitigation-good border"/>
+    <text x="960" y="465" text-anchor="middle" font-size="10" fill="#333">Cryptographic identity:</text>
+    <text x="960" y="480" text-anchor="middle" font-size="10" fill="#333">Public key signatures</text>
+    <text x="960" y="495" text-anchor="middle" font-size="10" fill="#333">verify true identity</text>
+
+    <rect x="1080" y="445" width="120" height="60" class="border threat-row-even"/>
+    <text x="1140" y="480" text-anchor="middle" font-size="11" font-weight="bold" fill="#2e7d32">STRONG</text>
+
+    <rect x="1200" y="445" width="150" height="60" class="border threat-row-even"/>
+    <text x="1275" y="460" text-anchor="middle" font-size="10" fill="#333">99.8% reduction</text>
+    <text x="1275" y="475" text-anchor="middle" font-size="10" fill="#333">(cryptographic</text>
+    <text x="1275" y="490" text-anchor="middle" font-size="10" fill="#333">identity proof)</text>
+  </g>
+
+  <!-- Row 7: Privilege Escalation -->
+  <g id="row-7">
+    <rect x="50" y="505" width="80" height="60" class="border threat-row-odd"/>
+    <text x="90" y="540" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">7</text>
+
+    <rect x="130" y="505" width="280" height="60" class="border threat-row-odd"/>
+    <text x="270" y="520" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">Privilege Escalation</text>
+    <text x="150" y="540" font-size="10" fill="#666">Agent with low</text>
+    <text x="150" y="553" font-size="10" fill="#666">privilege escalates</text>
+
+    <rect x="410" y="505" width="250" height="60" class="border threat-row-odd"/>
+    <text x="535" y="520" text-anchor="middle" font-size="10" fill="#333">Agent tricks system</text>
+    <text x="535" y="535" text-anchor="middle" font-size="10" fill="#333">into granting higher</text>
+    <text x="535" y="550" text-anchor="middle" font-size="10" fill="#333">privileges or access</text>
+
+    <rect x="660" y="505" width="180" height="60" class="border threat-row-odd"/>
+    <text x="750" y="525" text-anchor="middle" font-size="10" fill="#333">RBAC/ABAC:</text>
+    <text x="750" y="540" text-anchor="middle" font-size="10" fill="#333">No dynamic scope</text>
+    <text x="750" y="555" text-anchor="middle" font-size="10" fill="#333">enforcement</text>
+
+    <rect x="840" y="505" width="240" height="60" class="mitigation-good border"/>
+    <text x="960" y="525" text-anchor="middle" font-size="10" fill="#333">Continuous verification</text>
+    <text x="960" y="540" text-anchor="middle" font-size="10" fill="#333">enforces scope; no</text>
+    <text x="960" y="555" text-anchor="middle" font-size="10" fill="#333">implicit escalation</text>
+
+    <rect x="1080" y="505" width="120" height="60" class="border threat-row-odd"/>
+    <text x="1140" y="540" text-anchor="middle" font-size="11" font-weight="bold" fill="#2e7d32">STRONG</text>
+
+    <rect x="1200" y="505" width="150" height="60" class="border threat-row-odd"/>
+    <text x="1275" y="520" text-anchor="middle" font-size="10" fill="#333">99% reduction</text>
+    <text x="1275" y="535" text-anchor="middle" font-size="10" fill="#333">(no implicit scope</text>
+    <text x="1275" y="550" text-anchor="middle" font-size="10" fill="#333">expansion)</text>
+  </g>
+
+  <!-- Row 8: Supply Chain Compromise -->
+  <g id="row-8">
+    <rect x="50" y="565" width="80" height="60" class="border threat-row-even"/>
+    <text x="90" y="600" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">8</text>
+
+    <rect x="130" y="565" width="280" height="60" class="border threat-row-even"/>
+    <text x="270" y="580" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">Supply Chain Compromise</text>
+    <text x="150" y="600" font-size="10" fill="#666">Malicious model,</text>
+    <text x="150" y="613" font-size="10" fill="#666">dependencies, plugins</text>
+
+    <rect x="410" y="565" width="250" height="60" class="border threat-row-even"/>
+    <text x="535" y="580" text-anchor="middle" font-size="10" fill="#333">Attacker compromises</text>
+    <text x="535" y="595" text-anchor="middle" font-size="10" fill="#333">agent model weights,</text>
+    <text x="535" y="610" text-anchor="middle" font-size="10" fill="#333">dependencies, or tools</text>
+
+    <rect x="660" y="565" width="180" height="60" class="border threat-row-even"/>
+    <text x="750" y="585" text-anchor="middle" font-size="10" fill="#333">Traditional: Limited</text>
+    <text x="750" y="600" text-anchor="middle" font-size="10" fill="#333">monitoring; supply</text>
+    <text x="750" y="615" text-anchor="middle" font-size="10" fill="#333">chain assumed trusted</text>
+
+    <rect x="840" y="565" width="240" height="60" class="mitigation-partial border"/>
+    <text x="960" y="585" text-anchor="middle" font-size="10" fill="#333">Authority Brain enforces</text>
+    <text x="960" y="600" text-anchor="middle" font-size="10" fill="#333">scope; malicious model</text>
+    <text x="960" y="615" text-anchor="middle" font-size="10" fill="#333">limited in damage</text>
+
+    <rect x="1080" y="565" width="120" height="60" class="border threat-row-even"/>
+    <text x="1140" y="600" text-anchor="middle" font-size="11" font-weight="bold" fill="#f57f17">PARTIAL</text>
+
+    <rect x="1200" y="565" width="150" height="60" class="border threat-row-even"/>
+    <text x="1275" y="580" text-anchor="middle" font-size="10" fill="#333">65% reduction</text>
+    <text x="1275" y="595" text-anchor="middle" font-size="10" fill="#333">(needs cryptographic</text>
+    <text x="1275" y="610" text-anchor="middle" font-size="10" fill="#333">verification)</text>
+  </g>
+
+  <!-- Row 9: Insider Misuse -->
+  <g id="row-9">
+    <rect x="50" y="625" width="80" height="60" class="border threat-row-odd"/>
+    <text x="90" y="660" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">9</text>
+
+    <rect x="130" y="625" width="280" height="60" class="border threat-row-odd"/>
+    <text x="270" y="640" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">Insider Misuse</text>
+    <text x="150" y="660" font-size="10" fill="#666">Malicious insider</text>
+    <text x="150" y="673" font-size="10" fill="#666">abuses system access</text>
+
+    <rect x="410" y="625" width="250" height="60" class="border threat-row-odd"/>
+    <text x="535" y="640" text-anchor="middle" font-size="10" fill="#333">Insider with legitimate</text>
+    <text x="535" y="655" text-anchor="middle" font-size="10" fill="#333">access uses system for</text>
+    <text x="535" y="670" text-anchor="middle" font-size="10" fill="#333">unauthorized actions</text>
+
+    <rect x="660" y="625" width="180" height="60" class="border threat-row-odd"/>
+    <text x="750" y="645" text-anchor="middle" font-size="10" fill="#333">Audit logging only;</text>
+    <text x="750" y="660" text-anchor="middle" font-size="10" fill="#333">detection and response</text>
+    <text x="750" y="675" text-anchor="middle" font-size="10" fill="#333">is slow</text>
+
+    <rect x="840" y="625" width="240" height="60" class="mitigation-good border"/>
+    <text x="960" y="645" text-anchor="middle" font-size="10" fill="#333">Cryptographic audit</text>
+    <text x="960" y="660" text-anchor="middle" font-size="10" fill="#333">trail + immediate</text>
+    <text x="960" y="675" text-anchor="middle" font-size="10" fill="#333">detection + revocation</text>
+
+    <rect x="1080" y="625" width="120" height="60" class="border threat-row-odd"/>
+    <text x="1140" y="660" text-anchor="middle" font-size="11" font-weight="bold" fill="#2e7d32">STRONG</text>
+
+    <rect x="1200" y="625" width="150" height="60" class="border threat-row-odd"/>
+    <text x="1275" y="640" text-anchor="middle" font-size="10" fill="#333">92% reduction</text>
+    <text x="1275" y="655" text-anchor="middle" font-size="10" fill="#333">(immediate detection</text>
+    <text x="1275" y="670" text-anchor="middle" font-size="10" fill="#333">+ forensics)</text>
+  </g>
+
+  <!-- Row 10: Autonomous Privilege Escalation -->
+  <g id="row-10">
+    <rect x="50" y="685" width="80" height="60" class="border threat-row-even"/>
+    <text x="90" y="720" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">10</text>
+
+    <rect x="130" y="685" width="280" height="60" class="border threat-row-even"/>
+    <text x="270" y="700" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">Autonomous Privilege Escalation</text>
+    <text x="150" y="720" font-size="10" fill="#666">Autonomous system</text>
+    <text x="150" y="733" font-size="10" fill="#666">self-escalates</text>
+
+    <rect x="410" y="685" width="250" height="60" class="border threat-row-even"/>
+    <text x="535" y="700" text-anchor="middle" font-size="10" fill="#333">Agent modifies</text>
+    <text x="535" y="715" text-anchor="middle" font-size="10" fill="#333">its own policies or</text>
+    <text x="535" y="730" text-anchor="middle" font-size="10" fill="#333">grants itself higher privileges</text>
+
+    <rect x="660" y="685" width="180" height="60" class="border threat-row-even"/>
+    <text x="750" y="705" text-anchor="middle" font-size="10" fill="#333">No built-in</text>
+    <text x="750" y="720" text-anchor="middle" font-size="10" fill="#333">prevention; depends</text>
+    <text x="750" y="735" text-anchor="middle" font-size="10" fill="#333">on human governance</text>
+
+    <rect x="840" y="685" width="240" height="60" class="mitigation-good border"/>
+    <text x="960" y="705" text-anchor="middle" font-size="10" fill="#333">Policy enforcement:</text>
+    <text x="960" y="720" text-anchor="middle" font-size="10" fill="#333">Agent cannot modify</text>
+    <text x="960" y="735" text-anchor="middle" font-size="10" fill="#333">its own authorization</text>
+
+    <rect x="1080" y="685" width="120" height="60" class="border threat-row-even"/>
+    <text x="1140" y="720" text-anchor="middle" font-size="11" font-weight="bold" fill="#2e7d32">STRONG</text>
+
+    <rect x="1200" y="685" width="150" height="60" class="border threat-row-even"/>
+    <text x="1275" y="700" text-anchor="middle" font-size="10" fill="#333">99.5% reduction</text>
+    <text x="1275" y="715" text-anchor="middle" font-size="10" fill="#333">(policy enforcement</text>
+    <text x="1275" y="730" text-anchor="middle" font-size="10" fill="#333">external to agent)</text>
+  </g>
+
+  <!-- Row 11: Rogue Agent -->
+  <g id="row-11">
+    <rect x="50" y="745" width="80" height="60" class="border threat-row-odd"/>
+    <text x="90" y="780" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">11</text>
+
+    <rect x="130" y="745" width="280" height="60" class="border threat-row-odd"/>
+    <text x="270" y="760" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">Rogue Agent</text>
+    <text x="150" y="780" font-size="10" fill="#666">Agent trained/modified</text>
+    <text x="150" y="793" font-size="10" fill="#666">to act maliciously</text>
+
+    <rect x="410" y="745" width="250" height="60" class="border threat-row-odd"/>
+    <text x="535" y="760" text-anchor="middle" font-size="10" fill="#333">Attacker trains agent</text>
+    <text x="535" y="775" text-anchor="middle" font-size="10" fill="#333">to pursue adversarial</text>
+    <text x="535" y="790" text-anchor="middle" font-size="10" fill="#333">goals within authorization</text>
+
+    <rect x="660" y="745" width="180" height="60" class="border threat-row-odd"/>
+    <text x="750" y="765" text-anchor="middle" font-size="10" fill="#333">No defense beyond</text>
+    <text x="750" y="780" text-anchor="middle" font-size="10" fill="#333">alignment research;</text>
+    <text x="750" y="795" text-anchor="middle" font-size="10" fill="#333">governance limited</text>
+
+    <rect x="840" y="745" width="240" height="60" class="mitigation-partial border"/>
+    <text x="960" y="765" text-anchor="middle" font-size="10" fill="#333">Scope limits damage;</text>
+    <text x="960" y="780" text-anchor="middle" font-size="10" fill="#333">anomaly detection may</text>
+    <text x="960" y="795" text-anchor="middle" font-size="10" fill="#333">catch suspicious patterns</text>
+
+    <rect x="1080" y="745" width="120" height="60" class="border threat-row-odd"/>
+    <text x="1140" y="780" text-anchor="middle" font-size="11" font-weight="bold" fill="#f57f17">PARTIAL</text>
+
+    <rect x="1200" y="745" width="150" height="60" class="border threat-row-odd"/>
+    <text x="1275" y="760" text-anchor="middle" font-size="10" fill="#333">50–70% reduction</text>
+    <text x="1275" y="775" text-anchor="middle" font-size="10" fill="#333">(scope limits damage;</text>
+    <text x="1275" y="790" text-anchor="middle" font-size="10" fill="#333">alignment is separate)</text>
+  </g>
+
+  <!-- Summary -->
+  <text x="50" y="840" font-size="12" font-weight="bold" fill="#1a237e">Summary Statistics:</text>
+  <text x="50" y="860" font-size="11" fill="#333">Strong Coverage (STRONG): 8 of 11 threats | Average Risk Reduction: 90%</text>
+  <text x="50" y="880" font-size="11" fill="#333">Partial Coverage (PARTIAL): 3 of 11 threats | Complementary controls needed for complete protection</text>
+  <text x="50" y="900" font-size="11" fill="#333">IrisKey alone does not address: Model alignment, training-time backdoors, or capability limitations</text>
+</svg>

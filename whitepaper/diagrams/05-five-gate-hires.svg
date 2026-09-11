@@ -1,0 +1,232 @@
+<svg viewBox="0 0 1400 800" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .main-title { font-size: 22px; font-weight: bold; fill: #1a237e; }
+      .subtitle { font-size: 13px; fill: #666; }
+      .gate-label { font-size: 13px; font-weight: bold; }
+      .time-label { font-size: 11px; fill: #fff; }
+      .decision-box { fill: none; stroke-width: 2; rx: 3; }
+      .success { fill: #c8e6c9; stroke: #2e7d32; }
+      .warning { fill: #ffe0b2; stroke: #f57c00; }
+      .failure { fill: #ffcdd2; stroke: #c62828; }
+    </style>
+    <marker id="arrow-solid" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <polygon points="0 0, 10 3, 0 6" fill="#333"/>
+    </marker>
+  </defs>
+
+  <!-- Main title -->
+  <text x="700" y="35" text-anchor="middle" class="main-title">Five-Gate Authorization Engine – Sequential Flow</text>
+  <text x="700" y="55" text-anchor="middle" class="subtitle">Each gate is a decision point; all must pass for approval (total latency: ~100-600ms)</text>
+
+  <!-- START POINT -->
+  <circle cx="80" cy="120" r="30" fill="#4caf50" stroke="#2e7d32" stroke-width="2"/>
+  <text x="80" y="125" text-anchor="middle" fill="white" font-weight="bold" font-size="14">START</text>
+
+  <!-- Arrow to Gate 1 -->
+  <line x1="110" y1="120" x2="180" y2="120" stroke="#333" stroke-width="2.5" marker-end="url(#arrow-solid)"/>
+
+  <!-- ===== GATE 1: Identity (1-5ms) ===== -->
+  <g id="gate1">
+    <rect x="180" y="75" width="140" height="90" rx="5" fill="#1a237e" stroke="#000" stroke-width="2"/>
+    <text x="250" y="105" text-anchor="middle" class="gate-label" fill="white">Gate 1: Identity</text>
+    <text x="250" y="125" text-anchor="middle" class="time-label" font-weight="bold">1–5 ms</text>
+    <text x="250" y="145" text-anchor="middle" fill="white" font-size="10">Verify credentials</text>
+    <text x="250" y="160" text-anchor="middle" fill="white" font-size="10">Check revocation</text>
+
+    <!-- Failure path (down to reject) -->
+    <line x1="180" y1="165" x2="100" y2="280" stroke="#c62828" stroke-width="2" stroke-dasharray="3,3"/>
+    <text x="135" y="210" fill="#c62828" font-weight="bold" font-size="11">✗ Fail</text>
+
+    <!-- Success path (down to Gate 2) -->
+    <line x1="250" y1="165" x2="250" y2="210" stroke="#388e3c" stroke-width="2.5" marker-end="url(#arrow-solid)"/>
+    <text x="280" y="190" fill="#388e3c" font-weight="bold" font-size="11">✓ Pass</text>
+  </g>
+
+  <!-- ===== GATE 2: Policy (10-50ms) ===== -->
+  <g id="gate2">
+    <rect x="180" y="230" width="140" height="90" rx="5" fill="#f57c00" stroke="#000" stroke-width="2"/>
+    <text x="250" y="260" text-anchor="middle" class="gate-label" fill="white">Gate 2: Policy</text>
+    <text x="250" y="280" text-anchor="middle" class="time-label" font-weight="bold">10–50 ms</text>
+    <text x="250" y="300" text-anchor="middle" fill="white" font-size="10">Check authorization</text>
+    <text x="250" y="315" text-anchor="middle" fill="white" font-size="10">Validate scope</text>
+
+    <!-- Failure path -->
+    <line x1="180" y1="320" x2="100" y2="370" stroke="#c62828" stroke-width="2" stroke-dasharray="3,3"/>
+    <text x="135" y="345" fill="#c62828" font-weight="bold" font-size="11">✗ Fail</text>
+
+    <!-- Success path -->
+    <line x1="250" y1="320" x2="250" y2="365" stroke="#388e3c" stroke-width="2.5" marker-end="url(#arrow-solid)"/>
+    <text x="280" y="345" fill="#388e3c" font-weight="bold" font-size="11">✓ Pass</text>
+  </g>
+
+  <!-- ===== GATE 3: Action (5-20ms) ===== -->
+  <g id="gate3">
+    <rect x="180" y="385" width="140" height="90" rx="5" fill="#388e3c" stroke="#000" stroke-width="2"/>
+    <text x="250" y="415" text-anchor="middle" class="gate-label" fill="white">Gate 3: Action</text>
+    <text x="250" y="435" text-anchor="middle" class="time-label" font-weight="bold">5–20 ms</text>
+    <text x="250" y="455" text-anchor="middle" fill="white" font-size="10">Validate action type</text>
+    <text x="250" y="470" text-anchor="middle" fill="white" font-size="10">Enforce scope</text>
+
+    <!-- Failure path -->
+    <line x1="180" y1="430" x2="100" y2="460" stroke="#c62828" stroke-width="2" stroke-dasharray="3,3"/>
+    <text x="135" y="450" fill="#c62828" font-weight="bold" font-size="11">✗ Fail</text>
+
+    <!-- Success path -->
+    <line x1="250" y1="475" x2="250" y2="520" stroke="#388e3c" stroke-width="2.5" marker-end="url(#arrow-solid)"/>
+    <text x="280" y="500" fill="#388e3c" font-weight="bold" font-size="11">✓ Pass</text>
+  </g>
+
+  <!-- ===== GATE 4: Context (50-500ms) ===== -->
+  <g id="gate4">
+    <rect x="180" y="540" width="140" height="90" rx="5" fill="#c62828" stroke="#000" stroke-width="2"/>
+    <text x="250" y="570" text-anchor="middle" class="gate-label" fill="white">Gate 4: Context</text>
+    <text x="250" y="590" text-anchor="middle" class="time-label" font-weight="bold">50–500 ms</text>
+    <text x="250" y="610" text-anchor="middle" fill="white" font-size="10">Anomaly detection</text>
+    <text x="250" y="625" text-anchor="middle" fill="white" font-size="10">Behavioral analysis</text>
+
+    <!-- THREE paths: Fail, Escalate, Pass -->
+    <!-- Reject path (left) -->
+    <line x1="180" y1="585" x2="100" y2="550" stroke="#c62828" stroke-width="2" stroke-dasharray="3,3"/>
+    <text x="135" y="565" fill="#c62828" font-weight="bold" font-size="11">✗ High anomaly</text>
+
+    <!-- Escalate path (middle) -->
+    <line x1="250" y1="630" x2="250" y2="670" stroke="#ff9800" stroke-width="2" marker-end="url(#arrow-solid)"/>
+    <text x="280" y="650" fill="#ff9800" font-weight="bold" font-size="11">⚠ Medium anomaly</text>
+
+    <!-- Pass path (right) -->
+    <line x1="320" y1="585" x2="400" y2="520" stroke="#388e3c" stroke-width="2.5" marker-end="url(#arrow-solid)"/>
+    <text x="350" y="550" fill="#388e3c" font-weight="bold" font-size="11">✓ Low anomaly</text>
+  </g>
+
+  <!-- ===== GATE 5: Execution (5-10ms) ===== -->
+  <g id="gate5">
+    <rect x="380" y="540" width="140" height="90" rx="5" fill="#6a1b9a" stroke="#000" stroke-width="2"/>
+    <text x="450" y="570" text-anchor="middle" class="gate-label" fill="white">Gate 5: Execute</text>
+    <text x="450" y="590" text-anchor="middle" class="time-label" font-weight="bold">5–10 ms</text>
+    <text x="450" y="610" text-anchor="middle" fill="white" font-size="10">Resource readiness</text>
+    <text x="450" y="625" text-anchor="middle" fill="white" font-size="10">Systems available</text>
+
+    <!-- Defer path (down) -->
+    <line x1="380" y1="585" x2="300" y2="650" stroke="#ff9800" stroke-width="2" stroke-dasharray="3,3"/>
+    <text x="330" y="620" fill="#ff9800" font-weight="bold" font-size="11">⏱ Defer</text>
+
+    <!-- Success path (right to APPROVE) -->
+    <line x1="520" y1="585" x2="600" y2="520" stroke="#388e3c" stroke-width="2.5" marker-end="url(#arrow-solid)"/>
+    <text x="550" y="550" fill="#388e3c" font-weight="bold" font-size="11">✓ Ready</text>
+  </g>
+
+  <!-- ===== DECISION OUTCOMES (Bottom) ===== -->
+  <text x="700" y="720" text-anchor="middle" font-size="16" font-weight="bold" fill="#1a237e">Authorization Decision Outcomes</text>
+
+  <!-- APPROVE -->
+  <g id="approve-box">
+    <rect x="580" y="745" width="140" height="50" rx="4" class="decision-box success"/>
+    <text x="650" y="763" text-anchor="middle" font-size="13" font-weight="bold" fill="#1b5e20">✓ APPROVE</text>
+    <text x="650" y="784" text-anchor="middle" font-size="10" fill="#2e7d32">All gates pass</text>
+  </g>
+
+  <!-- ESCALATE -->
+  <g id="escalate-box">
+    <rect x="760" y="745" width="140" height="50" rx="4" class="decision-box warning"/>
+    <text x="830" y="763" text-anchor="middle" font-size="13" font-weight="bold" fill="#e65100">⚠ ESCALATE</text>
+    <text x="830" y="784" text-anchor="middle" font-size="10" fill="#f57c00">Anomaly detected</text>
+  </g>
+
+  <!-- DEFER -->
+  <g id="defer-box">
+    <rect x="940" y="745" width="140" height="50" rx="4" class="decision-box warning"/>
+    <text x="1010" y="763" text-anchor="middle" font-size="13" font-weight="bold" fill="#f57f17">⏱ DEFER</text>
+    <text x="1010" y="784" text-anchor="middle" font-size="10" fill="#ff6f00">Resource unavailable</text>
+  </g>
+
+  <!-- REJECT -->
+  <g id="reject-box">
+    <rect x="1120" y="745" width="140" height="50" rx="4" class="decision-box failure"/>
+    <text x="1190" y="763" text-anchor="middle" font-size="13" font-weight="bold" fill="#b71c1c">✗ REJECT</text>
+    <text x="1190" y="784" text-anchor="middle" font-size="10" fill="#c62828">Gate(s) fail</text>
+  </g>
+
+  <!-- Arrows from gates to outcomes -->
+  <path d="M 100 550 L 620 745" stroke="#c62828" stroke-width="1.5" stroke-dasharray="3,3" fill="none"/>
+  <path d="M 250 670 L 830 745" stroke="#ff9800" stroke-width="1.5" fill="none"/>
+  <path d="M 450 630 L 1010 745" stroke="#ff9800" stroke-width="1.5" fill="none"/>
+  <path d="M 520 585 L 650 745" stroke="#388e3c" stroke-width="2" fill="none" marker-end="url(#arrow-solid)"/>
+
+  <!-- RIGHT SIDE: LATENCY & TIMING INFORMATION -->
+  <g id="timing-info">
+    <!-- Box -->
+    <rect x="800" y="70" width="580" height="270" rx="6" fill="#f5f5f5" stroke="#999" stroke-width="1"/>
+
+    <!-- Title -->
+    <text x="1090" y="100" text-anchor="middle" font-size="14" font-weight="bold" fill="#1a237e">Authorization Latency Budget</text>
+
+    <!-- Individual gate times -->
+    <text x="820" y="135" font-size="12" font-weight="bold" fill="#1a237e">Per-Gate Latency:</text>
+
+    <text x="820" y="160" font-size="11" fill="#333">• Gate 1 (Identity): <tspan font-weight="bold">1–5 ms</tspan></text>
+    <text x="820" y="180" font-size="11" fill="#333">  Verify cryptographic credentials, check revocation list</text>
+
+    <text x="820" y="205" font-size="11" fill="#333">• Gate 2 (Policy): <tspan font-weight="bold">10–50 ms</tspan></text>
+    <text x="820" y="225" font-size="11" fill="#333">  Policy lookup, scope validation, rule matching</text>
+
+    <text x="820" y="250" font-size="11" fill="#333">• Gate 3 (Action): <tspan font-weight="bold">5–20 ms</tspan></text>
+    <text x="820" y="270" font-size="11" fill="#333">  Action type validation, scope enforcement</text>
+
+    <text x="820" y="295" font-size="11" fill="#333">• Gate 4 (Context): <tspan font-weight="bold">50–500 ms</tspan> ⭐ DOMINATES</text>
+    <text x="820" y="315" font-size="11" fill="#333">  Behavioral profiling, anomaly scoring, pattern analysis</text>
+
+    <text x="820" y="340" font-size="11" fill="#333">• Gate 5 (Execute): <tspan font-weight="bold">5–10 ms</tspan></text>
+    <text x="820" y="360" font-size="11" fill="#333">  Resource availability check, systems status</text>
+
+    <!-- Total summary -->
+    <rect x="820" y="380" width="540" height="50" rx="3" fill="#e3f2fd" stroke="#1976d2" stroke-width="1"/>
+    <text x="1090" y="405" text-anchor="middle" font-size="12" font-weight="bold" fill="#1a237e">Total Authorization Latency: ~71–585 ms</text>
+    <text x="1090" y="423" text-anchor="middle" font-size="11" fill="#666">(Typical case: 150–250ms; Context gate latency dominates)</text>
+  </g>
+
+  <!-- RIGHT SIDE: DECISION CRITERIA -->
+  <g id="decision-criteria">
+    <!-- Box -->
+    <rect x="800" y="360" width="580" height="350" rx="6" fill="#fff9c4" stroke="#f57f17" stroke-width="1"/>
+
+    <!-- Title -->
+    <text x="1090" y="390" text-anchor="middle" font-size="14" font-weight="bold" fill="#e65100">Decision Criteria by Gate</text>
+
+    <!-- Gate 1 -->
+    <rect x="820" y="405" width="540" height="35" rx="2" fill="#e8eaf6" stroke="#3f51b5" stroke-width="1"/>
+    <text x="830" y="422" font-size="11" font-weight="bold" fill="#1a237e">Gate 1 (Identity):</text>
+    <text x="1100" y="422" font-size="10" fill="#333">PASS if signature valid AND not revoked</text>
+    <text x="1100" y="436" font-size="10" fill="#666">FAIL otherwise</text>
+
+    <!-- Gate 2 -->
+    <rect x="820" y="450" width="540" height="35" rx="2" fill="#fff3e0" stroke="#f57c00" stroke-width="1"/>
+    <text x="830" y="467" font-size="11" font-weight="bold" fill="#e65100">Gate 2 (Policy):</text>
+    <text x="1100" y="467" font-size="10" fill="#333">PASS if (action ∈ authorized_actions) AND (resource ∈ authorized_resources)</text>
+    <text x="1100" y="481" font-size="10" fill="#666">FAIL otherwise</text>
+
+    <!-- Gate 3 -->
+    <rect x="820" y="495" width="540" height="35" rx="2" fill="#e8f5e9" stroke="#388e3c" stroke-width="1"/>
+    <text x="830" y="512" font-size="11" font-weight="bold" fill="#2e7d32">Gate 3 (Action):</text>
+    <text x="1100" y="512" font-size="10" fill="#333">PASS if action_scope satisfied AND operation_valid</text>
+    <text x="1100" y="526" font-size="10" fill="#666">FAIL if outside scope</text>
+
+    <!-- Gate 4 -->
+    <rect x="820" y="540" width="540" height="50" rx="2" fill="#fce4ec" stroke="#c2185b" stroke-width="1"/>
+    <text x="830" y="557" font-size="11" font-weight="bold" fill="#880e4f">Gate 4 (Context):</text>
+    <text x="1100" y="557" font-size="10" fill="#333">anomaly_score = [0.0 – 1.0]</text>
+    <text x="1100" y="571" font-size="10" fill="#333">PASS if score &lt; 0.3 | ESCALATE if 0.3–0.7 | REJECT if &gt; 0.7</text>
+    <text x="1100" y="585" font-size="10" fill="#666">(Thresholds configurable per policy)</text>
+
+    <!-- Gate 5 -->
+    <rect x="820" y="600" width="540" height="35" rx="2" fill="#f3e5f5" stroke="#6a1b9a" stroke-width="1"/>
+    <text x="830" y="617" font-size="11" font-weight="bold" fill="#4a148c">Gate 5 (Execute):</text>
+    <text x="1100" y="617" font-size="10" fill="#333">PASS if resources_available AND systems_healthy</text>
+    <text x="1100" y="631" font-size="10" fill="#666">DEFER if temporarily unavailable</text>
+
+    <!-- Key principle -->
+    <rect x="820" y="645" width="540" height="50" rx="3" fill="#e8f5e9" stroke="#2e7d32" stroke-width="2"/>
+    <text x="1090" y="665" text-anchor="middle" font-size="11" font-weight="bold" fill="#1b5e20">All gates must PASS for APPROVE decision</text>
+    <text x="1090" y="683" text-anchor="middle" font-size="10" fill="#2e7d32">ANY gate failure → REJECT; Anomaly in Gate 4 → ESCALATE</text>
+  </g>
+</svg>
