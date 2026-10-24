@@ -1,0 +1,18 @@
+node_modules/
+dist/
+
+# Local secrets and generated artifacts
+.env
+.env.*
+!.env.example
+!.env.*.example
+.dev.vars
+*.pem
+*.p12
+*.key
+coverage/
+test-results/
+playwright-report/
+*.tsbuildinfo
+*.log
+.DS_Store
